@@ -1,6 +1,6 @@
 {
   "name": "@auto.pro/core",
-  "version": "1.0.0",
+  "version": "7.0.1",
   "description": "auto.pro tools core",
   "main": "index.js",
   "scripts": {
@@ -23,6 +23,5 @@
     "ts-node": "^8.4.1",
     "tslib": "^1.10.0",
     "typescript": "^3.6.3"
-  },
-  "dependencies": {}
+  }
 }
