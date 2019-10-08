@@ -1,5 +1,5 @@
 {
-  "name": "action",
+  "name": "@auto.pro/action",
   "version": "7.0.3",
   "description": "> TODO: description",
   "author": "molysama <molysama.i@gmail.com>",
@@ -22,5 +22,6 @@
   },
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
-  }
+  },
+  "gitHead": "0d4ab5a8f8700c97a5a523f694848af22694814a"
 }
