@@ -1,0 +1,28 @@
+{
+  "name": "@auto.pro/core",
+  "version": "1.0.0",
+  "description": "auto.pro tools core",
+  "main": "index.js",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "test": "nyc mocha -r ts-node/register test/*.ts"
+  },
+  "keywords": [
+    "auto.js",
+    "auto.pro"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/mocha": "^5.2.7",
+    "assert": "^2.0.0",
+    "ava": "^2.4.0",
+    "mocha": "^6.2.1",
+    "nyc": "^14.1.1",
+    "rollup-plugin-typescript": "^1.0.1",
+    "ts-node": "^8.4.1",
+    "tslib": "^1.10.0",
+    "typescript": "^3.6.3"
+  },
+  "dependencies": {}
+}
