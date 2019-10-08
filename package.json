@@ -1,9 +1,11 @@
 {
   "name": "root",
-  "private": false,
   "workspaces": [
     "packages/*"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "lerna": "^3.16.5"
   }

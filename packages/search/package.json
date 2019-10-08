@@ -1,6 +1,9 @@
 {
   "name": "@auto.pro/search",
   "version": "7.0.7",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "> TODO: description",
   "author": "molysama <molysama.i@gmail.com>",
   "homepage": "https://github.com/molysama/auto.pro#readme",
@@ -22,5 +25,6 @@
   },
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
-  }
+  },
+  "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc"
 }

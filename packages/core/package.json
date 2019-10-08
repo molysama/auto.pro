@@ -8,6 +8,9 @@
     "build": "tsc && rollup -c rollup.config.js",
     "test": "nyc mocha -r ts-node/register test/*.ts"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "auto.js",
     "auto.pro"
@@ -28,5 +31,5 @@
   "dependencies": {
     "rxjs": "^6.5.3"
   },
-  "gitHead": "59dbe237557eef934b5365d81c5b8e2ad1433e49"
+  "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc"
 }
