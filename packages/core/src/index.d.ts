@@ -1,8 +1,5 @@
 export interface InjectionKey<T> extends Symbol {
 }
-export declare function sleep(low: number, up?: number): void;
-export interface Image {
-}
 export interface App {
     isRoot?: boolean;
     use(plugin: Plugin, option?: any): this;

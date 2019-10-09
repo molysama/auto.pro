@@ -22,7 +22,7 @@
   },
   "scripts": {
     "build": "tsc && rollup -c rollup.config.js",
-    "test": "nyc mocha -r ts-node/register test/*.ts"
+    "test": "nyc mocha --global * -r ts-node/register test/*.ts"
   },
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"

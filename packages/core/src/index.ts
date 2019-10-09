@@ -1,16 +1,6 @@
 import { isFunction } from "./utils"
 
-declare const $shell: any
-
 export interface InjectionKey<T> extends Symbol {}
-
-
-
-export declare function sleep (low: number, up?: number): void
-
-export interface Image {
-
-}
 
 export interface App {
     isRoot?: boolean

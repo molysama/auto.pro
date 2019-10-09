@@ -4,10 +4,20 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "ut": "nyc node scripts/test.js",
+    "test": "nyc jest"
+  },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
     "lerna": "^3.16.5"
+  },
+  "dependencies": {
+    "@types/jest": "^24.0.18",
+    "jest": "^24.9.0",
+    "minimist": "^1.2.0",
+    "ts-jest": "^24.1.0"
   }
 }

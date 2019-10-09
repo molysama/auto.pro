@@ -1,15 +1,7 @@
 'use strict';
 
-import { App, sleep, Image, Plugin, InjectionKey, inject } from '@auto.pro/core'
+import { App, Plugin, InjectionKey, inject } from '@auto.pro/core'
 import bezier from './bezier'
-
-declare function Tap (x: number, y: number): void
-declare function press (x: number, y: number, delay: number): void
-declare function random (low: number, up: number): number
-declare function Swipe (x1: number, y1: number, x2: number, y2: number, duration: number): void
-// declare const Swipe: any
-declare function gesture (duration: number, ...points: Array<number>): void
-declare function captureScreen(path?: string): Image
 
 type ClickFunction = (x: number, y: number, delay?: [number, number] | [600, 800]) => any
 type SwipeFunction = (startPoint: [number, number], endPoint: [number, number], duration?: number) => any

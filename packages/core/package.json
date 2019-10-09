@@ -6,7 +6,7 @@
   "types": "src/index.d.ts",
   "scripts": {
     "build": "tsc && rollup -c rollup.config.js",
-    "test": "nyc mocha -r ts-node/register test/*.ts"
+    "test": "nyc mocha --global * -r ts-node/register test/*.ts"
   },
   "publishConfig": {
     "access": "public"

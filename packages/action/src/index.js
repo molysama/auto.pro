@@ -17,7 +17,7 @@ function click(isRoot) {
         if (delay === void 0) { delay = [600, 800]; }
         if (isRoot) {
             Tap(x, y);
-            core_1.sleep(300);
+            sleep(300);
         }
         else {
             press(x, y, random.apply(void 0, delay));
@@ -39,7 +39,7 @@ function swipe(isRoot) {
         duration += Math.max(xMax - xMin, yMax - yMin);
         if (isRoot) {
             Swipe(x1, y1, x2, y2, duration);
-            core_1.sleep(duration);
+            sleep(duration);
             return;
         }
         var c1 = [

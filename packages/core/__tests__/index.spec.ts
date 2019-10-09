@@ -1,10 +1,8 @@
-
-import assert from 'assert'
 import createApp, { Plugin } from '../src/index'
 
 describe('app', () => {
-    it('use', () => {
+    test('init', () => {
         const app = createApp()
-        assert.equal(app.isRoot, false)
+        expect(app.isRoot).toBe(false)
     })
 })
