@@ -1,6 +1,6 @@
 'use strict';
 
-import Core from '@auto.pro/core'
+import Core from "@auto.pro/core"
 import ActionPlugin, {useAction} from '../src/index'
 
 

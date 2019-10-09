@@ -3,10 +3,9 @@
   "version": "7.1.0",
   "description": "auto.pro tools core",
   "main": "dist/index.js",
-  "types": "src/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc && rollup -c rollup.config.js",
-    "test": "nyc mocha --global * -r ts-node/register test/*.ts"
+    "build": "tsc && rollup -c rollup.config.js"
   },
   "publishConfig": {
     "access": "public"
@@ -18,11 +17,6 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@types/mocha": "^5.2.7",
-    "assert": "^2.0.0",
-    "ava": "^2.4.0",
-    "mocha": "^6.2.1",
-    "nyc": "^14.1.1",
     "rollup-plugin-typescript": "^1.0.1",
     "ts-node": "^8.4.1",
     "tslib": "^1.10.0",

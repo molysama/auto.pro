@@ -8,7 +8,8 @@
   },
   "homepage": "https://github.com/molysama/auto.pro#readme",
   "license": "ISC",
-  "main": "lib/action.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -21,8 +22,7 @@
     "url": "git+https://github.com/molysama/auto.pro.git"
   },
   "scripts": {
-    "build": "tsc && rollup -c rollup.config.js",
-    "test": "nyc mocha --global * -r ts-node/register test/*.ts"
+    "build": "tsc && rollup -c rollup.config.js"
   },
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
