@@ -1,6 +1,6 @@
 {
   "name": "@auto.pro/core",
-  "version": "7.0.8",
+  "version": "7.0.9",
   "description": "auto.pro tools core",
   "main": "dist/index.js",
   "types": "src/index.d.ts",

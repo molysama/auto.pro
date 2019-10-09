@@ -1,6 +1,6 @@
 {
   "name": "@auto.pro/action",
-  "version": "7.0.8",
+  "version": "7.0.9",
   "description": "> TODO: description",
   "author": "molysama <molysama.i@gmail.com>",
   "publishConfig": {
@@ -27,7 +27,5 @@
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
   },
-  "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc",
-  "dependencies": {
-  }
+  "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc"
 }
