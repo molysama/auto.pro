@@ -21,10 +21,13 @@
     "url": "git+https://github.com/molysama/auto.pro.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "build": "tsc && rollup -c rollup.config.js",
+    "test": "nyc mocha -r ts-node/register test/*.ts"
   },
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
   },
-  "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc"
+  "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc",
+  "dependencies": {
+  }
 }

@@ -2,7 +2,7 @@
 import typescript from 'rollup-plugin-typescript'
 
 export default {
-    input: 'src/index.ts',
+    input: 'lib/action.ts',
     output: {
         file: 'dist/index.js',
         format: 'cjs'
