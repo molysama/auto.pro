@@ -1,6 +1,6 @@
 {
   "name": "@auto.pro/search",
-  "version": "7.1.1",
+  "version": "7.1.5",
   "publishConfig": {
     "access": "public"
   },
