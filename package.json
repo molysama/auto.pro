@@ -8,9 +8,6 @@
     "ut": "nyc node scripts/test.js",
     "test": "nyc jest"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "devDependencies": {
     "lerna": "^3.16.5"
   },
