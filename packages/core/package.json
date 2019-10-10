@@ -3,7 +3,7 @@
   "version": "7.1.4",
   "description": "auto.pro tools core",
   "main": "dist/index.js",
-  "types": "index/index.d.ts",
+  "types": "src/index.d.ts",
   "scripts": {
     "build": "tsc && rollup -c rollup.config.js"
   },
