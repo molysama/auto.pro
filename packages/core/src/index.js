@@ -64,7 +64,7 @@ function default_1(screenType) {
         },
         use: function (plugin, option) {
             if (option === void 0) { option = {}; }
-            if (this.plugins.includes(plugin)) {
+            if (this.plugins.indexOf(plugin) != -1) {
                 return core;
             }
             if (utils_1.isFunction(plugin)) {

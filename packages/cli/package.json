@@ -34,5 +34,8 @@
     "log-symbols": "^3.0.0",
     "ora": "^4.0.2"
   },
-  "gitHead": "4957d581230f126c552ba4465a0532e5ebecb19b"
+  "gitHead": "4957d581230f126c552ba4465a0532e5ebecb19b",
+  "devDependencies": {
+    "@babel/preset-env": "^7.6.3"
+  }
 }

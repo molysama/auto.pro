@@ -99,7 +99,7 @@ export default function (screenType: ('w' | 'h' | undefined) = 'w'): Core {
             ctx.provides[key as string] = value
         },
         use (plugin: Plugin, option: any = {}) {
-            if (this.plugins.includes(plugin)) {
+            if (this.plugins.indexOf(plugin) != -1) {
                 return core
             }
             if (isFunction(plugin)) {

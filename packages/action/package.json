@@ -26,5 +26,9 @@
   "gitHead": "4957d581230f126c552ba4465a0532e5ebecb19b",
   "dependencies": {
     "bezier-js": "^2.4.4"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.6.3",
+    "rollup-plugin-babel": "^4.3.3"
   }
 }

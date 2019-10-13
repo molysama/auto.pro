@@ -1,5 +1,6 @@
 
 import typescript from 'rollup-plugin-typescript'
+import babel from 'rollup-plugin-babel'
 
 export default {
     input: 'src/index.ts',
@@ -8,6 +9,7 @@ export default {
         format: 'cjs'
     },
     plugins: [
-        typescript()
+        typescript(),
+        babel()
     ]
 }
