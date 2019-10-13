@@ -9,7 +9,7 @@
   "homepage": "https://github.com/molysama/auto.pro#readme",
   "license": "ISC",
   "main": "dist/index.js",
-  "types": "dist/index.js",
+  "types": "src/index.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -23,7 +23,9 @@
     "type": "git",
     "url": "git+https://github.com/molysama/auto.pro.git"
   },
-  "scripts": {},
+  "scripts": {
+    "build": "tsc && rollup -c rollup.config.js"
+  },
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
   },
