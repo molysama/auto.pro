@@ -1,24 +1,26 @@
 'use strict';
 
-import { App, Plugin, InjectionKey, inject } from '@auto.pro/core'
-import bezier from './bezier'
+import { Core, Plugin, InjectionKey, inject } from '@auto.pro/core'
+const Bezier = require('bezier-js')
 
-type ClickFunction = (x: number, y: number, delay?: [number, number] | [600, 800]) => any
-type SwipeFunction = (startPoint: [number, number], endPoint: [number, number], duration?: number) => any
-type CapFunction = (path?: string) => any
+export type ClickFunction = (x: number, y: number, delay?: [number, number] | [600, 800]) => any
+export type SwipeFunction = (startPoint: [number, number], endPoint: [number, number], duration?: number) => any
 
-function click (isRoot: boolean): ClickFunction {
-    return (x: number, y: number, delay: [number, number] = [600, 800]) => {
-        if (isRoot) {
-            Tap(x, y)
-            sleep(300)
-        } else {
-            press(x, y, random(...delay))
-        }
+let click: ClickFunction 
+let swipe: SwipeFunction
+
+export function useAction () {
+    return {
+        click,
+        swipe
     }
 }
-function swipe (isRoot: boolean): SwipeFunction {
-    return (startPoint: [number, number], endPoint: [number, number], duration: number | undefined) => {
+
+
+function setAction (core: Core) {
+    const isRoot = core.isRoot
+
+    swipe = (startPoint: [number, number], endPoint: [number, number], duration: number | undefined) => {
         const x1 = startPoint[0]
         const y1 = startPoint[1]
         const x2 = endPoint[0]
@@ -47,39 +49,29 @@ function swipe (isRoot: boolean): SwipeFunction {
             Math.floor((yMax - yMin) / 3 * 2 + yMin) - random(5, 10)
         ]
 
-        const points = bezier.getBezierPoints(50, startPoint, c1, c2, endPoint)
-        // 根据方向来排序坐标
+        // const points = bezier.getBezierPoints(50, startPoint, c1, c2, endPoint)
+        const curve = new Bezier(...startPoint, ...endPoint, ...c1, ...c2)
+        const points = curve.getLUT(16).map(p => [Math.floor(p['x']), Math.floor(p['y'])])
         gesture(duration, ...points)
-    }
-}
-function cap (): CapFunction {
-    return (path?: string) => {
-        if (path) {
-            return captureScreen(path)
+    } 
+    click = (x: number, y: number, delay: [number, number] = [600, 800]) => {
+        if (x == null || y == null) {
+            return
+        }
+        if (isRoot) {
+            Tap(x, y)
+            sleep(300)
         } else {
-            return captureScreen()
+            press(x, y, random(...delay))
         }
     }
+    core.provide('swipe', swipe)
+    core.provide('click', click)
 }
-
-export function useAction () {
-    return {
-        click: inject(clickKey) as ClickFunction,
-        cap: inject(capKey) as CapFunction,
-        swipe: inject(swipeKey) as SwipeFunction
-    }
-}
-
-const clickKey: InjectionKey<ClickFunction> = Symbol()
-const capKey: InjectionKey<CapFunction> = Symbol()
-const swipeKey: InjectionKey<SwipeFunction> = Symbol()
 
 const Action: Plugin = {
-    install (app: App) {
-        const isRoot = app.isRoot || false
-        app.provide(clickKey, click(isRoot))
-        app.provide(capKey, cap())
-        app.provide(swipeKey, swipe(isRoot))
+    install (core: Core) {
+        setAction(core)
     }
 }
 

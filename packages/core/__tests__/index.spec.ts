@@ -1,8 +1,16 @@
-import createApp, { Plugin } from '../src/index'
+import Core from '../src/index'
 
-describe('app', () => {
+declare const __TEST_GLOBAL__
+
+describe('Core', () => {
+
+
+    const core = Core()
     test('init', () => {
-        const app = createApp()
-        expect(app.isRoot).toBe(false)
+        expect(core.width).toBe(1280)
+    })
+
+    test('cap', () => {
+        expect(core.cap).not.toBeUndefined()
     })
 })

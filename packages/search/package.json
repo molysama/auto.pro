@@ -8,7 +8,8 @@
   "author": "molysama <molysama.i@gmail.com>",
   "homepage": "https://github.com/molysama/auto.pro#readme",
   "license": "ISC",
-  "main": "lib/search.js",
+  "main": "dist/index.js",
+  "types": "dist/index.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -26,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
   },
-  "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc"
+  "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc",
+  "dependencies": {
+    "rxjs": "^6.5.3"
+  }
 }

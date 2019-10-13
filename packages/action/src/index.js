@@ -6,26 +6,20 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var core_1 = require("@auto.pro/core");
-var bezier_1 = __importDefault(require("./bezier"));
-function click(isRoot) {
-    return function (x, y, delay) {
-        if (delay === void 0) { delay = [600, 800]; }
-        if (isRoot) {
-            Tap(x, y);
-            sleep(300);
-        }
-        else {
-            press(x, y, random.apply(void 0, delay));
-        }
+var Bezier = require('bezier-js');
+var click;
+var swipe;
+function useAction() {
+    return {
+        click: click,
+        swipe: swipe
     };
 }
-function swipe(isRoot) {
-    return function (startPoint, endPoint, duration) {
+exports.useAction = useAction;
+function setAction(core) {
+    var isRoot = core.isRoot;
+    swipe = function (startPoint, endPoint, duration) {
         var x1 = startPoint[0];
         var y1 = startPoint[1];
         var x2 = endPoint[0];
@@ -50,38 +44,30 @@ function swipe(isRoot) {
             Math.floor((xMax - xMin) / 3 * 2 + xMin) + random(5, 10),
             Math.floor((yMax - yMin) / 3 * 2 + yMin) - random(5, 10)
         ];
-        var points = bezier_1.default.getBezierPoints(50, startPoint, c1, c2, endPoint);
-        // 根据方向来排序坐标
+        // const points = bezier.getBezierPoints(50, startPoint, c1, c2, endPoint)
+        var curve = new (Bezier.bind.apply(Bezier, __spreadArrays([void 0], startPoint, endPoint, c1, c2)))();
+        var points = curve.getLUT(16).map(function (p) { return [Math.floor(p['x']), Math.floor(p['y'])]; });
         gesture.apply(void 0, __spreadArrays([duration], points));
     };
-}
-function cap() {
-    return function (path) {
-        if (path) {
-            return captureScreen(path);
+    click = function (x, y, delay) {
+        if (delay === void 0) { delay = [600, 800]; }
+        if (x == null || y == null) {
+            return;
+        }
+        if (isRoot) {
+            Tap(x, y);
+            sleep(300);
         }
         else {
-            return captureScreen();
+            press(x, y, random.apply(void 0, delay));
         }
     };
+    core.provide('swipe', swipe);
+    core.provide('click', click);
 }
-function useAction() {
-    return {
-        click: core_1.inject(clickKey),
-        cap: core_1.inject(capKey),
-        swipe: core_1.inject(swipeKey)
-    };
-}
-exports.useAction = useAction;
-var clickKey = Symbol();
-var capKey = Symbol();
-var swipeKey = Symbol();
 var Action = {
-    install: function (app) {
-        var isRoot = app.isRoot || false;
-        app.provide(clickKey, click(isRoot));
-        app.provide(capKey, cap());
-        app.provide(swipeKey, swipe(isRoot));
+    install: function (core) {
+        setAction(core);
     }
 };
 exports.default = Action;

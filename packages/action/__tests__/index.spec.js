@@ -12,21 +12,25 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = __importDefault(require("@auto.pro/core"));
 var index_1 = __importStar(require("../src/index"));
+var Bezier = require('bezier-js');
 describe('ActionPlugin', function () {
-    var app = core_1.default();
-    test('app', function () {
-        expect(app).not.toBeUndefined();
+    test('bezier', function () {
+        var curve = new Bezier(60, 40, 180, 90, 105, 60, 120, 50);
+        var LUT = curve.getLUT(16);
+        console.log(LUT);
+        expect(LUT).not.toBeUndefined();
+    });
+    var core = core_1.default();
+    test('core init', function () {
+        expect(core).not.toBeUndefined();
     });
     test('isRoot == false', function () {
-        expect(app.isRoot).not.toBeUndefined();
+        expect(core.isRoot).not.toBeUndefined();
     });
-    app.use(index_1.default);
-    var _a = index_1.useAction(), click = _a.click, cap = _a.cap, swipe = _a.swipe;
+    core.use(index_1.default);
+    var _a = index_1.useAction(), click = _a.click, swipe = _a.swipe;
     test('click', function () {
         expect(click).not.toBeUndefined();
-    });
-    test('cap', function () {
-        expect(cap).not.toBeUndefined();
     });
     test('swipe', function () {
         expect(swipe).not.toBeUndefined();

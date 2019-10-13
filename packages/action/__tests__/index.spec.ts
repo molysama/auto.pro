@@ -2,28 +2,32 @@
 
 import Core from "@auto.pro/core"
 import ActionPlugin, {useAction} from '../src/index'
-
+const Bezier = require('bezier-js')
 
 describe('ActionPlugin', () => {
 
-    const app = Core()
+    test('bezier', () => {
+        var curve = new Bezier(60, 40, 180, 90, 105, 60, 120, 50);
+        var LUT = curve.getLUT(16);
+        console.log(LUT)
+        expect(LUT).not.toBeUndefined()
+    })
 
-    test('app', () => {
-        expect(app).not.toBeUndefined()
+    const core = Core()
+
+    test('core init', () => {
+        expect(core).not.toBeUndefined()
     })
 
     test('isRoot == false', () => {
-        expect(app.isRoot).not.toBeUndefined()
+        expect(core.isRoot).not.toBeUndefined()
     })
 
-    app.use(ActionPlugin)
-    const {click, cap, swipe} = useAction()
+    core.use(ActionPlugin)
+    const {click, swipe} = useAction()
 
     test('click', () => {
         expect(click).not.toBeUndefined()
-    })
-    test('cap', () => {
-        expect(cap).not.toBeUndefined()
     })
     test('swipe', () => {
         expect(swipe).not.toBeUndefined()

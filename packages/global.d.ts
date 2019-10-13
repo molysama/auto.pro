@@ -1,6 +1,15 @@
 interface Image {}
-declare function sleep (low: number, up?: number): void
+
 declare const $shell: any
+declare const images: any
+declare const device: any
+declare const threads: {
+    start: Function
+}
+declare const auto: any
+declare const app: any
+
+declare function sleep (low: number, up?: number): void
 declare function Tap (x: number, y: number): void
 declare function press (x: number, y: number, delay: number): void
 declare function random (low: number, up: number): number
