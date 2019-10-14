@@ -4,15 +4,17 @@ import { Plugin } from '@auto.pro/core';
  *
  * @param {string} path 待查图片路径
  * @param {object} option 查询参数
+ * @param {number} index 取范围内的第几个结果，值从1开始，设置该值后将转换返回值为该index的坐标或null
  * @param {string|boolean} useCache 缓存名，false则不使用缓存
+ * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export declare function findImg(param: {
     path: string;
     option: any;
+    index?: number;
     useCache?: {
         key: string;
         offset: number;
-        index: number | 'all';
     };
     eachTime: number;
     nextTime?: number;
@@ -20,7 +22,7 @@ export declare function findImg(param: {
     take?: number;
     doIfNotFound?: Function;
     image?: Image;
-}): Observable<[[number, number]]>;
+}): Observable<[[number, number] | [number, number] | null]>;
 /**
  * (精确查找)
  * 判断区域内是否不含有colors中的任意一个，不含有则返回true，含有则返回false

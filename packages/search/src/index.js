@@ -39,6 +39,12 @@ function region(param) {
         h = y + h >= height ? height - y : h;
         return [x, y, w, h];
     }
+    else if (param.length == 2) {
+        return [
+            Math.min(Math.max(0, param[0]), width),
+            Math.min(Math.max(0, param[1]), height)
+        ];
+    }
     else {
         return param;
     }
@@ -75,11 +81,14 @@ function readImg(imgPath, mode) {
  *
  * @param {string} path 待查图片路径
  * @param {object} option 查询参数
+ * @param {number} index 取范围内的第几个结果，值从1开始，设置该值后将转换返回值为该index的坐标或null
  * @param {string|boolean} useCache 缓存名，false则不使用缓存
+ * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
     var path = param.path || '';
     var option = param.option || {};
+    var index = param.index;
     var useCache = param.useCache;
     var cachePath = useCache && (path + useCache.key || '__cache__') || null;
     var cacheOffset = useCache && useCache.offset || 2;
@@ -138,7 +147,7 @@ function findImg(param) {
         }
         return rxjs_1.of(match);
     }), operators_1.take(ONCE ? 1 : 99999999), operators_1.filter(function (v) { return ONCE ? true : v.length > 0; }), operators_1.take(TAKE_NUM), operators_1.map(function (res) {
-        return res.map(function (p) {
+        var result = res.map(function (p) {
             return [
                 Math.floor(p.point['x']),
                 Math.floor(p.point['y'])
@@ -156,48 +165,44 @@ function findImg(param) {
                 return false;
             }
         });
+        // 如果设置了取第几个
+        if (index != undefined) {
+            // 如果从缓存里找，则只判断索引0
+            if (cachePath && cache[cachePath]) {
+                result = result.length > 0 ? [result[0]] : [];
+            }
+            else {
+                // 如果还未设置缓存，则取第index-1个，没有则返回空数组
+                result = result.length >= index ? [result[index - 1]] : [];
+            }
+        }
+        return result;
     }), operators_1.tap(function (res) {
         // 如果有结果，且确认要缓存
-        // 若指定了index为数字，则将对应的结果存入缓存
-        // 若指定了index为'all'，则将所有结果范围内的边界作为缓存
-        // 若指定了useCache，但没指定index，则index为0
         if (res && res.length > 0 && useCache && cachePath && !cache[cachePath]) {
-            useCache.index = useCache.index || 0;
-            var cacheRegion = void 0;
-            if (typeof useCache.index == 'number' && res.length > useCache.index) {
-                cacheRegion = region([
-                    res[useCache.index][0] - cacheOffset,
-                    res[useCache.index][1] - cacheOffset,
-                    res[useCache.index][0] + template.width + cacheOffset * 2,
-                    res[useCache.index][1] + template.height + cacheOffset * 2
-                ]);
-            }
-            else if (useCache.index === 'all') {
-                if (res.length == 0) {
-                    cacheRegion = region([
-                        res[0][0] - cacheOffset,
-                        res[0][1] - cacheOffset,
-                        res[0][1] + template.width + cacheOffset * 2,
-                        res[0][1] + template.height + cacheOffset * 2
-                    ]);
-                }
-                else {
-                    var xArray = res.map(function (e) { return e[0]; });
-                    var yArray = res.map(function (e) { return e[1]; });
-                    cacheRegion = region([
-                        Math.min.apply(Math, xArray) - cacheOffset,
-                        Math.min.apply(Math, yArray) - cacheOffset,
-                        Math.max.apply(Math, xArray) + template.width + cacheOffset * 2,
-                        Math.max.apply(Math, yArray) + template.height + cacheOffset * 2
-                    ]);
-                }
-            }
-            cache[cachePath] = cacheRegion;
+            var xArray = res.map(function (e) { return e[0]; });
+            var yArray = res.map(function (e) { return e[1]; });
+            cache[cachePath] = region([
+                Math.min.apply(Math, xArray) - cacheOffset,
+                Math.min.apply(Math, yArray) - cacheOffset,
+                Math.max.apply(Math, xArray) + template.width + cacheOffset * 2,
+                Math.max.apply(Math, yArray) + template.height + cacheOffset * 2
+            ]);
             queryOption.region = cache[cachePath];
         }
         if (nextTime) {
             pass$ && pass$.next(false);
         }
+    }), operators_1.map(function (res) {
+        var result;
+        // 如果设置了取第几个，则对最后结果进行处理，有结果则直接返回索引0的值，无结果则返回null
+        if (index != undefined) {
+            result = res.length > 0 ? res[0] : null;
+        }
+        else {
+            result = res;
+        }
+        return result;
     }), operators_1.finalize(function () {
         template.recycle();
         pass$ && pass$.complete();
