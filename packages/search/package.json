@@ -1,6 +1,6 @@
 {
   "name": "@auto.pro/search",
-  "version": "7.2.0",
+  "version": "7.2.1",
   "publishConfig": {
     "access": "public"
   },
@@ -34,7 +34,7 @@
     "rxjs": "^6.5.3"
   },
   "devDependencies": {
-    "rollup-plugin-babel": "^4.3.3",
-    "@babel/preset-env": "^7.6.3"
+    "@babel/preset-env": "^7.6.3",
+    "rollup-plugin-babel": "^4.3.3"
   }
 }
