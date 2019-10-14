@@ -10,6 +10,13 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
@@ -74,7 +81,7 @@ function findImg(param) {
     var path = param.path || '';
     var option = param.option || {};
     var useCache = param.useCache;
-    var cachePath = useCache && (useCache.key || '__cache__') || null;
+    var cachePath = useCache && (path + useCache.key || '__cache__') || null;
     var cacheOffset = useCache && useCache.offset || 2;
     var eachTime = param.eachTime || 100;
     var nextTime = param.nextTime;
@@ -197,24 +204,94 @@ function findImg(param) {
     }));
 }
 exports.findImg = findImg;
-function useSearch() {
-    return {
-        readImg: readImg,
-        findImg: findImg
-    };
+/**
+ * (精确查找)
+ * 判断区域内是否不含有colors中的任意一个，不含有则返回true，含有则返回false
+ *
+ * @param {Image} image     图源
+ * @param {Array} region    查找范围
+ * @param {Array} colors    待查颜色数组
+ */
+function noAnyColors(image, region, colors) {
+    if (region === void 0) { region = []; }
+    if (colors === void 0) { colors = []; }
+    var src = readImg(image);
+    var result = !colors.some(function (c) {
+        if (images.findColorInRegion.apply(images, __spreadArrays([src, c], region))) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    });
+    if (getPrototype(image) === 'String') {
+        src.recycle();
+    }
+    return result;
 }
-exports.useSearch = useSearch;
+exports.noAnyColors = noAnyColors;
+/**
+ * (精确查找)
+ * 区域内含有colors中的全部颜色时，返回true，否则返回false
+ *
+ * @param image 图源
+ * @param region 范围
+ * @param colors 待查颜色数组
+ */
+function hasMulColors(image, region, colors) {
+    if (region === void 0) { region = []; }
+    if (colors === void 0) { colors = []; }
+    var src = readImg(image);
+    var result = colors.every(function (c) {
+        if (images.findColorEquals.apply(images, __spreadArrays([src, c], region))) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    });
+    if (getPrototype(image) === 'String') {
+        src.recycle();
+    }
+    return result;
+}
+exports.hasMulColors = hasMulColors;
+/**
+ * 存在任意颜色，则返回颜色坐标，否则返回false
+ *
+ * @param image
+ * @param colors
+ * @param option
+ * @returns {[number, number] | false}
+ */
+function hasAnyColors(image, colors, option) {
+    if (colors === void 0) { colors = []; }
+    if (option === void 0) { option = {
+        threshold: 10
+    }; }
+    var result = false;
+    var src = readImg(image);
+    colors.some(function (c) {
+        var has = images.findColor(readImg, c, option);
+        if (has) {
+            result = [has['x'], has['y']];
+            return true;
+        }
+        else {
+            return false;
+        }
+    });
+    if (getPrototype(image) === 'String') {
+        src.recycle();
+    }
+    return result;
+}
+exports.hasAnyColors = hasAnyColors;
 var SearchPlugin = {
     install: function (core, option) {
-        if (option === void 0) { option = {
-            baseWidth: 1280,
-            baseHeight: 720
-        }; }
-        var baseWidth = option.baseWidth || 1280;
-        var baseHeight = option.baseHeight || 720;
         width = core.width;
         height = core.height;
-        scale = Math.min(core.width / baseWidth, core.height / baseHeight);
+        scale = core.scale;
         cap = core.cap;
     }
 };

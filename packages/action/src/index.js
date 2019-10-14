@@ -44,7 +44,6 @@ function setAction(core) {
             Math.floor((xMax - xMin) / 3 * 2 + xMin) + random(5, 10),
             Math.floor((yMax - yMin) / 3 * 2 + yMin) - random(5, 10)
         ];
-        // const points = bezier.getBezierPoints(50, startPoint, c1, c2, endPoint)
         var curve = new (Bezier.bind.apply(Bezier, __spreadArrays([void 0], startPoint, endPoint, c1, c2)))();
         var points = curve.getLUT(16).map(function (p) { return [Math.floor(p['x']), Math.floor(p['y'])]; });
         gesture.apply(void 0, __spreadArrays([duration], points));

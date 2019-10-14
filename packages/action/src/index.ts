@@ -49,7 +49,6 @@ function setAction (core: Core) {
             Math.floor((yMax - yMin) / 3 * 2 + yMin) - random(5, 10)
         ]
 
-        // const points = bezier.getBezierPoints(50, startPoint, c1, c2, endPoint)
         const curve = new Bezier(...startPoint, ...endPoint, ...c1, ...c2)
         const points = curve.getLUT(16).map(p => [Math.floor(p['x']), Math.floor(p['y'])])
         gesture(duration, ...points)

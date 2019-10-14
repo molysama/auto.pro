@@ -5,6 +5,7 @@ export interface Core {
     isRoot: boolean;
     width: number;
     height: number;
+    scale: number;
     screenType: ('w' | 'h' | undefined);
     cap: CapFunction;
     plugins: Plugin[];
@@ -21,7 +22,13 @@ export declare function inject<T>(key: InjectionKey<T> | string): T | undefined;
 export declare function inject<T>(key: InjectionKey<T> | string, defaultValue: T): T;
 /**
  *
- * @param {'w' | 'h' | undefined} screenType 期望的屏幕类型，默认为横屏'w'，设为undefined时将无屏幕信息，影响截图、找图等功能
+ * @param {number | 1280} param.baseWidth 脚本制作时的宽度基准值
+ * @param {number | 720} param.baseHeight 脚本制作时的高度基准值
+ * @param {boolean | true} param.needCap 是否需要截图权限
  */
-export default function (screenType?: ('w' | 'h' | undefined)): Core;
+export default function (param?: {
+    baseWidth?: number;
+    baseHeight?: number;
+    needCap?: boolean;
+}): Core;
 export {};

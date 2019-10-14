@@ -43,7 +43,7 @@ function getPrototype (obj: any) {
     }
 }
 
-function readImg (imgPath: string, mode?: number) {
+function readImg (imgPath: Image | string, mode?: number) {
     if (!imgPath) {
         return null
     }
@@ -88,7 +88,7 @@ export function findImg (param: {
     const option = param.option || {}
 
     const useCache = param.useCache
-    const cachePath = useCache && (useCache.key || '__cache__') || null
+    const cachePath = useCache && (path + useCache.key || '__cache__') || null
     const cacheOffset = useCache && useCache.offset || 2
 
     const eachTime = param.eachTime || 100
@@ -240,25 +240,87 @@ export function findImg (param: {
 
 }
 
-export function useSearch () {
-    return {
-        readImg,
-        findImg
+/**
+ * (精确查找)
+ * 判断区域内是否不含有colors中的任意一个，不含有则返回true，含有则返回false
+ * 
+ * @param {Image} image     图源
+ * @param {Array} region    查找范围
+ * @param {Array} colors    待查颜色数组 
+ */
+export function noAnyColors (image: Image, region: [] = [], colors: [] = []) {
+    let src = readImg(image)
+    let result = !colors.some(c => {
+        if (images.findColorInRegion(src, c, ...region)) {
+            return true
+        } else {
+            return false
+        }
+    })
+    if (getPrototype(image) === 'String') {
+        src.recycle()
     }
+    return result
+}
+
+/**
+ * (精确查找)
+ * 区域内含有colors中的全部颜色时，返回true，否则返回false
+ * 
+ * @param image 图源
+ * @param region 范围
+ * @param colors 待查颜色数组
+ */
+export function hasMulColors(image: Image | string, region: [] = [], colors: [] = []) {
+    let src = readImg(image)
+    let result = colors.every(c => {
+        if (images.findColorEquals(src, c, ...region)) {
+            return true
+        } else {
+            return false
+        }
+    })
+    if (getPrototype(image) === 'String') {
+        src.recycle()
+    }
+    return result
+}
+
+/**
+ * 存在任意颜色，则返回颜色坐标，否则返回false
+ * 
+ * @param image 
+ * @param colors 
+ * @param option 
+ * @returns {[number, number] | false}
+ */
+export function hasAnyColors(image: Image | string, colors: [] = [], option = {
+    threshold: 10
+}): ([number, number] | false) {
+    let result: [number, number] | false = false
+    let src = readImg(image)
+    colors.some(c => {
+        let has = images.findColor(readImg, c, option)
+        if (has) {
+            result = [has['x'], has['y']]
+            return true
+        } else {
+            return false
+        }
+    })
+    if (getPrototype(image) === 'String') {
+        src.recycle()
+    }
+    return result
 }
 
 
 const SearchPlugin: Plugin = {
-    install (core: Core, option: any = {
-        baseWidth: 1280,
-        baseHeight: 720
-    }) {
-        const baseWidth = option.baseWidth || 1280
-        const baseHeight = option.baseHeight || 720
+    install (core: Core, option: any) {
 
         width = core.width
         height = core.height
-        scale = Math.min(core.width / baseWidth, core.height / baseHeight)
+        scale = core.scale
         cap = core.cap
     } 
 }

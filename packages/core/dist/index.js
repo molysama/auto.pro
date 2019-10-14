@@ -21,13 +21,22 @@ function inject(key, defaultValue) {
 }
 /**
  *
- * @param {'w' | 'h' | undefined} screenType 期望的屏幕类型，默认为横屏'w'，设为undefined时将无屏幕信息，影响截图、找图等功能
+ * @param {number | 1280} param.baseWidth 脚本制作时的宽度基准值
+ * @param {number | 720} param.baseHeight 脚本制作时的高度基准值
+ * @param {boolean | true} param.needCap 是否需要截图权限
  */
-function index (screenType) {
-    if (screenType === void 0) { screenType = 'w'; }
+function index (param) {
+    if (param === void 0) { param = {}; }
+    var needCap = param.needCap === false ? false : true;
+    var baseWidth = param.baseWidth || 1280;
+    var baseHeight = param.baseHeight || 720;
+    var screenType = baseWidth >= baseHeight ? 'w' : 'h';
     var isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false;
-    var width = typeof device != 'undefined' ? Math.max(device.width, device.height) : 0;
-    var height = typeof device != 'undefined' ? Math.min(device.width, device.height) : 0;
+    var max = typeof device != 'undefined' ? Math.max(device.width, device.height) : 0;
+    var min = typeof device != 'undefined' ? Math.min(device.width, device.height) : 0;
+    var width = screenType === 'w' ? max : min;
+    var height = screenType === 'w' ? min : max;
+    var scale = Math.min(width / baseWidth, height / baseHeight);
     if (!isRoot) {
         threads && threads.start && threads.start(function () {
             if (screenType) {
@@ -48,11 +57,12 @@ function index (screenType) {
         isRoot: isRoot,
         width: width,
         height: height,
+        scale: scale,
         plugins: [],
         screenType: screenType,
         cap: function (path) {
-            if (!screenType) {
-                throw 'cap仅当screenType为真值时可用';
+            if (!needCap) {
+                throw 'cap仅当needCap为真值时可用';
             }
             if (path) {
                 return captureScreen(path);
