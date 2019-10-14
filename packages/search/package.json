@@ -31,11 +31,10 @@
   },
   "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc",
   "dependencies": {
-    "core-js": "^3.2.1",
-    "rollup-plugin-babel": "^4.3.3",
     "rxjs": "^6.5.3"
   },
   "devDependencies": {
+    "rollup-plugin-babel": "^4.3.3",
     "@babel/preset-env": "^7.6.3"
   }
 }
