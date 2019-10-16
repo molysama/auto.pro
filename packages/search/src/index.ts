@@ -1,5 +1,5 @@
 
-import { throwError, of, BehaviorSubject, timer, NEVER, Observable } from 'rxjs'
+import { throwError, of, BehaviorSubject, timer, NEVER, Observable, defer } from 'rxjs'
 import { map, filter, take, tap, exhaustMap, finalize, withLatestFrom, switchMap, startWith, delay } from 'rxjs/operators'
 
 import {CapFunction, inject, Plugin, Core} from '@auto.pro/core'
@@ -91,154 +91,155 @@ export function findImg (param: {
     doIfNotFound?: Function
     image?: Image
 }): Observable<[[number, number] | [number, number] | null]> {
-    const path = param.path || ''
-    const option = param.option || {}
-    const index = param.index
+    return defer(() => {
+        const path = param.path || ''
+        const option = param.option || {}
+        const index = param.index
 
-    const useCache = param.useCache
-    const cachePath = useCache && (path + useCache.key || '__cache__') || null
-    const cacheOffset = useCache && useCache.offset || 2
+        const useCache = param.useCache
+        const cachePath = useCache && (path + useCache.key || '__cache__') || null
+        const cacheOffset = useCache && useCache.offset || 2
 
-    const eachTime = param.eachTime || 100
-    const nextTime = param.nextTime
-    const DO_IF_NOT_FOUND = param.doIfNotFound
-    const image = param.image || null
+        const eachTime = param.eachTime || 100
+        const nextTime = param.nextTime
+        const DO_IF_NOT_FOUND = param.doIfNotFound
+        const image = param.image || null
 
-    // 是否只找一次，无论是否找到都返回结果，默认false
-    // 如果提供了截图cap，则只找一次
-    const ONCE = image ? true : param.once
-    const TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999
+        // 是否只找一次，无论是否找到都返回结果，默认false
+        // 如果提供了截图cap，则只找一次
+        const ONCE = image ? true : param.once
+        const TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999
 
-    let template = readImg(path)
-    if (!template) {
-        return throwError('template path is null')
-    }
-
-    template = images.scale(template, scale, scale)
-
-    let queryOption = { ...option }
-    queryOption.threshold = queryOption.threshold || 0.8
-
-    // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值
-    if (cachePath && cache[cachePath]) {
-        queryOption.region = cache[cachePath]
-    } else if (queryOption.region) {
-        let region = queryOption.region
-        if (region[0] < 0) {
-            region[0] = 0
+        let template = readImg(path)
+        if (!template) {
+            return throwError('template path is null')
         }
-        if (region[1] < 0) {
-            region[1] = 0
-        }
-        if (region.length == 4) {
-            let x = region[0] + region[2]
-            let y = region[1] + region[3]
-            if (x > width) {
-                region[2] = width - region[0]
+
+        template = images.scale(template, scale, scale)
+
+        let queryOption = { ...option }
+        queryOption.threshold = queryOption.threshold || 0.8
+
+        // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值
+        if (cachePath && cache[cachePath]) {
+            queryOption.region = cache[cachePath]
+        } else if (queryOption.region) {
+            let region = queryOption.region
+            if (region[0] < 0) {
+                region[0] = 0
             }
-            if (y > height) {
-                region[3] = height - region[1]
+            if (region[1] < 0) {
+                region[1] = 0
             }
-        }
-        queryOption.region = region
-    }
-
-    let pass$ = image ? null : new BehaviorSubject(true)
-
-    const image$ = image ? of(image) : timer(0, eachTime).pipe(
-        withLatestFrom(pass$ && pass$.pipe(
-            switchMap(v => {
-                if (v) {
-                    return of(v)
-                } else {
-                    return of(true).pipe(
-                        delay(nextTime || 500),
-                        startWith(false)
-                    )
+            if (region.length == 4) {
+                let x = region[0] + region[2]
+                let y = region[1] + region[3]
+                if (x > width) {
+                    region[2] = width - region[0]
                 }
+                if (y > height) {
+                    region[3] = height - region[1]
+                }
+            }
+            queryOption.region = region
+        }
+
+        let pass$ = image ? null : new BehaviorSubject(true)
+
+        const image$ = image ? of(image) : timer(0, eachTime).pipe(
+            withLatestFrom(pass$ && pass$.pipe(
+                switchMap(v => {
+                    if (v) {
+                        return of(v)
+                    } else {
+                        return of(true).pipe(
+                            delay(nextTime || 500),
+                            startWith(false)
+                        )
+                    }
+                })
+            ) || of(true)),
+            filter((v: any) => v[1]),
+            map(() => cap())
+        )
+
+        return image$.pipe(
+            exhaustMap(src => {
+                let match = images.matchTemplate(src, template, queryOption).matches
+                if (match.length == 0 && DO_IF_NOT_FOUND) {
+                    DO_IF_NOT_FOUND()
+                }
+                return of(match)
+            }),
+            take(ONCE ? 1 : 99999999),
+            filter(v => ONCE ? true : v.length > 0),
+            take(TAKE_NUM),
+            map(res => {
+                let result = res.map(p => {
+                    return [
+                        Math.floor(p.point['x']),
+                        Math.floor(p.point['y'])
+                    ]
+                }).sort((a, b) => {
+                    let absY = Math.abs(a[1] - b[1])
+                    let absX = Math.abs(a[0] - b[0])
+                    if (absY > 4 && a[1] > b[1]) {
+                        return true
+                    }
+                    else if (absY < 4) {
+                        return absX > 4 && a[0] > b[0]
+                    } else {
+                        return false
+                    }
+                })
+
+                // 如果设置了取第几个
+                if (index != undefined) {
+                    // 如果从缓存里找，则只判断索引0
+                    if (cachePath && cache[cachePath]) {
+                        result = result.length > 0 ? [result[0]] : []
+                    } else {
+                        // 如果还未设置缓存，则取第index-1个，没有则返回空数组
+                        result = result.length >= index ? [result[index - 1]] : []
+                    }
+                }
+                return result
+            }),
+            tap(res => {
+                // 如果有结果，且确认要缓存
+                if (res && res.length > 0 && useCache && cachePath && !cache[cachePath]) {
+
+                    const xArray = res.map(e => e[0])
+                    const yArray = res.map(e => e[1])
+
+                    cache[cachePath] = region([
+                        Math.min(...xArray) - cacheOffset,
+                        Math.min(...yArray) - cacheOffset,
+                        Math.max(...xArray) + template.width + cacheOffset * 2,
+                        Math.max(...yArray) + template.height + cacheOffset * 2
+                    ])
+                    queryOption.region = cache[cachePath]
+                }
+                if (nextTime) {
+                    pass$ && pass$.next(false)
+                }
+            }),
+            map(res => {
+                let result
+                // 如果设置了取第几个，则对最后结果进行处理，有结果则直接返回索引0的值，无结果则返回null
+                if (index != undefined) {
+                    result = res.length > 0 ? res[0] : null
+                } else {
+                    result = res
+                }
+                return result
+            }),
+            finalize(() => {
+                template.recycle()
+                pass$ && pass$.complete()
             })
-        ) || of(true)),
-        filter((v: any) => v[1]),
-        map(() => cap())
-    )
-
-    return image$.pipe(
-        exhaustMap(src => {
-            let match = images.matchTemplate(src, template, queryOption).matches
-            if (match.length == 0 && DO_IF_NOT_FOUND) {
-                DO_IF_NOT_FOUND()
-            }
-            return of(match)
-        }),
-        take(ONCE ? 1 : 99999999),
-        filter(v => ONCE ? true : v.length > 0),
-        take(TAKE_NUM),
-        map(res => {
-            let result = res.map(p => {
-                return [
-                    Math.floor(p.point['x']),
-                    Math.floor(p.point['y'])
-                ]
-            }).sort((a, b) => {
-                let absY = Math.abs(a[1] - b[1])
-                let absX = Math.abs(a[0] - b[0])
-                if (absY > 4 && a[1] > b[1]) {
-                    return true
-                }
-                else if (absY < 4) {
-                    return absX > 4 && a[0] > b[0]
-                } else {
-                    return false
-                }
-            })
-
-            // 如果设置了取第几个
-            if (index != undefined) {
-                // 如果从缓存里找，则只判断索引0
-                if (cachePath && cache[cachePath]) {
-                    result = result.length > 0 ? [result[0]] : []
-                } else {
-                    // 如果还未设置缓存，则取第index-1个，没有则返回空数组
-                    result = result.length >= index ? [result[index-1]] : []
-                }
-            }
-            return result
-        }),
-        tap(res => {
-            // 如果有结果，且确认要缓存
-            if (res && res.length > 0 && useCache && cachePath && !cache[cachePath]) {
-
-                const xArray = res.map(e => e[0])
-                const yArray = res.map(e => e[1])
-
-                cache[cachePath] = region([
-                    Math.min(...xArray) - cacheOffset,
-                    Math.min(...yArray) - cacheOffset,
-                    Math.max(...xArray) + template.width + cacheOffset * 2,
-                    Math.max(...yArray) + template.height + cacheOffset * 2
-                ])
-                queryOption.region = cache[cachePath]
-            }
-            if (nextTime) {
-                pass$ && pass$.next(false)
-            }
-        }),
-        map(res => {
-            let result
-            // 如果设置了取第几个，则对最后结果进行处理，有结果则直接返回索引0的值，无结果则返回null
-            if (index != undefined) {
-                result = res.length > 0 ? res[0] : null
-            } else {
-                result = res
-            }
-            return result
-        }),
-        finalize(() => {
-            template.recycle()
-            pass$ && pass$.complete()
-        })
-    )
-
+        )
+    })
 
 }
 

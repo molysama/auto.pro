@@ -105,127 +105,129 @@ function readImg(imgPath, mode) {
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
-    var path = param.path || '';
-    var option = param.option || {};
-    var index = param.index;
-    var useCache = param.useCache;
-    var cachePath = useCache && (path + useCache.key || '__cache__') || null;
-    var cacheOffset = useCache && useCache.offset || 2;
-    var eachTime = param.eachTime || 100;
-    var nextTime = param.nextTime;
-    var DO_IF_NOT_FOUND = param.doIfNotFound;
-    var image = param.image || null;
-    // 是否只找一次，无论是否找到都返回结果，默认false
-    // 如果提供了截图cap，则只找一次
-    var ONCE = image ? true : param.once;
-    var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
-    var template = readImg(path);
-    if (!template) {
-        return rxjs.throwError('template path is null');
-    }
-    template = images.scale(template, scale, scale);
-    var queryOption = __assign({}, option);
-    queryOption.threshold = queryOption.threshold || 0.8;
-    // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值
-    if (cachePath && cache[cachePath]) {
-        queryOption.region = cache[cachePath];
-    }
-    else if (queryOption.region) {
-        var region_1 = queryOption.region;
-        if (region_1[0] < 0) {
-            region_1[0] = 0;
+    return rxjs.defer(function () {
+        var path = param.path || '';
+        var option = param.option || {};
+        var index = param.index;
+        var useCache = param.useCache;
+        var cachePath = useCache && (path + useCache.key || '__cache__') || null;
+        var cacheOffset = useCache && useCache.offset || 2;
+        var eachTime = param.eachTime || 100;
+        var nextTime = param.nextTime;
+        var DO_IF_NOT_FOUND = param.doIfNotFound;
+        var image = param.image || null;
+        // 是否只找一次，无论是否找到都返回结果，默认false
+        // 如果提供了截图cap，则只找一次
+        var ONCE = image ? true : param.once;
+        var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
+        var template = readImg(path);
+        if (!template) {
+            return rxjs.throwError('template path is null');
         }
-        if (region_1[1] < 0) {
-            region_1[1] = 0;
-        }
-        if (region_1.length == 4) {
-            var x = region_1[0] + region_1[2];
-            var y = region_1[1] + region_1[3];
-            if (x > width) {
-                region_1[2] = width - region_1[0];
-            }
-            if (y > height) {
-                region_1[3] = height - region_1[1];
-            }
-        }
-        queryOption.region = region_1;
-    }
-    var pass$ = image ? null : new rxjs.BehaviorSubject(true);
-    var image$ = image ? rxjs.of(image) : rxjs.timer(0, eachTime).pipe(operators.withLatestFrom(pass$ && pass$.pipe(operators.switchMap(function (v) {
-        if (v) {
-            return rxjs.of(v);
-        }
-        else {
-            return rxjs.of(true).pipe(operators.delay(nextTime || 500), operators.startWith(false));
-        }
-    })) || rxjs.of(true)), operators.filter(function (v) { return v[1]; }), operators.map(function () { return cap(); }));
-    return image$.pipe(operators.exhaustMap(function (src) {
-        var match = images.matchTemplate(src, template, queryOption).matches;
-        if (match.length == 0 && DO_IF_NOT_FOUND) {
-            DO_IF_NOT_FOUND();
-        }
-        return rxjs.of(match);
-    }), operators.take(ONCE ? 1 : 99999999), operators.filter(function (v) { return ONCE ? true : v.length > 0; }), operators.take(TAKE_NUM), operators.map(function (res) {
-        var result = res.map(function (p) {
-            return [
-                Math.floor(p.point['x']),
-                Math.floor(p.point['y'])
-            ];
-        }).sort(function (a, b) {
-            var absY = Math.abs(a[1] - b[1]);
-            var absX = Math.abs(a[0] - b[0]);
-            if (absY > 4 && a[1] > b[1]) {
-                return true;
-            }
-            else if (absY < 4) {
-                return absX > 4 && a[0] > b[0];
-            }
-            else {
-                return false;
-            }
-        });
-        // 如果设置了取第几个
-        if (index != undefined) {
-            // 如果从缓存里找，则只判断索引0
-            if (cachePath && cache[cachePath]) {
-                result = result.length > 0 ? [result[0]] : [];
-            }
-            else {
-                // 如果还未设置缓存，则取第index-1个，没有则返回空数组
-                result = result.length >= index ? [result[index - 1]] : [];
-            }
-        }
-        return result;
-    }), operators.tap(function (res) {
-        // 如果有结果，且确认要缓存
-        if (res && res.length > 0 && useCache && cachePath && !cache[cachePath]) {
-            var xArray = res.map(function (e) { return e[0]; });
-            var yArray = res.map(function (e) { return e[1]; });
-            cache[cachePath] = region([
-                Math.min.apply(Math, xArray) - cacheOffset,
-                Math.min.apply(Math, yArray) - cacheOffset,
-                Math.max.apply(Math, xArray) + template.width + cacheOffset * 2,
-                Math.max.apply(Math, yArray) + template.height + cacheOffset * 2
-            ]);
+        template = images.scale(template, scale, scale);
+        var queryOption = __assign({}, option);
+        queryOption.threshold = queryOption.threshold || 0.8;
+        // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值
+        if (cachePath && cache[cachePath]) {
             queryOption.region = cache[cachePath];
         }
-        if (nextTime) {
-            pass$ && pass$.next(false);
+        else if (queryOption.region) {
+            var region_1 = queryOption.region;
+            if (region_1[0] < 0) {
+                region_1[0] = 0;
+            }
+            if (region_1[1] < 0) {
+                region_1[1] = 0;
+            }
+            if (region_1.length == 4) {
+                var x = region_1[0] + region_1[2];
+                var y = region_1[1] + region_1[3];
+                if (x > width) {
+                    region_1[2] = width - region_1[0];
+                }
+                if (y > height) {
+                    region_1[3] = height - region_1[1];
+                }
+            }
+            queryOption.region = region_1;
         }
-    }), operators.map(function (res) {
-        var result;
-        // 如果设置了取第几个，则对最后结果进行处理，有结果则直接返回索引0的值，无结果则返回null
-        if (index != undefined) {
-            result = res.length > 0 ? res[0] : null;
-        }
-        else {
-            result = res;
-        }
-        return result;
-    }), operators.finalize(function () {
-        template.recycle();
-        pass$ && pass$.complete();
-    }));
+        var pass$ = image ? null : new rxjs.BehaviorSubject(true);
+        var image$ = image ? rxjs.of(image) : rxjs.timer(0, eachTime).pipe(operators.withLatestFrom(pass$ && pass$.pipe(operators.switchMap(function (v) {
+            if (v) {
+                return rxjs.of(v);
+            }
+            else {
+                return rxjs.of(true).pipe(operators.delay(nextTime || 500), operators.startWith(false));
+            }
+        })) || rxjs.of(true)), operators.filter(function (v) { return v[1]; }), operators.map(function () { return cap(); }));
+        return image$.pipe(operators.exhaustMap(function (src) {
+            var match = images.matchTemplate(src, template, queryOption).matches;
+            if (match.length == 0 && DO_IF_NOT_FOUND) {
+                DO_IF_NOT_FOUND();
+            }
+            return rxjs.of(match);
+        }), operators.take(ONCE ? 1 : 99999999), operators.filter(function (v) { return ONCE ? true : v.length > 0; }), operators.take(TAKE_NUM), operators.map(function (res) {
+            var result = res.map(function (p) {
+                return [
+                    Math.floor(p.point['x']),
+                    Math.floor(p.point['y'])
+                ];
+            }).sort(function (a, b) {
+                var absY = Math.abs(a[1] - b[1]);
+                var absX = Math.abs(a[0] - b[0]);
+                if (absY > 4 && a[1] > b[1]) {
+                    return true;
+                }
+                else if (absY < 4) {
+                    return absX > 4 && a[0] > b[0];
+                }
+                else {
+                    return false;
+                }
+            });
+            // 如果设置了取第几个
+            if (index != undefined) {
+                // 如果从缓存里找，则只判断索引0
+                if (cachePath && cache[cachePath]) {
+                    result = result.length > 0 ? [result[0]] : [];
+                }
+                else {
+                    // 如果还未设置缓存，则取第index-1个，没有则返回空数组
+                    result = result.length >= index ? [result[index - 1]] : [];
+                }
+            }
+            return result;
+        }), operators.tap(function (res) {
+            // 如果有结果，且确认要缓存
+            if (res && res.length > 0 && useCache && cachePath && !cache[cachePath]) {
+                var xArray = res.map(function (e) { return e[0]; });
+                var yArray = res.map(function (e) { return e[1]; });
+                cache[cachePath] = region([
+                    Math.min.apply(Math, xArray) - cacheOffset,
+                    Math.min.apply(Math, yArray) - cacheOffset,
+                    Math.max.apply(Math, xArray) + template.width + cacheOffset * 2,
+                    Math.max.apply(Math, yArray) + template.height + cacheOffset * 2
+                ]);
+                queryOption.region = cache[cachePath];
+            }
+            if (nextTime) {
+                pass$ && pass$.next(false);
+            }
+        }), operators.map(function (res) {
+            var result;
+            // 如果设置了取第几个，则对最后结果进行处理，有结果则直接返回索引0的值，无结果则返回null
+            if (index != undefined) {
+                result = res.length > 0 ? res[0] : null;
+            }
+            else {
+                result = res;
+            }
+            return result;
+        }), operators.finalize(function () {
+            template.recycle();
+            pass$ && pass$.complete();
+        }));
+    });
 }
 /**
  * (精确查找)
