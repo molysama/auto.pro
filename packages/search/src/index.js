@@ -204,6 +204,15 @@ function findImg(param) {
                 result = res;
             }
             return result;
+        }), 
+        // 如果没有设置ONCE，且设置了index，则对最终结果进行过滤
+        operators_1.filter(function (v) {
+            if (!ONCE && index != undefined) {
+                return v;
+            }
+            else {
+                return true;
+            }
         }), operators_1.finalize(function () {
             template.recycle();
             pass$ && pass$.complete();

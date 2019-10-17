@@ -223,6 +223,15 @@ function findImg(param) {
                 result = res;
             }
             return result;
+        }), 
+        // 如果没有设置ONCE，且设置了index，则对最终结果进行过滤
+        operators.filter(function (v) {
+            if (!ONCE && index != undefined) {
+                return v;
+            }
+            else {
+                return true;
+            }
         }), operators.finalize(function () {
             template.recycle();
             pass$ && pass$.complete();
