@@ -30,5 +30,6 @@ export default function (param?: {
     baseWidth?: number;
     baseHeight?: number;
     needCap?: boolean;
+    needService?: boolean;
 }): Core;
 export {};

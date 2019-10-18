@@ -37,22 +37,20 @@ function index (param) {
     var width = screenType === 'w' ? max : min;
     var height = screenType === 'w' ? min : max;
     var scale = Math.min(width / baseWidth, height / baseHeight);
-    if (!isRoot) {
-        threads && threads.start && threads.start(function () {
-            if (screenType) {
-                var _a = screenType === 'w' ? [width, height] : [height, width], w = _a[0], h = _a[1];
-                if (!requestScreenCapture(w, h)) {
-                    toast("请求截图失败");
-                    exit();
-                }
+    threads && threads.start && threads.start(function () {
+        if (needCap) {
+            var _a = screenType === 'w' ? [width, height] : [height, width], w = _a[0], h = _a[1];
+            if (!requestScreenCapture(w, h)) {
+                toast("请求截图失败");
+                exit();
             }
-            if (auto.service == null) {
-                app.startActivity({
-                    action: "android.settings.ACCESSIBILITY_SETTINGS"
-                });
-            }
-        });
-    }
+        }
+        if ((param.needService || !isRoot) && auto.service == null) {
+            app.startActivity({
+                action: "android.settings.ACCESSIBILITY_SETTINGS"
+            });
+        }
+    });
     var core = {
         isRoot: isRoot,
         width: width,

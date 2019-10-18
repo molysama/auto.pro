@@ -59,7 +59,8 @@ export function inject(key: InjectionKey<any> | string, defaultValue?: any) {
 export default function (param: {
     baseWidth?: number,
     baseHeight?: number,
-    needCap?: boolean
+    needCap?: boolean,
+    needService?: boolean
 } = {
 }): Core {
 
@@ -76,24 +77,22 @@ export default function (param: {
 
     const scale = Math.min(width / baseWidth, height / baseHeight)
 
-    if (!isRoot) {
-        threads && threads.start && threads.start(function () {
+    threads && threads.start && threads.start(function () {
 
-            if (screenType) {
-                const [w, h] = screenType === 'w' ? [width, height] : [height, width]
-                if (!requestScreenCapture(w, h)) {
-                    toast("请求截图失败");
-                    exit();
-                }
+        if (needCap) {
+            const [w, h] = screenType === 'w' ? [width, height] : [height, width]
+            if (!requestScreenCapture(w, h)) {
+                toast("请求截图失败");
+                exit();
             }
+        }
 
-            if (auto.service == null) {
-                app.startActivity({
-                    action: "android.settings.ACCESSIBILITY_SETTINGS"
-                });
-            }
-        })
-    }
+        if ((param.needService || !isRoot) && auto.service == null) {
+            app.startActivity({
+                action: "android.settings.ACCESSIBILITY_SETTINGS"
+            });
+        }
+    })
 
     const core: Core = {
         isRoot,
