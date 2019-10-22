@@ -1,7 +1,7 @@
 'use strict';
 
 import Core from "@auto.pro/core"
-import ActionPlugin, {useAction} from '../src/index'
+import ActionPlugin, {click, swipe} from '../src/index'
 const Bezier = require('bezier-js')
 
 describe('ActionPlugin', () => {
@@ -24,7 +24,6 @@ describe('ActionPlugin', () => {
     })
 
     core.use(ActionPlugin)
-    const {click, swipe} = useAction()
 
     test('click', () => {
         expect(click).not.toBeUndefined()

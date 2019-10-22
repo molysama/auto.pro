@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = __importDefault(require("../src/index"));
 describe('Core', function () {
-    var core = index_1.default();
+    var core = index_1.default({});
     test('init', function () {
         expect(core.width).toBe(1280);
     });

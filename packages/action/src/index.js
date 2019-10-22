@@ -8,18 +8,9 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var Bezier = require('bezier-js');
-var click;
-var swipe;
-function useAction() {
-    return {
-        click: click,
-        swipe: swipe
-    };
-}
-exports.useAction = useAction;
 function setAction(core) {
     var isRoot = core.isRoot;
-    swipe = function (startPoint, endPoint, duration) {
+    exports.swipe = function (startPoint, endPoint, duration) {
         var x1 = startPoint[0];
         var y1 = startPoint[1];
         var x2 = endPoint[0];
@@ -48,7 +39,7 @@ function setAction(core) {
         var points = curve.getLUT(16).map(function (p) { return [Math.floor(p['x']), Math.floor(p['y'])]; });
         gesture.apply(void 0, __spreadArrays([duration], points));
     };
-    click = function (x, y, delay) {
+    exports.click = function (x, y, delay) {
         if (delay === void 0) { delay = [600, 800]; }
         if (x == null || y == null) {
             return;
@@ -61,8 +52,8 @@ function setAction(core) {
             press(x, y, random.apply(void 0, delay));
         }
     };
-    core.provide('swipe', swipe);
-    core.provide('click', click);
+    core.provide('swipe', exports.swipe);
+    core.provide('click', exports.click);
 }
 var Action = {
     install: function (core) {

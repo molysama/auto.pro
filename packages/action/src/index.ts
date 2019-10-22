@@ -6,16 +6,8 @@ const Bezier = require('bezier-js')
 export type ClickFunction = (x: number, y: number, delay?: [number, number] | [600, 800]) => any
 export type SwipeFunction = (startPoint: [number, number], endPoint: [number, number], duration?: number) => any
 
-let click: ClickFunction 
-let swipe: SwipeFunction
-
-export function useAction () {
-    return {
-        click,
-        swipe
-    }
-}
-
+export let click: ClickFunction 
+export let swipe: SwipeFunction
 
 function setAction (core: Core) {
     const isRoot = core.isRoot

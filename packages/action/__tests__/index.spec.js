@@ -28,11 +28,10 @@ describe('ActionPlugin', function () {
         expect(core.isRoot).not.toBeUndefined();
     });
     core.use(index_1.default);
-    var _a = index_1.useAction(), click = _a.click, swipe = _a.swipe;
     test('click', function () {
-        expect(click).not.toBeUndefined();
+        expect(index_1.click).not.toBeUndefined();
     });
     test('swipe', function () {
-        expect(swipe).not.toBeUndefined();
+        expect(index_1.swipe).not.toBeUndefined();
     });
 });

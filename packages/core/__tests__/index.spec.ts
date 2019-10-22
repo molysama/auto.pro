@@ -5,7 +5,9 @@ declare const __TEST_GLOBAL__
 describe('Core', () => {
 
 
-    const core = Core()
+    const core = Core({
+
+    })
     test('init', () => {
         expect(core.width).toBe(1280)
     })
