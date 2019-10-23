@@ -288,7 +288,7 @@ function hasAnyColors(image, colors, option) {
     var result = false;
     var src = readImg(image);
     colors.some(function (c) {
-        var has = images.findColor(readImg, c, option);
+        var has = images.findColor(src, c, option);
         if (has) {
             result = [has['x'], has['y']];
             return true;

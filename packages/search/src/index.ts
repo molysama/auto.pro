@@ -311,7 +311,7 @@ export function hasAnyColors(image: Image | string, colors: [] = [], option = {
     let result: [number, number] | false = false
     let src = readImg(image)
     colors.some(c => {
-        let has = images.findColor(readImg, c, option)
+        let has = images.findColor(src, c, option)
         if (has) {
             result = [has['x'], has['y']]
             return true
