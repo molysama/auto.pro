@@ -227,7 +227,9 @@ function findImg(param) {
                 }, nextTime);
             }
         }), operators.finalize(function () {
-            clearTimeout(t);
+            if (t) {
+                clearTimeout(t);
+            }
             template.recycle();
         }));
     });

@@ -227,7 +227,9 @@ export function findImg (param: {
                 }
             }),
             finalize(() => {
-                clearTimeout(t)
+                if (t) {
+                    clearTimeout(t)
+                }
                 template.recycle()
             })
         )
