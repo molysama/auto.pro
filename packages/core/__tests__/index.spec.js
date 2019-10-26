@@ -1,15 +1,27 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = __importDefault(require("../src/index"));
+var index_1 = __importStar(require("../src/index"));
+index_1.default({
+    baseWidth: 1920,
+    baseHeight: 1280
+});
 describe('Core', function () {
-    var core = index_1.default({});
-    test('init', function () {
-        expect(core.width).toBe(1280);
+    test('isRoot exist', function () {
+        expect(index_1.isRoot).not.toBeUndefined();
     });
-    test('cap', function () {
-        expect(core.cap).not.toBeUndefined();
+    test('pause', function () {
+        index_1.pause();
+        expect(index_1.isPause).toBe(true);
+    });
+    test('resume', function () {
+        index_1.resume();
+        expect(index_1.isPause).toBe(false);
     });
 });

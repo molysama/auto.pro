@@ -1,18 +1,15 @@
 'use strict';
 
-import { Core, Plugin, InjectionKey, inject } from '@auto.pro/core'
+import { Plugin, isRoot, isPause} from '@auto.pro/core'
 const Bezier = require('bezier-js')
 
-export type ClickFunction = (x: number, y: number, delay?: [number, number] | [600, 800]) => any
-export type SwipeFunction = (startPoint: [number, number], endPoint: [number, number], duration?: number) => any
+export let click: (x: number, y: number, delay?: [number, number] | [600, 800]) => any
+export let swipe: (startPoint: [number, number], endPoint: [number, number], duration?: number) => any
 
-export let click: ClickFunction 
-export let swipe: SwipeFunction
-
-function setAction (core: Core) {
-    const isRoot = core.isRoot
+function setAction () {
 
     swipe = (startPoint: [number, number], endPoint: [number, number], duration: number | undefined) => {
+        while (isPause) {}
         const x1 = startPoint[0]
         const y1 = startPoint[1]
         const x2 = endPoint[0]
@@ -46,6 +43,7 @@ function setAction (core: Core) {
         gesture(duration, ...points)
     } 
     click = (x: number, y: number, delay: [number, number] = [600, 800]) => {
+        while (isPause) {}
         if (x == null || y == null) {
             return
         }
@@ -56,13 +54,11 @@ function setAction (core: Core) {
             press(x, y, random(...delay))
         }
     }
-    core.provide('swipe', swipe)
-    core.provide('click', click)
 }
 
 const Action: Plugin = {
-    install (core: Core) {
-        setAction(core)
+    install (option={}) {
+        setAction()
     }
 }
 

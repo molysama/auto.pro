@@ -1,7 +1,8 @@
 'use strict';
 
-import Core from "@auto.pro/core"
+import Core, {isRoot, use} from "@auto.pro/core"
 import ActionPlugin, {click, swipe} from '../src/index'
+
 const Bezier = require('bezier-js')
 
 describe('ActionPlugin', () => {
@@ -13,21 +14,14 @@ describe('ActionPlugin', () => {
         expect(LUT).not.toBeUndefined()
     })
 
-    const core = Core()
+    Core()
 
-    test('core init', () => {
-        expect(core).not.toBeUndefined()
-    })
-
-    test('isRoot == false', () => {
-        expect(core.isRoot).not.toBeUndefined()
-    })
-
-    core.use(ActionPlugin)
+    use(ActionPlugin)
 
     test('click', () => {
         expect(click).not.toBeUndefined()
     })
+
     test('swipe', () => {
         expect(swipe).not.toBeUndefined()
     })

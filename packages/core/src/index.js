@@ -1,40 +1,79 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
-var ctx = {
-    provides: {}
-};
-function inject(key, defaultValue) {
-    if (ctx) {
-        var provides = ctx.provides;
-        if (key in provides) {
-            // TS doesn't allow symbol as index type
-            return provides[key];
-        }
-        else if (defaultValue !== undefined) {
-            return defaultValue;
-        }
+var isRoot;
+exports.isRoot = isRoot;
+var needCap;
+var needService;
+var baseWidth = 1280;
+var baseHeight = 720;
+var width;
+exports.width = width;
+var height;
+exports.height = height;
+var scale;
+exports.scale = scale;
+var screenType;
+exports.screenType = screenType;
+function cap(path) {
+    if (!needCap) {
+        throw 'cap仅当needCap为真值时可用';
+    }
+    if (path) {
+        return captureScreen(path);
+    }
+    else {
+        return captureScreen();
     }
 }
-exports.inject = inject;
-/**
- *
- * @param {number | 1280} param.baseWidth 脚本制作时的宽度基准值
- * @param {number | 720} param.baseHeight 脚本制作时的高度基准值
- * @param {boolean | true} param.needCap 是否需要截图权限
- */
+exports.cap = cap;
+var plugins = [];
+function use(plugin, option) {
+    if (plugins.indexOf(plugin) !== -1) {
+        return;
+    }
+    else if (utils_1.isFunction(plugin)) {
+        plugin(option);
+    }
+    else if (utils_1.isFunction(plugin.install)) {
+        plugin.install(option);
+    }
+    return plugins.push(plugin);
+}
+exports.use = use;
+var isPause = false;
+exports.isPause = isPause;
+function pause() {
+    exports.isPause = isPause = true;
+}
+exports.pause = pause;
+function resume() {
+    exports.isPause = isPause = false;
+}
+exports.resume = resume;
+function getWidth(value) {
+    if (value === void 0) { value = 1; }
+    return Math.floor(width * value);
+}
+exports.getWidth = getWidth;
+function getHeight(value) {
+    if (value === void 0) { value = 1; }
+    return Math.floor(height * value);
+}
+exports.getHeight = getHeight;
 function default_1(param) {
     if (param === void 0) { param = {}; }
-    var needCap = param.needCap === false ? false : true;
-    var baseWidth = param.baseWidth || 1280;
-    var baseHeight = param.baseHeight || 720;
-    var screenType = baseWidth >= baseHeight ? 'w' : 'h';
-    var isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false;
+    needCap = param.needCap === true ? true : false;
+    needService = param.needService === true ? true : false;
+    baseWidth = param.baseWidth || baseWidth;
+    baseHeight = param.baseHeight || baseHeight;
+    exports.screenType = screenType = baseWidth >= baseHeight ? 'w' : 'h';
+    exports.isRoot = isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false;
     var max = typeof device != 'undefined' ? Math.max(device.width, device.height) : 0;
     var min = typeof device != 'undefined' ? Math.min(device.width, device.height) : 0;
-    var width = screenType === 'w' ? max : min;
-    var height = screenType === 'w' ? min : max;
-    var scale = Math.min(width / baseWidth, height / baseHeight);
+    exports.width = width = screenType === 'w' ? max : min;
+    exports.height = height = screenType === 'w' ? min : max;
+    exports.scale = scale = Math.min(width / baseWidth, height / baseHeight);
     threads && threads.start && threads.start(function () {
         if (needCap) {
             var _a = screenType === 'w' ? [width, height] : [height, width], w = _a[0], h = _a[1];
@@ -43,56 +82,11 @@ function default_1(param) {
                 exit();
             }
         }
-        if ((param.needService || !isRoot) && auto.service == null) {
+        if ((needService || !isRoot) && auto.service == null) {
             app.startActivity({
                 action: "android.settings.ACCESSIBILITY_SETTINGS"
             });
         }
     });
-    var core = {
-        isRoot: isRoot,
-        width: width,
-        height: height,
-        scale: scale,
-        plugins: [],
-        screenType: screenType,
-        cap: function (path) {
-            if (!needCap) {
-                throw 'cap仅当needCap为真值时可用';
-            }
-            if (path) {
-                return captureScreen(path);
-            }
-            else {
-                return captureScreen();
-            }
-        },
-        provide: function (key, value) {
-            ctx.provides[key] = value;
-        },
-        use: function (plugin, option) {
-            if (option === void 0) { option = {}; }
-            if (this.plugins.indexOf(plugin) != -1) {
-                return core;
-            }
-            if (utils_1.isFunction(plugin)) {
-                plugin(core, option);
-            }
-            else if (utils_1.isFunction(plugin.install)) {
-                plugin.install(core, option);
-            }
-            this.plugins.push(plugin);
-            return core;
-        },
-        getWidth: function (value) {
-            if (value === void 0) { value = 1; }
-            return Math.floor(this.width * value);
-        },
-        getHeight: function (value) {
-            if (value === void 0) { value = 1; }
-            return Math.floor(this.height * value);
-        }
-    };
-    return core;
 }
 exports.default = default_1;

@@ -2,6 +2,8 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+var core = require('@auto.pro/core');
+
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -26,8 +28,7 @@ function __spreadArrays() {
 }
 
 var Bezier = require('bezier-js');
-function setAction(core) {
-    var isRoot = core.isRoot;
+function setAction() {
     exports.swipe = function (startPoint, endPoint, duration) {
         var x1 = startPoint[0];
         var y1 = startPoint[1];
@@ -40,7 +41,7 @@ function setAction(core) {
         // duration 距离成正比，每100px加100毫秒
         duration = duration || random(800, 1000);
         duration += Math.max(xMax - xMin, yMax - yMin);
-        if (isRoot) {
+        if (core.isRoot) {
             Swipe(x1, y1, x2, y2, duration);
             sleep(duration);
             return;
@@ -62,7 +63,7 @@ function setAction(core) {
         if (x == null || y == null) {
             return;
         }
-        if (isRoot) {
+        if (core.isRoot) {
             Tap(x, y);
             sleep(300);
         }
@@ -70,12 +71,10 @@ function setAction(core) {
             press(x, y, random.apply(void 0, delay));
         }
     };
-    core.provide('swipe', exports.swipe);
-    core.provide('click', exports.click);
 }
 var Action = {
-    install: function (core) {
-        setAction(core);
+    install: function (option) {
+        setAction();
     }
 };
 

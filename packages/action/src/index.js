@@ -7,10 +7,11 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var core_1 = require("@auto.pro/core");
 var Bezier = require('bezier-js');
-function setAction(core) {
-    var isRoot = core.isRoot;
+function setAction() {
     exports.swipe = function (startPoint, endPoint, duration) {
+        while (core_1.isPause) { }
         var x1 = startPoint[0];
         var y1 = startPoint[1];
         var x2 = endPoint[0];
@@ -22,7 +23,7 @@ function setAction(core) {
         // duration 距离成正比，每100px加100毫秒
         duration = duration || random(800, 1000);
         duration += Math.max(xMax - xMin, yMax - yMin);
-        if (isRoot) {
+        if (core_1.isRoot) {
             Swipe(x1, y1, x2, y2, duration);
             sleep(duration);
             return;
@@ -41,10 +42,11 @@ function setAction(core) {
     };
     exports.click = function (x, y, delay) {
         if (delay === void 0) { delay = [600, 800]; }
+        while (core_1.isPause) { }
         if (x == null || y == null) {
             return;
         }
-        if (isRoot) {
+        if (core_1.isRoot) {
             Tap(x, y);
             sleep(300);
         }
@@ -52,12 +54,11 @@ function setAction(core) {
             press(x, y, random.apply(void 0, delay));
         }
     };
-    core.provide('swipe', exports.swipe);
-    core.provide('click', exports.click);
 }
 var Action = {
-    install: function (core) {
-        setAction(core);
+    install: function (option) {
+        if (option === void 0) { option = {}; }
+        setAction();
     }
 };
 exports.default = Action;

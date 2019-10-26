@@ -2,12 +2,7 @@
 import { throwError, of, BehaviorSubject, timer, NEVER, Observable, defer } from 'rxjs'
 import { map, filter, take, tap, exhaustMap, finalize, withLatestFrom, switchMap, startWith, delay } from 'rxjs/operators'
 
-import {CapFunction, inject, Plugin, Core} from '@auto.pro/core'
-
-let width: number
-let height: number
-let scale: number
-let cap: CapFunction
+import {Plugin, cap, scale, width, height, isPause} from '@auto.pro/core'
 
 const cache: Record<string, any> = {}
 
@@ -34,7 +29,6 @@ function region (param: any) {
     }
 }
 
-
 function getPrototype (obj: any) {
     if (obj == undefined) {
         return null
@@ -49,6 +43,7 @@ function getPrototype (obj: any) {
 }
 
 function readImg (imgPath: Image | string, mode?: number) {
+    while (isPause) {}
     if (!imgPath) {
         return null
     }
@@ -147,6 +142,7 @@ export function findImg (param: {
         let pass$ = image ? null : new BehaviorSubject(true)
 
         const image$ = image ? of(image) : timer(0, eachTime).pipe(
+            filter(() => isPause !== true),
             withLatestFrom(pass$ && pass$.pipe(
                 switchMap(v => {
                     if (v) {
@@ -327,12 +323,7 @@ export function hasAnyColors(image: Image | string, colors: [] = [], option = {
 
 
 const SearchPlugin: Plugin = {
-    install (core: Core, option: any) {
-
-        width = core.width
-        height = core.height
-        scale = core.scale
-        cap = core.cap
+    install (option: any) {
     } 
 }
 

@@ -1,7 +1,4 @@
 'use strict';
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -10,7 +7,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var core_1 = __importDefault(require("@auto.pro/core"));
+var core_1 = __importStar(require("@auto.pro/core"));
 var index_1 = __importStar(require("../src/index"));
 var Bezier = require('bezier-js');
 describe('ActionPlugin', function () {
@@ -20,14 +17,8 @@ describe('ActionPlugin', function () {
         console.log(LUT);
         expect(LUT).not.toBeUndefined();
     });
-    var core = core_1.default();
-    test('core init', function () {
-        expect(core).not.toBeUndefined();
-    });
-    test('isRoot == false', function () {
-        expect(core.isRoot).not.toBeUndefined();
-    });
-    core.use(index_1.default);
+    core_1.default();
+    core_1.use(index_1.default);
     test('click', function () {
         expect(index_1.click).not.toBeUndefined();
     });

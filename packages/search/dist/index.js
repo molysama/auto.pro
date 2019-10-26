@@ -4,6 +4,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var rxjs = require('rxjs');
 var operators = require('rxjs/operators');
+var core = require('@auto.pro/core');
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -39,10 +40,6 @@ function __spreadArrays() {
     return r;
 }
 
-var width;
-var height;
-var scale;
-var cap;
 var cache = {};
 /**
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
@@ -54,14 +51,14 @@ function region(param) {
         var y = Math.max(0, param[1]);
         var w = param[2] - x;
         var h = param[3] - y;
-        w = x + w >= width ? width - x : w;
-        h = y + h >= height ? height - y : h;
+        w = x + w >= core.width ? core.width - x : w;
+        h = y + h >= core.height ? core.height - y : h;
         return [x, y, w, h];
     }
     else if (param.length == 2) {
         return [
-            Math.min(Math.max(0, param[0]), width),
-            Math.min(Math.max(0, param[1]), height)
+            Math.min(Math.max(0, param[0]), core.width),
+            Math.min(Math.max(0, param[1]), core.height)
         ];
     }
     else {
@@ -124,7 +121,7 @@ function findImg(param) {
         if (!template) {
             return rxjs.throwError('template path is null');
         }
-        template = images.scale(template, scale, scale);
+        template = images.scale(template, core.scale, core.scale);
         var queryOption = __assign({}, option);
         queryOption.threshold = queryOption.threshold || 0.8;
         // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值
@@ -142,24 +139,24 @@ function findImg(param) {
             if (region_1.length == 4) {
                 var x = region_1[0] + region_1[2];
                 var y = region_1[1] + region_1[3];
-                if (x > width) {
-                    region_1[2] = width - region_1[0];
+                if (x > core.width) {
+                    region_1[2] = core.width - region_1[0];
                 }
-                if (y > height) {
-                    region_1[3] = height - region_1[1];
+                if (y > core.height) {
+                    region_1[3] = core.height - region_1[1];
                 }
             }
             queryOption.region = region_1;
         }
         var pass$ = image ? null : new rxjs.BehaviorSubject(true);
-        var image$ = image ? rxjs.of(image) : rxjs.timer(0, eachTime).pipe(operators.withLatestFrom(pass$ && pass$.pipe(operators.switchMap(function (v) {
+        var image$ = image ? rxjs.of(image) : rxjs.timer(0, eachTime).pipe(operators.filter(function () { return core.isPause !== true; }), operators.withLatestFrom(pass$ && pass$.pipe(operators.switchMap(function (v) {
             if (v) {
                 return rxjs.of(v);
             }
             else {
                 return rxjs.of(true).pipe(operators.delay(nextTime || 500), operators.startWith(false));
             }
-        })) || rxjs.of(true)), operators.filter(function (v) { return v[1]; }), operators.map(function () { return cap(); }));
+        })) || rxjs.of(true)), operators.filter(function (v) { return v[1]; }), operators.map(function () { return core.cap(); }));
         return image$.pipe(operators.exhaustMap(function (src) {
             var match = images.matchTemplate(src, template, queryOption).matches;
             if (match.length == 0 && DO_IF_NOT_FOUND) {
@@ -319,11 +316,7 @@ function hasAnyColors(image, colors, option) {
     return result;
 }
 var SearchPlugin = {
-    install: function (core, option) {
-        width = core.width;
-        height = core.height;
-        scale = core.scale;
-        cap = core.cap;
+    install: function (option) {
     }
 };
 

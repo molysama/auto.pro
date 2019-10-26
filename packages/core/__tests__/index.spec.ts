@@ -1,18 +1,23 @@
-import Core from '../src/index'
+import Core, {isPause, pause, resume, isRoot} from '../src/index'
 
-declare const __TEST_GLOBAL__
+Core({
+    baseWidth: 1920,
+    baseHeight: 1280
+})
 
 describe('Core', () => {
 
-
-    const core = Core({
-
-    })
-    test('init', () => {
-        expect(core.width).toBe(1280)
+    test('isRoot exist', () => {
+        expect(isRoot).not.toBeUndefined()
     })
 
-    test('cap', () => {
-        expect(core.cap).not.toBeUndefined()
+    test('pause', () => {
+        pause()
+        expect(isPause).toBe(true)
+    })
+
+    test('resume', () => {
+        resume()
+        expect(isPause).toBe(false)
     })
 })

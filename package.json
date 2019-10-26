@@ -5,10 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "ut": "node scripts/test.js",
-    "test": "jest -C jest.config.js",
-    "mocha": "mocha -r ts-node/register --config ./mocharc.js packages/**/__tests__/**/*.spec.ts",
-    "ava": "ync ava"
+    "test": "jest -C jest.config.js"
   },
   "devDependencies": {
     "lerna": "^3.16.5"
