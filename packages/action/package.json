@@ -1,7 +1,7 @@
 {
   "name": "@auto.pro/action",
   "version": "7.4.0-alpha.0",
-  "description": "> TODO: description",
+  "description": "module for control app",
   "author": "molysama <molysama.i@gmail.com>",
   "publishConfig": {
     "access": "public"

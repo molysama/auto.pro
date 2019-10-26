@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "> TODO: description",
+  "description": "auto.pro module for search image and color",
   "author": "molysama <molysama.i@gmail.com>",
   "homepage": "https://github.com/molysama/auto.pro#readme",
   "license": "ISC",
