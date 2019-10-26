@@ -96,7 +96,7 @@ export function findImg (param: {
         const cacheOffset = useCache && useCache.offset || 2
 
         const eachTime = param.eachTime || 100
-        const nextTime = param.nextTime || 500
+        const nextTime = param.nextTime || 0
         const DO_IF_NOT_FOUND = param.doIfNotFound
         const image = param.image || null
 
@@ -139,29 +139,12 @@ export function findImg (param: {
             queryOption.region = region
         }
 
-        let pass$ = new BehaviorSubject(true)
-
-        const image$ = image ? of(image) : timer(0, eachTime).pipe(
-            filter(() => isPause !== true),
-            withLatestFrom(pass$.pipe(
-                switchMap(v => {
-                    if (v) {
-                        return of(true)
-                    } else {
-                        return of(true).pipe(
-                            delay(nextTime),
-                            startWith(false)
-                        )
-                    }
-                })
-            )),
-            filter((v: any) => v[1]),
-            map(() => cap())
-        )
-
-        return image$.pipe(
-            exhaustMap(src => {
-                let match = images.matchTemplate(src, template, queryOption).matches
+        let isPass = true
+        let t: any
+        return timer(0, eachTime).pipe(
+            filter(() => !isPause && isPass),
+            exhaustMap(() => {
+                let match = images.matchTemplate(image || cap(), template, queryOption).matches
                 if (match.length == 0 && DO_IF_NOT_FOUND) {
                     DO_IF_NOT_FOUND()
                 }
@@ -236,13 +219,16 @@ export function findImg (param: {
                 }
             }),
             tap(v => {
-                if (v && nextTime) {
-                    pass$.next(false)
+                if (v && nextTime && isPass) {
+                    isPass = false
+                    t = setTimeout(function(){
+                        isPass = true
+                    }, nextTime)
                 }
             }),
             finalize(() => {
+                clearTimeout(t)
                 template.recycle()
-                pass$ && pass$.complete()
             })
         )
     })
