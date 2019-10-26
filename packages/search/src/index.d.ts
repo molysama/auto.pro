@@ -22,7 +22,7 @@ export declare function findImg(param: {
     take?: number;
     doIfNotFound?: Function;
     image?: Image;
-}): Observable<[[number, number] | [number, number] | null]>;
+}): Observable<any>;
 /**
  * (精确查找)
  * 判断区域内是否不含有colors中的任意一个，不含有则返回true，含有则返回false

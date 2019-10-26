@@ -85,7 +85,7 @@ export function findImg (param: {
     take?: number
     doIfNotFound?: Function
     image?: Image
-}): Observable<[[number, number] | [number, number] | null]> {
+}): Observable<any> {
     return defer(() => {
         const path = param.path || ''
         const option = param.option || {}
@@ -96,7 +96,7 @@ export function findImg (param: {
         const cacheOffset = useCache && useCache.offset || 2
 
         const eachTime = param.eachTime || 100
-        const nextTime = param.nextTime
+        const nextTime = param.nextTime || 500
         const DO_IF_NOT_FOUND = param.doIfNotFound
         const image = param.image || null
 
@@ -139,22 +139,22 @@ export function findImg (param: {
             queryOption.region = region
         }
 
-        let pass$ = image ? null : new BehaviorSubject(true)
+        let pass$ = new BehaviorSubject(true)
 
         const image$ = image ? of(image) : timer(0, eachTime).pipe(
             filter(() => isPause !== true),
-            withLatestFrom(pass$ && pass$.pipe(
+            withLatestFrom(pass$.pipe(
                 switchMap(v => {
                     if (v) {
-                        return of(v)
+                        return of(true)
                     } else {
                         return of(true).pipe(
-                            delay(nextTime || 500),
+                            delay(nextTime),
                             startWith(false)
                         )
                     }
                 })
-            ) || of(true)),
+            )),
             filter((v: any) => v[1]),
             map(() => cap())
         )
@@ -216,9 +216,6 @@ export function findImg (param: {
                     ])
                     queryOption.region = cache[cachePath]
                 }
-                if (nextTime) {
-                    pass$ && pass$.next(false)
-                }
             }),
             map(res => {
                 let result
@@ -236,6 +233,11 @@ export function findImg (param: {
                     return v
                 } else {
                     return true
+                }
+            }),
+            tap(v => {
+                if (v && nextTime) {
+                    pass$.next(false)
                 }
             }),
             finalize(() => {

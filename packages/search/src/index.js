@@ -92,7 +92,7 @@ function findImg(param) {
         var cachePath = useCache && (path + useCache.key || '__cache__') || null;
         var cacheOffset = useCache && useCache.offset || 2;
         var eachTime = param.eachTime || 100;
-        var nextTime = param.nextTime;
+        var nextTime = param.nextTime || 500;
         var DO_IF_NOT_FOUND = param.doIfNotFound;
         var image = param.image || null;
         // 是否只找一次，无论是否找到都返回结果，默认false
@@ -130,15 +130,15 @@ function findImg(param) {
             }
             queryOption.region = region_1;
         }
-        var pass$ = image ? null : new rxjs_1.BehaviorSubject(true);
-        var image$ = image ? rxjs_1.of(image) : rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return core_1.isPause !== true; }), operators_1.withLatestFrom(pass$ && pass$.pipe(operators_1.switchMap(function (v) {
+        var pass$ = new rxjs_1.BehaviorSubject(true);
+        var image$ = image ? rxjs_1.of(image) : rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return core_1.isPause !== true; }), operators_1.withLatestFrom(pass$.pipe(operators_1.switchMap(function (v) {
             if (v) {
-                return rxjs_1.of(v);
+                return rxjs_1.of(true);
             }
             else {
-                return rxjs_1.of(true).pipe(operators_1.delay(nextTime || 500), operators_1.startWith(false));
+                return rxjs_1.of(true).pipe(operators_1.delay(nextTime), operators_1.startWith(false));
             }
-        })) || rxjs_1.of(true)), operators_1.filter(function (v) { return v[1]; }), operators_1.map(function () { return core_1.cap(); }));
+        }))), operators_1.filter(function (v) { return v[1]; }), operators_1.map(function () { return core_1.cap(); }));
         return image$.pipe(operators_1.exhaustMap(function (src) {
             var match = images.matchTemplate(src, template, queryOption).matches;
             if (match.length == 0 && DO_IF_NOT_FOUND) {
@@ -189,9 +189,6 @@ function findImg(param) {
                 ]);
                 queryOption.region = cache[cachePath];
             }
-            if (nextTime) {
-                pass$ && pass$.next(false);
-            }
         }), operators_1.map(function (res) {
             var result;
             // 如果设置了取第几个，则对最后结果进行处理，有结果则直接返回索引0的值，无结果则返回null
@@ -210,6 +207,10 @@ function findImg(param) {
             }
             else {
                 return true;
+            }
+        }), operators_1.tap(function (v) {
+            if (v && nextTime) {
+                pass$.next(false);
             }
         }), operators_1.finalize(function () {
             template.recycle();
