@@ -2,6 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+require('es6-shim');
 var rxjs = require('rxjs');
 var operators = require('rxjs/operators');
 var core = require('@auto.pro/core');
@@ -40,7 +41,9 @@ function __spreadArrays() {
     return r;
 }
 
+var random = require('lodash/fp/random');
 var cache = {};
+var colorCache = {};
 /**
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
  * @param param
@@ -99,11 +102,15 @@ function readImg(imgPath, mode) {
  * @param {object} option 查询参数
  * @param {number} index 取范围内的第几个结果，值从1开始，设置该值后将转换返回值为该index的坐标或null
  * @param {string|boolean} useCache 缓存名，false则不使用缓存
+ * @param {'image'|'color'} method 找图的方式，默认为图片匹配: image
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
     return rxjs.defer(function () {
         var path = param.path || '';
+        if (!path) {
+            return rxjs.throwError('path为空');
+        }
         var option = param.option || {};
         var index = param.index;
         var useCache = param.useCache;
@@ -117,13 +124,50 @@ function findImg(param) {
         // 如果提供了截图cap，则只找一次
         var ONCE = image ? true : param.once;
         var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
-        var template = readImg(path);
-        if (!template) {
-            return rxjs.throwError('template path is null');
-        }
-        template = images.scale(template, core.scale, core.scale);
+        var method = param.method === 'image' ? 'image' : 'color';
         var queryOption = __assign({}, option);
-        queryOption.threshold = queryOption.threshold || 0.8;
+        var template;
+        var colorTemplate;
+        if (method === 'color') {
+            queryOption.threshold = queryOption.threshold || 4;
+            // 如果path对应的缓存不存在，则需要readImg并获取色点
+            if (!colorCache[path]) {
+                template = readImg(path);
+                if (!template) {
+                    return rxjs.throwError('template path is null');
+                }
+                template = images.scale(template, core.scale, core.scale);
+                var points_1 = [];
+                var templateWidth_1 = template.width;
+                var templateHeight_1 = template.height;
+                rxjs.generate(1, function (x) { return true; }, function (x) { return x + 1; }).pipe(operators.map(function () {
+                    var x = random(0, templateWidth_1);
+                    var y = random(0, templateHeight_1);
+                    var c = images.pixel(template, x, y);
+                    return [x, y, c];
+                }), operators.distinct(function (p) { return p[2]; }), operators.take(param.colorPointNumber === undefined ? 10 : Math.floor(param.colorPointNumber))).subscribe(function (o) { return points_1.push(o); });
+                colorTemplate = {
+                    color: images.pixel(template, 0, 0),
+                    points: points_1,
+                    width: template.width,
+                    height: template.height
+                };
+                template.recycle();
+                template = null;
+                colorCache[path] = colorTemplate;
+            }
+            else {
+                colorTemplate = colorCache[path];
+            }
+        }
+        else {
+            template = readImg(path);
+            if (!template) {
+                return rxjs.throwError('template path is null');
+            }
+            template = images.scale(template, core.scale, core.scale);
+            queryOption.threshold = queryOption.threshold || 0.8;
+        }
         // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值
         if (cachePath && cache[cachePath]) {
             queryOption.region = cache[cachePath];
@@ -151,13 +195,25 @@ function findImg(param) {
         var isPass = true;
         var t;
         return rxjs.timer(0, eachTime).pipe(operators.filter(function () { return !core.isPause && isPass; }), operators.exhaustMap(function () {
-            var match = images.matchTemplate(image || core.cap(), template, queryOption).matches;
+            var match;
+            if (method === 'image') {
+                match = images.matchTemplate(image || core.cap(), template, queryOption).matches;
+            }
+            else {
+                var result = images.findMultiColors(image || core.cap(), colorTemplate['color'], colorTemplate['points'], queryOption);
+                if (result) {
+                    match = [[result['x'], result['y']]];
+                }
+                else {
+                    match = [];
+                }
+            }
             if (match.length == 0 && DO_IF_NOT_FOUND) {
                 DO_IF_NOT_FOUND();
             }
             return rxjs.of(match);
         }), operators.take(ONCE ? 1 : 99999999), operators.filter(function (v) { return ONCE ? true : v.length > 0; }), operators.take(TAKE_NUM), operators.map(function (res) {
-            var result = res.map(function (p) {
+            var result = method === 'color' ? res : res.map(function (p) {
                 return [
                     Math.floor(p.point['x']),
                     Math.floor(p.point['y'])
@@ -192,11 +248,12 @@ function findImg(param) {
             if (res && res.length > 0 && useCache && cachePath && !cache[cachePath]) {
                 var xArray = res.map(function (e) { return e[0]; });
                 var yArray = res.map(function (e) { return e[1]; });
+                var img = method === 'color' ? colorTemplate : template;
                 cache[cachePath] = region([
                     Math.min.apply(Math, xArray) - cacheOffset,
                     Math.min.apply(Math, yArray) - cacheOffset,
-                    Math.max.apply(Math, xArray) + template.width + cacheOffset * 2,
-                    Math.max.apply(Math, yArray) + template.height + cacheOffset * 2
+                    Math.max.apply(Math, xArray) + img.width + cacheOffset * 2,
+                    Math.max.apply(Math, yArray) + img.height + cacheOffset * 2
                 ]);
                 queryOption.region = cache[cachePath];
             }
@@ -230,7 +287,9 @@ function findImg(param) {
             if (t) {
                 clearTimeout(t);
             }
-            template.recycle();
+            if (template) {
+                template.recycle();
+            }
         }));
     });
 }

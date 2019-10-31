@@ -1,10 +1,13 @@
 
-import { throwError, of, BehaviorSubject, timer, NEVER, Observable, defer } from 'rxjs'
-import { map, filter, take, tap, exhaustMap, finalize, withLatestFrom, switchMap, startWith, delay } from 'rxjs/operators'
+import 'es6-shim'
+import { throwError, of, BehaviorSubject, timer, NEVER, Observable, defer, generate, zip } from 'rxjs'
+import { map, filter, take, tap, exhaustMap, finalize, withLatestFrom, switchMap, startWith, delay, distinct } from 'rxjs/operators'
 
 import {Plugin, cap, scale, width, height, isPause} from '@auto.pro/core'
+const random = require('lodash/fp/random')
 
 const cache: Record<string, any> = {}
+const colorCache: Record<string, any> = {}
 
 /**
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
@@ -62,13 +65,13 @@ function readImg (imgPath: Image | string, mode?: number) {
     return result
 }
 
-
 /**
  * 
  * @param {string} path 待查图片路径
  * @param {object} option 查询参数
  * @param {number} index 取范围内的第几个结果，值从1开始，设置该值后将转换返回值为该index的坐标或null
  * @param {string|boolean} useCache 缓存名，false则不使用缓存
+ * @param {'image'|'color'} method 找图的方式，默认为图片匹配: image
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export function findImg (param: {
@@ -84,10 +87,17 @@ export function findImg (param: {
     once?: boolean
     take?: number
     doIfNotFound?: Function
-    image?: Image
+    image?: Image,
+    method?: string,
+    colorPointNumber?: number
 }): Observable<any> {
     return defer(() => {
         const path = param.path || ''
+
+        if (!path) {
+            return throwError('path为空')
+        }
+
         const option = param.option || {}
         const index = param.index
 
@@ -104,16 +114,55 @@ export function findImg (param: {
         // 如果提供了截图cap，则只找一次
         const ONCE = image ? true : param.once
         const TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999
+        const method = param.method === 'image' ? 'image' : 'color'
+        const queryOption = { ...option }
 
-        let template = readImg(path)
-        if (!template) {
-            return throwError('template path is null')
+        let template
+        let colorTemplate
+        if (method === 'color') {
+            queryOption.threshold = queryOption.threshold || 4
+            // 如果path对应的缓存不存在，则需要readImg并获取色点
+            if (!colorCache[path]) {
+                template = readImg(path)
+                if (!template) {
+                    return throwError('template path is null')
+                }
+                template = images.scale(template, scale, scale)
+
+                const points: any[] = []
+                const templateWidth = template.width
+                const templateHeight = template.height
+                generate(1, x => true, x => x + 1).pipe(
+                    map(() => {
+                        let x = random(0, templateWidth)
+                        let y = random(0, templateHeight)
+                        let c = images.pixel(template, x, y)
+                        return [x, y, c]
+                    }),
+                    distinct(p => p[2]),
+                    take(param.colorPointNumber === undefined ? 10 : Math.floor(param.colorPointNumber))
+                ).subscribe(o => points.push(o))
+                colorTemplate = {
+                    color: images.pixel(template, 0, 0),
+                    points,
+                    width: template.width,
+                    height: template.height
+                }
+                template.recycle()
+                template = null
+                colorCache[path] = colorTemplate
+            } else {
+                colorTemplate = colorCache[path]
+            }
+        } else {
+            template = readImg(path)
+            if (!template) {
+                return throwError('template path is null')
+            }
+
+            template = images.scale(template, scale, scale)
+            queryOption.threshold = queryOption.threshold || 0.8
         }
-
-        template = images.scale(template, scale, scale)
-
-        let queryOption = { ...option }
-        queryOption.threshold = queryOption.threshold || 0.8
 
         // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值
         if (cachePath && cache[cachePath]) {
@@ -144,7 +193,17 @@ export function findImg (param: {
         return timer(0, eachTime).pipe(
             filter(() => !isPause && isPass),
             exhaustMap(() => {
-                let match = images.matchTemplate(image || cap(), template, queryOption).matches
+                let match
+                if (method === 'image') {
+                    match = images.matchTemplate(image || cap(), template, queryOption).matches
+                } else {
+                    let result = images.findMultiColors(image || cap(), colorTemplate['color'], colorTemplate['points'], queryOption)
+                    if (result) {
+                        match = [[result['x'], result['y']]]
+                    } else {
+                        match = []
+                    }
+                }
                 if (match.length == 0 && DO_IF_NOT_FOUND) {
                     DO_IF_NOT_FOUND()
                 }
@@ -154,7 +213,7 @@ export function findImg (param: {
             filter(v => ONCE ? true : v.length > 0),
             take(TAKE_NUM),
             map(res => {
-                let result = res.map(p => {
+                let result = method === 'color' ? res : res.map(p => {
                     return [
                         Math.floor(p.point['x']),
                         Math.floor(p.point['y'])
@@ -191,11 +250,12 @@ export function findImg (param: {
                     const xArray = res.map(e => e[0])
                     const yArray = res.map(e => e[1])
 
+                    const img = method === 'color' ? colorTemplate : template
                     cache[cachePath] = region([
                         Math.min(...xArray) - cacheOffset,
                         Math.min(...yArray) - cacheOffset,
-                        Math.max(...xArray) + template.width + cacheOffset * 2,
-                        Math.max(...yArray) + template.height + cacheOffset * 2
+                        Math.max(...xArray) + img.width + cacheOffset * 2,
+                        Math.max(...yArray) + img.height + cacheOffset * 2
                     ])
                     queryOption.region = cache[cachePath]
                 }
@@ -230,7 +290,9 @@ export function findImg (param: {
                 if (t) {
                     clearTimeout(t)
                 }
-                template.recycle()
+                if (template) {
+                    template.recycle()
+                }
             })
         )
     })

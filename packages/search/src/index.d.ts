@@ -1,3 +1,4 @@
+import 'es6-shim';
 import { Observable } from 'rxjs';
 import { Plugin } from '@auto.pro/core';
 /**
@@ -6,6 +7,7 @@ import { Plugin } from '@auto.pro/core';
  * @param {object} option 查询参数
  * @param {number} index 取范围内的第几个结果，值从1开始，设置该值后将转换返回值为该index的坐标或null
  * @param {string|boolean} useCache 缓存名，false则不使用缓存
+ * @param {'image'|'color'} method 找图的方式，默认为图片匹配: image
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export declare function findImg(param: {
@@ -22,6 +24,8 @@ export declare function findImg(param: {
     take?: number;
     doIfNotFound?: Function;
     image?: Image;
+    method?: string;
+    colorPointNumber?: number;
 }): Observable<any>;
 /**
  * (精确查找)
