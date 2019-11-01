@@ -41,9 +41,21 @@ function __spreadArrays() {
     return r;
 }
 
-var random = require('lodash/fp/random');
+// importClass(org.opencv.features2d.ORB)
+importClass(org.opencv.core.MatOfKeyPoint);
+importClass(org.opencv.features2d.FastFeatureDetector);
 var cache = {};
 var colorCache = {};
+function getMatches(src) {
+    // var startTime = new Date().getTime()
+    var gray = images.grayscale(src);
+    var sift = FastFeatureDetector.create();
+    var keyPoints = new MatOfKeyPoint();
+    sift.detect(gray.mat, keyPoints);
+    gray.recycle();
+    // console.log('orb cost', new Date().getTime() - startTime)
+    return keyPoints.toArray().map(function (e) { return e.pt; });
+}
 /**
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
  * @param param
@@ -108,6 +120,7 @@ function readImg(imgPath, mode) {
 function findImg(param) {
     return rxjs.defer(function () {
         var path = param.path || '';
+        console.log('path', path);
         if (!path) {
             return rxjs.throwError('path为空');
         }
@@ -124,33 +137,41 @@ function findImg(param) {
         // 如果提供了截图cap，则只找一次
         var ONCE = image ? true : param.once;
         var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
-        var method = param.method === 'image' ? 'image' : 'color';
+        // const method = param.method === 'image' ? 'image' : 'color'
+        var method = param.method === 'color' ? 'color' : 'image';
         var queryOption = __assign({}, option);
         var template;
         var colorTemplate;
         if (method === 'color') {
-            queryOption.threshold = queryOption.threshold || 4;
+            var threshold = queryOption.threshold;
+            if (threshold > 0 && threshold < 1 || threshold === undefined) {
+                threshold = 10;
+            }
+            queryOption.threshold = threshold;
             // 如果path对应的缓存不存在，则需要readImg并获取色点
             if (!colorCache[path]) {
                 template = readImg(path);
                 if (!template) {
                     return rxjs.throwError('template path is null');
                 }
-                template = images.scale(template, core.scale, core.scale);
+                // template = images.scale(template, scale, scale)
                 var points_1 = [];
-                var templateWidth_1 = template.width;
-                var templateHeight_1 = template.height;
-                rxjs.generate(1, function (x) { return true; }, function (x) { return x + 1; }).pipe(operators.map(function () {
-                    var x = random(0, templateWidth_1);
-                    var y = random(0, templateHeight_1);
-                    var c = images.pixel(template, x, y);
-                    return [x, y, c];
-                }), operators.distinct(function (p) { return p[2]; }), operators.take(param.colorPointNumber === undefined ? 10 : Math.floor(param.colorPointNumber))).subscribe(function (o) { return points_1.push(o); });
+                var keyPoints = getMatches(template);
+                if (keyPoints.length <= 8) {
+                    keyPoints.push({ x: template.width / 3, y: template.height / 3 });
+                    keyPoints.push({ x: template.width / 2, y: template.height / 3 });
+                    keyPoints.push({ x: template.width / 2, y: template.height / 2 });
+                    keyPoints.push({ x: template.width * 3 / 4, y: template.height * 3 / 4 });
+                }
+                rxjs.from(keyPoints).pipe(operators.map(function (pt) {
+                    var c = colors.toString(images.pixel(template, pt['x'], pt['y']));
+                    return [pt['x'] * core.scale, pt['y'] * core.scale, c];
+                }), operators.distinct(function (p) { return p[0] + "_" + p[1] + "_" + p[2]; }), operators.take(param.colorPointNumber === undefined ? 10 : Math.floor(param.colorPointNumber))).subscribe(function (o) { return points_1.push(o); });
                 colorTemplate = {
-                    color: images.pixel(template, 0, 0),
+                    color: colors.toString(images.pixel(template, 0, 0)),
                     points: points_1,
-                    width: template.width,
-                    height: template.height
+                    width: template.width * core.scale,
+                    height: template.height * core.scale
                 };
                 template.recycle();
                 template = null;
@@ -159,6 +180,7 @@ function findImg(param) {
             else {
                 colorTemplate = colorCache[path];
             }
+            console.log(colorTemplate);
         }
         else {
             template = readImg(path);
@@ -173,7 +195,7 @@ function findImg(param) {
             queryOption.region = cache[cachePath];
         }
         else if (queryOption.region) {
-            var region_1 = queryOption.region;
+            var region_1 = queryOption.region || [0, 0];
             if (region_1[0] < 0) {
                 region_1[0] = 0;
             }
