@@ -1,6 +1,10 @@
 interface Image {}
 
+declare const importClass
+declare const org
 declare const $shell: any
+declare const files
+declare const colors
 declare const images: any
 declare const device: any
 declare const threads: {

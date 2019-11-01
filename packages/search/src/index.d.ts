@@ -1,13 +1,20 @@
 import 'es6-shim';
 import { Observable } from 'rxjs';
 import { Plugin } from '@auto.pro/core';
+export declare function readImg(imgPath: Image | string, mode?: number): any;
 /**
  *
  * @param {string} path 待查图片路径
  * @param {object} option 查询参数
  * @param {number} index 取范围内的第几个结果，值从1开始，设置该值后将转换返回值为该index的坐标或null
- * @param {string|boolean} useCache 缓存名，false则不使用缓存
- * @param {'image'|'color'} method 找图的方式，默认为图片匹配: image
+ * @param {string|boolean} useCache 缓存配置
+ * @param {number} eachTime 找图定时器的间隔，默认为100(ms)
+ * @param {number} nextTime 匹配到图片后，下一次匹配的间隔，默认为0(ms)
+ * @param {boolean} once 是否只找一次，该值为true时直接返回本次匹配结果
+ * @param {number} take 期望匹配到几次结果，默认为1
+ * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
+ * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
+ * @param {'image'|'color'} method 找图的方式，默认为image图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export declare function findImg(param: {
@@ -18,7 +25,7 @@ export declare function findImg(param: {
         key: string;
         offset: number;
     };
-    eachTime: number;
+    eachTime?: number;
     nextTime?: number;
     once?: boolean;
     take?: number;
