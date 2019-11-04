@@ -58,25 +58,19 @@ function region(param) {
         return param;
     }
 }
-function getPrototype(obj) {
-    if (obj == undefined) {
-        return null;
-    }
-    var prototype = Object.prototype.toString.call(obj);
-    if (prototype == '[object JavaObject]') {
-        return obj.getClass().getSimpleName();
-    }
-    else {
-        return prototype.substring(prototype.indexOf(' ') + 1, prototype.indexOf(']'));
-    }
-}
+/**
+ * 获取指定路径的Image对象，若已是Image则不重复获取
+ * @param {string | Image} imgPath 图片路径
+ * @param {number | undefined} mode 获取模式，若为0则返回灰度图像
+ * @returns {Image | null}
+ */
 function readImg(imgPath, mode) {
     while (core_1.isPause) { }
     if (!imgPath) {
         return null;
     }
     var result;
-    if (getPrototype(imgPath) != 'String') {
+    if (core_1.getPrototype(imgPath) != 'String') {
         result = imgPath;
     }
     else {
@@ -89,7 +83,7 @@ function readImg(imgPath, mode) {
 }
 exports.readImg = readImg;
 /**
- *
+ * 找图函数，此函数为异步函数！
  * @param {string} path 待查图片路径
  * @param {object} option 查询参数
  * @param {number} index 取范围内的第几个结果，值从1开始，设置该值后将转换返回值为该index的坐标或null
@@ -101,6 +95,7 @@ exports.readImg = readImg;
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @param {'image'|'color'} method 找图的方式，默认为image图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
+ * @param {number} colorPointNumber 'color'模式下，可以指定色点的个数，默认为10
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
@@ -306,23 +301,23 @@ exports.findImg = findImg;
  * (精确查找)
  * 判断区域内是否不含有colors中的任意一个，不含有则返回true，含有则返回false
  *
- * @param {Image} image     图源
+ * @param {string | Image} image     图源，若为字符串则自动回收内存
  * @param {Array} region    查找范围
- * @param {Array} colors    待查颜色数组
+ * @param {Array<Color>} colors    待查颜色数组
  */
 function noAnyColors(image, region, colors) {
     if (region === void 0) { region = []; }
     if (colors === void 0) { colors = []; }
     var src = readImg(image);
     var result = !colors.some(function (c) {
-        if (images.findColorInRegion.apply(images, __spreadArrays([src, c], region))) {
+        if (images.findColorEquals.apply(images, __spreadArrays([src, c], region))) {
             return true;
         }
         else {
             return false;
         }
     });
-    if (getPrototype(image) === 'String') {
+    if (core_1.getPrototype(image) === 'String') {
         src.recycle();
     }
     return result;
@@ -332,9 +327,9 @@ exports.noAnyColors = noAnyColors;
  * (精确查找)
  * 区域内含有colors中的全部颜色时，返回true，否则返回false
  *
- * @param image 图源
- * @param region 范围
- * @param colors 待查颜色数组
+ * @param {string | Image} image     图源，若为字符串则自动回收内存
+ * @param {Array} region 范围
+ * @param {Array<Color>} colors 待查颜色数组
  */
 function hasMulColors(image, region, colors) {
     if (region === void 0) { region = []; }
@@ -348,7 +343,7 @@ function hasMulColors(image, region, colors) {
             return false;
         }
     });
-    if (getPrototype(image) === 'String') {
+    if (core_1.getPrototype(image) === 'String') {
         src.recycle();
     }
     return result;
@@ -357,9 +352,12 @@ exports.hasMulColors = hasMulColors;
 /**
  * 存在任意颜色，则返回颜色坐标，否则返回false
  *
- * @param image
- * @param colors
- * @param option
+ * @param {string | Image} image 图源，若为字符串则自动回收内存
+ * @param {Array<Color>} colors 待查颜色数组
+ * @param {{
+ *      threshold: 10,
+ *      region: []
+ * }} option 查找参数
  * @returns {[number, number] | false}
  */
 function hasAnyColors(image, colors, option) {
@@ -379,7 +377,7 @@ function hasAnyColors(image, colors, option) {
             return false;
         }
     });
-    if (getPrototype(image) === 'String') {
+    if (core_1.getPrototype(image) === 'String') {
         src.recycle();
     }
     return result;
