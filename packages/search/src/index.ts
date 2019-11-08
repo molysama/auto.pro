@@ -108,7 +108,6 @@ export function findImg (param: {
 }): Observable<any> {
     return defer(() => {
         const path = param.path || ''
-        console.log('path', path)
 
         if (!path) {
             return throwError('path为空')
@@ -178,7 +177,6 @@ export function findImg (param: {
             } else {
                 colorTemplate = colorCache[path]
             }
-            console.log(colorTemplate)
         } else {
             template = readImg(path)
             if (!template) {

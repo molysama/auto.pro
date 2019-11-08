@@ -101,7 +101,6 @@ exports.readImg = readImg;
 function findImg(param) {
     return rxjs_1.defer(function () {
         var path = param.path || '';
-        console.log('path', path);
         if (!path) {
             return rxjs_1.throwError('path为空');
         }
@@ -161,7 +160,6 @@ function findImg(param) {
             else {
                 colorTemplate = colorCache[path];
             }
-            console.log(colorTemplate);
         }
         else {
             template = readImg(path);
