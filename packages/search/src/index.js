@@ -94,7 +94,7 @@ exports.readImg = readImg;
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
- * @param {'image'|'color'} method 找图的方式，默认为'image'图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
+ * @param {'image'|'color'} type 找图的方式，默认为'image'图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
@@ -116,7 +116,7 @@ function findImg(param) {
         // 如果提供了截图cap，则只找一次
         var ONCE = image ? true : param.once;
         var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
-        var method = param.method === 'color' ? 'color' : 'image';
+        var method = param.type === 'color' ? 'color' : 'image';
         var queryOption = __assign({}, option);
         var template;
         var colorTemplate;
