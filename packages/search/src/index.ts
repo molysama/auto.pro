@@ -1,6 +1,6 @@
 import 'es6-shim'
 import { throwError, of, timer, Observable, defer, from } from 'rxjs'
-import { map, filter, take, tap, exhaustMap, finalize, distinct } from 'rxjs/operators'
+import { map, filter, take, tap, exhaustMap, finalize, distinct, toArray, switchMap } from 'rxjs/operators'
 
 import {Plugin, cap, scale, width, height, isPause, getPrototype} from '@auto.pro/core'
 
@@ -85,8 +85,7 @@ export function readImg (imgPath: Image | string, mode?: number) {
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
- * @param {'image'|'color'} method 找图的方式，默认为image图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
- * @param {number} colorPointNumber 'color'模式下，可以指定色点的个数，默认为10
+ * @param {'image'|'color'} method 找图的方式，默认为'image'图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export function findImg (param: {
@@ -104,7 +103,6 @@ export function findImg (param: {
     doIfNotFound?: Function
     image?: Image,
     method?: string,
-    colorPointNumber?: number
 }): Observable<any> {
     return defer(() => {
         const path = param.path || ''
@@ -117,7 +115,7 @@ export function findImg (param: {
         const index = param.index
 
         const useCache = param.useCache
-        const cachePath = useCache && (path + useCache.key || '__cache__') || null
+        const cachePath = useCache && (path + (useCache.key || '__CACHE__')) || null
         const cacheOffset = useCache && useCache.offset || 2
 
         const eachTime = param.eachTime || 100
@@ -129,47 +127,56 @@ export function findImg (param: {
         // 如果提供了截图cap，则只找一次
         const ONCE = image ? true : param.once
         const TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999
-        // const method = param.method === 'image' ? 'image' : 'color'
         const method = param.method === 'color' ? 'color' : 'image'
         const queryOption = { ...option }
 
         let template
         let colorTemplate
         if (method === 'color') {
-            let threshold = queryOption.threshold
-            if (threshold > 0 && threshold < 1 || threshold === undefined) {
-                threshold = 10
-            }
-            queryOption.threshold = threshold
+            queryOption.threshold =  Math.floor(255 * (1 - queryOption.threshold || 0.8))
+
             // 如果path对应的缓存不存在，则需要readImg并获取色点
             if (!colorCache[path]) {
                 template = readImg(path)
                 if (!template) {
                     return throwError('template path is null')
                 }
-                // template = images.scale(template, scale, scale)
+
+                template = images.scale(template, scale, scale)
 
                 const points: any[] = []
                 let keyPoints = getMatches(template)
-                if (keyPoints.length <= 8) {
-                    keyPoints.push({x: template.width / 3, y: template.height / 3})
-                    keyPoints.push({x: template.width / 2, y: template.height / 3})
-                    keyPoints.push({x: template.width / 2, y: template.height / 2})
-                    keyPoints.push({x: template.width * 3 / 4, y: template.height * 3 / 4})
-                }
+                // 取前10个特征点，并加入9个点位
                 from(keyPoints).pipe(
-                    map((pt: any) => {
-                        let c = colors.toString(images.pixel(template, pt['x'], pt['y']))
-                        return [pt['x'] * scale, pt['y'] * scale, c]
+                    take(10),
+                    toArray(),
+                    switchMap(pts => {
+                        return from([
+                            ...pts,
+                            {x: template.width / 4, y: template.height / 4},
+                            {x: template.width / 2, y: template.height / 4},
+                            {x: template.width * 3 / 4, y: template.height / 4},
+
+                            {x: template.width / 4, y: template.height / 2},
+                            {x: template.width / 2, y: template.height / 2},
+                            {x: template.width * 3 / 4, y: template.height / 2},
+
+                            {x: template.width / 4, y: template.height * 3 / 4},
+                            {x: template.width / 2, y: template.height * 3 / 4},
+                            {x: template.width * 3 / 4, y: template.height * 3 / 4}
+                        ]).pipe(
+                            map((pt: any) => {
+                                let c = colors.toString(images.pixel(template, pt['x'], pt['y']))
+                                return [pt['x'], pt['y'], c]
+                            })
+                        )
                     }),
-                    distinct(p => `${p[0]}_${p[1]}_${p[2]}`),
-                    take(param.colorPointNumber === undefined ? 10 : Math.floor(param.colorPointNumber))
                 ).subscribe(o => points.push(o))
                 colorTemplate = {
                     color: colors.toString(images.pixel(template, 0, 0)),
                     points,
-                    width: template.width * scale,
-                    height: template.height * scale
+                    width: template.width,
+                    height: template.height
                 }
                 template.recycle()
                 template = null

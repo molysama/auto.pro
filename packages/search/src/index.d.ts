@@ -20,8 +20,7 @@ export declare function readImg(imgPath: Image | string, mode?: number): any;
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
- * @param {'image'|'color'} method 找图的方式，默认为image图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
- * @param {number} colorPointNumber 'color'模式下，可以指定色点的个数，默认为10
+ * @param {'image'|'color'} method 找图的方式，默认为'image'图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export declare function findImg(param: {
@@ -39,7 +38,6 @@ export declare function findImg(param: {
     doIfNotFound?: Function;
     image?: Image;
     method?: string;
-    colorPointNumber?: number;
 }): Observable<any>;
 /**
  * (精确查找)

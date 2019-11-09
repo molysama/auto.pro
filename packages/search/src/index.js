@@ -94,8 +94,7 @@ exports.readImg = readImg;
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
- * @param {'image'|'color'} method 找图的方式，默认为image图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
- * @param {number} colorPointNumber 'color'模式下，可以指定色点的个数，默认为10
+ * @param {'image'|'color'} method 找图的方式，默认为'image'图片匹配。设为'color'后自动提取特征点并进行多点找色，且只能匹配到范围内的第一个结果，即index只有1能生效
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
@@ -107,7 +106,7 @@ function findImg(param) {
         var option = param.option || {};
         var index = param.index;
         var useCache = param.useCache;
-        var cachePath = useCache && (path + useCache.key || '__cache__') || null;
+        var cachePath = useCache && (path + (useCache.key || '__CACHE__')) || null;
         var cacheOffset = useCache && useCache.offset || 2;
         var eachTime = param.eachTime || 100;
         var nextTime = param.nextTime || 0;
@@ -117,41 +116,43 @@ function findImg(param) {
         // 如果提供了截图cap，则只找一次
         var ONCE = image ? true : param.once;
         var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
-        // const method = param.method === 'image' ? 'image' : 'color'
         var method = param.method === 'color' ? 'color' : 'image';
         var queryOption = __assign({}, option);
         var template;
         var colorTemplate;
         if (method === 'color') {
-            var threshold = queryOption.threshold;
-            if (threshold > 0 && threshold < 1 || threshold === undefined) {
-                threshold = 10;
-            }
-            queryOption.threshold = threshold;
+            queryOption.threshold = Math.floor(255 * (1 - queryOption.threshold || 0.8));
             // 如果path对应的缓存不存在，则需要readImg并获取色点
             if (!colorCache[path]) {
                 template = readImg(path);
                 if (!template) {
                     return rxjs_1.throwError('template path is null');
                 }
-                // template = images.scale(template, scale, scale)
+                template = images.scale(template, core_1.scale, core_1.scale);
                 var points_1 = [];
                 var keyPoints = getMatches(template);
-                if (keyPoints.length <= 8) {
-                    keyPoints.push({ x: template.width / 3, y: template.height / 3 });
-                    keyPoints.push({ x: template.width / 2, y: template.height / 3 });
-                    keyPoints.push({ x: template.width / 2, y: template.height / 2 });
-                    keyPoints.push({ x: template.width * 3 / 4, y: template.height * 3 / 4 });
-                }
-                rxjs_1.from(keyPoints).pipe(operators_1.map(function (pt) {
-                    var c = colors.toString(images.pixel(template, pt['x'], pt['y']));
-                    return [pt['x'] * core_1.scale, pt['y'] * core_1.scale, c];
-                }), operators_1.distinct(function (p) { return p[0] + "_" + p[1] + "_" + p[2]; }), operators_1.take(param.colorPointNumber === undefined ? 10 : Math.floor(param.colorPointNumber))).subscribe(function (o) { return points_1.push(o); });
+                // 取前10个特征点，并加入9个点位
+                rxjs_1.from(keyPoints).pipe(operators_1.take(10), operators_1.toArray(), operators_1.switchMap(function (pts) {
+                    return rxjs_1.from(__spreadArrays(pts, [
+                        { x: template.width / 4, y: template.height / 4 },
+                        { x: template.width / 2, y: template.height / 4 },
+                        { x: template.width * 3 / 4, y: template.height / 4 },
+                        { x: template.width / 4, y: template.height / 2 },
+                        { x: template.width / 2, y: template.height / 2 },
+                        { x: template.width * 3 / 4, y: template.height / 2 },
+                        { x: template.width / 4, y: template.height * 3 / 4 },
+                        { x: template.width / 2, y: template.height * 3 / 4 },
+                        { x: template.width * 3 / 4, y: template.height * 3 / 4 }
+                    ])).pipe(operators_1.map(function (pt) {
+                        var c = colors.toString(images.pixel(template, pt['x'], pt['y']));
+                        return [pt['x'], pt['y'], c];
+                    }));
+                })).subscribe(function (o) { return points_1.push(o); });
                 colorTemplate = {
                     color: colors.toString(images.pixel(template, 0, 0)),
                     points: points_1,
-                    width: template.width * core_1.scale,
-                    height: template.height * core_1.scale
+                    width: template.width,
+                    height: template.height
                 };
                 template.recycle();
                 template = null;
