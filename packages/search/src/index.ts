@@ -24,31 +24,36 @@ function getMatches (template) {
 
     let result: any[] = []
     const ks: [] = keyPoints.toArray()
-    for(let i=0; i<ks.length && i <= 10; i++) {
+    for(let i=0; i<ks.length && i <= 6; i++) {
         result.push(ks[i]['pt'])
     }
-    result = [
-        ...result,
-        {x: template.width / 4, y: template.height / 4},
-        {x: template.width / 2, y: template.height / 4},
-        {x: template.width * 3 / 4, y: template.height / 4},
+    // result = [
+    //     ...result,
+    //     {x: template.width / 4, y: template.height / 4},
+    //     {x: template.width / 2, y: template.height / 4},
+    //     {x: template.width * 3 / 4, y: template.height / 4},
 
-        {x: template.width / 4, y: template.height / 2},
-        {x: template.width / 2, y: template.height / 2},
-        {x: template.width * 3 / 4, y: template.height / 2},
+    //     {x: template.width / 4, y: template.height / 2},
+    //     {x: template.width / 2, y: template.height / 2},
+    //     {x: template.width * 3 / 4, y: template.height / 2},
 
-        {x: template.width / 4, y: template.height * 3 / 4},
-        {x: template.width / 2, y: template.height * 3 / 4},
-        {x: template.width * 3 / 4, y: template.height * 3 / 4}
+    //     {x: template.width / 4, y: template.height * 3 / 4},
+    //     {x: template.width / 2, y: template.height * 3 / 4},
+    //     {x: template.width * 3 / 4, y: template.height * 3 / 4}
+    // ]
 
-    ]
+    return result.map(({x, y}) => {
+        // 先取色，后对坐标进行伸缩
+        let color = images.pixel(template, x, y)
+        x = Math.floor(x * scale)
+        y = Math.floor(y * scale)
+        return {
+            x,
+            y,
+            color
+        }
 
-    return result.map(({x, y}) => ({
-        x,
-        y,
-        color: images.pixel(template, x, y)
-
-    }))
+    })
 }
 
 /**
@@ -110,7 +115,9 @@ interface ColorCache {
     region: Array<any>
 }
 
-function matchByColor (img, option: ColorCache, threshold=4) {
+declare const util
+
+function matchByColor (img, option: ColorCache, threshold=10) {
 
     let headX = option.region[0]
     let headY = option.region[1]
@@ -118,12 +125,25 @@ function matchByColor (img, option: ColorCache, threshold=4) {
 
     let body = option.body
 
-    if (colors.isSimilar(headColor, images.pixel(img, headX, headY))) {
+    let bitmap = img.getBitmap()
+    let w = bitmap.getWidth()
+    let h = bitmap.getHeight()
+    let pixels = util.java.array("int", w * h)
+    bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
+
+    if (colors.isSimilar(headColor, pixels[headX + headY * w], threshold)) {
         const found = body && body.every(b => {
-            return colors.isSimilar(b.color, images.pixel(img, b.x + headX, b.y + headY), threshold)
+            return colors.isSimilar(b.color, pixels[headX + b.x + w * (headY + b.y)], threshold)
         })
         if (found) {
-            return [[headX, headY]]
+            return [
+                {
+                    point: {
+                        x: headX,
+                        y: headY
+                    }
+                }
+            ]
         } else {
             return []
         }
@@ -186,7 +206,7 @@ export function findImg (param: {
         const TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999
         const queryOption = { ...option }
 
-        let template
+        let template, scaleTemplate
 
         queryOption.threshold = queryOption.threshold || 0.8
 
@@ -201,7 +221,7 @@ export function findImg (param: {
                 return throwError('template path is null')
             }
 
-            template = images.scale(template, scale, scale)
+            scaleTemplate = images.scale(template, scale, scale)
 
             if (queryOption.region) {
                 let region = queryOption.region || [0, 0]
@@ -237,7 +257,7 @@ export function findImg (param: {
                     match = matchByColor(image || cap(), colorCache)
                 // 否则使用模板匹配
                 } else {
-                    match = images.matchTemplate(image || cap(), template, queryOption).matches
+                    match = images.matchTemplate(image || cap(), scaleTemplate, queryOption).matches
                 }
                 if (match.length == 0 && DO_IF_NOT_FOUND) {
                     DO_IF_NOT_FOUND()
@@ -288,13 +308,14 @@ export function findImg (param: {
                     const cacheRegion: [number, number, number, number] = region([
                         Math.min(...xArray) - cacheOffset,
                         Math.min(...yArray) - cacheOffset,
-                        Math.max(...xArray) + template.width + 1 + cacheOffset * 2,
-                        Math.max(...yArray) + template.height + 1 + cacheOffset * 2
+                        Math.max(...xArray) + scaleTemplate.width + 1 + cacheOffset * 2,
+                        Math.max(...yArray) + scaleTemplate.height + 1 + cacheOffset * 2
                     ])
                     // 如果指定了index，则将模板转换为特征点，并保存颜色、坐标、区域
                     if (index) {
                         cache[cachePath] = {
                             headColor: images.pixel(template, 0, 0),
+                            // 使用的是未经过裁剪的模板图片，因此结果应该进行scale处理
                             body: getMatches(template),
                             region: [...cacheRegion]
                         }
@@ -339,6 +360,9 @@ export function findImg (param: {
                 }
                 if (template) {
                     template.recycle()
+                }
+                if (scaleTemplate) {
+                    scaleTemplate.recycle()
                 }
             })
         )
