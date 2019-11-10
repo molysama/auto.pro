@@ -50,26 +50,32 @@ function getMatches(template) {
     var keyPoints = new MatOfKeyPoint();
     sift.detect(gray.mat, keyPoints);
     gray.recycle();
-    var result;
-    rxjs.from(keyPoints.toArray()).pipe(operators.take(10), operators.toArray(), operators.switchMap(function (pts) {
-        return rxjs.from(__spreadArrays(pts, [
-            { x: template.width / 4, y: template.height / 4 },
-            { x: template.width / 2, y: template.height / 4 },
-            { x: template.width * 3 / 4, y: template.height / 4 },
-            { x: template.width / 4, y: template.height / 2 },
-            { x: template.width / 2, y: template.height / 2 },
-            { x: template.width * 3 / 4, y: template.height / 2 },
-            { x: template.width / 4, y: template.height * 3 / 4 },
-            { x: template.width / 2, y: template.height * 3 / 4 },
-            { x: template.width * 3 / 4, y: template.height * 3 / 4 }
-        ])).pipe(operators.map(function (pt) {
-            return {
-                pt: pt,
-                color: images.pixel(template, pt['x'], pt['y'])
-            };
-        }), operators.toArray());
-    })).subscribe(function (res) { return result = res; });
-    return result;
+    var result = [];
+    var ks = keyPoints.toArray();
+    for (var i = 0; i < ks.length && i <= 10; i++) {
+        result.push(ks[i]['pt']);
+    }
+    result = __spreadArrays(result, [
+        { x: template.width / 4, y: template.height / 4 },
+        { x: template.width / 2, y: template.height / 4 },
+        { x: template.width * 3 / 4, y: template.height / 4 },
+        { x: template.width / 4, y: template.height / 2 },
+        { x: template.width / 2, y: template.height / 2 },
+        { x: template.width * 3 / 4, y: template.height / 2 },
+        { x: template.width / 4, y: template.height * 3 / 4 },
+        { x: template.width / 2, y: template.height * 3 / 4 },
+        { x: template.width * 3 / 4, y: template.height * 3 / 4 }
+    ]);
+    return result.map(function (_a) {
+        var x = _a.x, y = _a.y;
+        return ({
+            pt: {
+                x: x,
+                y: y
+            },
+            color: images.pixel(template, x, y)
+        });
+    });
 }
 /**
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
@@ -143,7 +149,7 @@ function matchByColor(img, option, threshold) {
  * @param {string} path 待查图片路径
  * @param {object} option 查询参数
  * @param {number} index 取范围内的第几个结果，值从1开始，设置该值后将转换返回值为该index的坐标或null
- * @param {string|boolean} useCache 缓存配置
+ * @param {object} useCache 缓存配置
  * @param {number} eachTime 找图定时器的间隔，默认为100(ms)
  * @param {number} nextTime 匹配到图片后，下一次匹配的间隔，默认为0(ms)
  * @param {boolean} once 是否只找一次，该值为true时直接返回本次匹配结果
@@ -162,6 +168,7 @@ function findImg(param) {
         var index = param.index;
         var useCache = param.useCache;
         var cachePath = useCache && (path + (useCache.key || '__CACHE__')) || null;
+        var cacheOffset = useCache && useCache.offset || 0;
         var eachTime = param.eachTime || 100;
         var nextTime = param.nextTime || 0;
         var DO_IF_NOT_FOUND = param.doIfNotFound;
@@ -259,15 +266,15 @@ function findImg(param) {
                 var xArray = res.map(function (e) { return e[0]; });
                 var yArray = res.map(function (e) { return e[1]; });
                 var cacheRegion = region([
-                    Math.min.apply(Math, xArray),
-                    Math.min.apply(Math, yArray),
-                    Math.max.apply(Math, xArray) + template.width + 1,
-                    Math.max.apply(Math, yArray) + template.height + 1
+                    Math.min.apply(Math, xArray) - cacheOffset,
+                    Math.min.apply(Math, yArray) - cacheOffset,
+                    Math.max.apply(Math, xArray) + template.width + 1 + cacheOffset * 2,
+                    Math.max.apply(Math, yArray) + template.height + 1 + cacheOffset * 2
                 ]);
                 // 如果指定了index，则将模板转换为特征点，并保存颜色、坐标、区域
                 if (index) {
                     cache[cachePath] = {
-                        headColor: images.pixel(template, cacheRegion[0], cacheRegion[1]),
+                        headColor: images.pixel(template, 0, 0),
                         body: getMatches(template),
                         region: __spreadArrays(cacheRegion)
                     };
