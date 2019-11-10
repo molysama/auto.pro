@@ -44,10 +44,8 @@ function getMatches (template) {
     ]
 
     return result.map(({x, y}) => ({
-        pt: {
-            x,
-            y
-        },
+        x,
+        y,
         color: images.pixel(template, x, y)
 
     }))
@@ -105,26 +103,24 @@ export function readImg (imgPath: Image | string, mode?: number) {
 interface ColorCache {
     headColor?: any,
     body?: Array<{
-        pt: {
-            x: number,
-            y: number
-        },
-        color
+        x: number,
+        y: number,
+        color: any
     }>,
     region: Array<any>
 }
 
 function matchByColor (img, option: ColorCache, threshold=4) {
 
-    let headX = region[0]
-    let headY = region[1]
+    let headX = option.region[0]
+    let headY = option.region[1]
     let headColor = option.headColor
 
     let body = option.body
 
     if (colors.isSimilar(headColor, images.pixel(img, headX, headY))) {
         const found = body && body.every(b => {
-            return colors.isSimilar(b.color, images.pixel(img, b.pt.x + headX, b.pt.y + headY), threshold)
+            return colors.isSimilar(b.color, images.pixel(img, b.x + headX, b.y + headY), threshold)
         })
         if (found) {
             return [[headX, headY]]

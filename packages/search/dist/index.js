@@ -69,10 +69,8 @@ function getMatches(template) {
     return result.map(function (_a) {
         var x = _a.x, y = _a.y;
         return ({
-            pt: {
-                x: x,
-                y: y
-            },
+            x: x,
+            y: y,
             color: images.pixel(template, x, y)
         });
     });
@@ -125,13 +123,13 @@ function readImg(imgPath, mode) {
 }
 function matchByColor(img, option, threshold) {
     if (threshold === void 0) { threshold = 4; }
-    var headX = region[0];
-    var headY = region[1];
+    var headX = option.region[0];
+    var headY = option.region[1];
     var headColor = option.headColor;
     var body = option.body;
     if (colors.isSimilar(headColor, images.pixel(img, headX, headY))) {
         var found = body && body.every(function (b) {
-            return colors.isSimilar(b.color, images.pixel(img, b.pt.x + headX, b.pt.y + headY), threshold);
+            return colors.isSimilar(b.color, images.pixel(img, b.x + headX, b.y + headY), threshold);
         });
         if (found) {
             return [[headX, headY]];
