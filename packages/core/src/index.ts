@@ -117,6 +117,11 @@ function getHeight (value: number = 1) {
     return Math.floor(height * value)
 }
 
+declare const android
+export function getTime() {
+    return android.os.SystemClock.uptimeMillis()
+}
+
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'

@@ -58,6 +58,7 @@ declare function getWidth(value?: number): number;
  * @returns 当前设备高度 * value
  */
 declare function getHeight(value?: number): number;
+export declare function getTime(): any;
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'

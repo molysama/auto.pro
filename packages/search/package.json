@@ -31,7 +31,6 @@
   },
   "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc",
   "dependencies": {
-    "es6-shim": "^0.35.5",
     "rxjs": "^6.5.3"
   },
   "devDependencies": {

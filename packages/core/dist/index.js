@@ -108,6 +108,9 @@ function getHeight(value) {
     if (value === void 0) { value = 1; }
     return Math.floor(exports.height * value);
 }
+function getTime() {
+    return android.os.SystemClock.uptimeMillis();
+}
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
@@ -164,6 +167,7 @@ exports.cap = cap;
 exports.default = index;
 exports.getHeight = getHeight;
 exports.getPrototype = getPrototype;
+exports.getTime = getTime;
 exports.getWidth = getWidth;
 exports.pause = pause;
 exports.resume = resume;
