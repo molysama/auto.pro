@@ -18,10 +18,50 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("es6-shim");
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var core_1 = require("@auto.pro/core");
+importClass(org.opencv.core.MatOfKeyPoint);
+importClass(org.opencv.features2d.FastFeatureDetector);
 var cache = {};
+var colorCache = {};
+function getMatches(template) {
+    var gray = images.grayscale(template);
+    var sift = FastFeatureDetector.create();
+    var keyPoints = new MatOfKeyPoint();
+    sift.detect(gray.mat, keyPoints);
+    gray.recycle();
+    var result = [];
+    var ks = keyPoints.toArray();
+    for (var i = 0; i < ks.length && i <= 6; i++) {
+        result.push(ks[i]['pt']);
+    }
+    // result = [
+    //     ...result,
+    //     {x: template.width / 4, y: template.height / 4},
+    //     {x: template.width / 2, y: template.height / 4},
+    //     {x: template.width * 3 / 4, y: template.height / 4},
+    //     {x: template.width / 4, y: template.height / 2},
+    //     {x: template.width / 2, y: template.height / 2},
+    //     {x: template.width * 3 / 4, y: template.height / 2},
+    //     {x: template.width / 4, y: template.height * 3 / 4},
+    //     {x: template.width / 2, y: template.height * 3 / 4},
+    //     {x: template.width * 3 / 4, y: template.height * 3 / 4}
+    // ]
+    return result.map(function (_a) {
+        var x = _a.x, y = _a.y;
+        // 先取色，后对坐标进行伸缩
+        var color = images.pixel(template, x, y);
+        x = Math.floor(x * core_1.scale);
+        y = Math.floor(y * core_1.scale);
+        return {
+            x: x,
+            y: y,
+            color: color
+        };
+    });
+}
 /**
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
  * @param param
@@ -70,6 +110,41 @@ function readImg(imgPath, mode) {
     return result;
 }
 exports.readImg = readImg;
+function matchByColor(img, option, threshold) {
+    if (threshold === void 0) { threshold = 10; }
+    var headX = option.region[0];
+    var headY = option.region[1];
+    var headColor = option.headColor;
+    var body = option.body;
+    var bitmap = img.getBitmap();
+    var w = bitmap.getWidth();
+    var h = bitmap.getHeight();
+    var pixels = util.java.array("int", w * h);
+    bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+    if (colors.isSimilar(headColor, pixels[headX + headY * w], threshold)) {
+        var t1 = core_1.getTime();
+        var found = body && body.every(function (b) {
+            return colors.isSimilar(b.color, pixels[headX + b.x + w * (headY + b.y)], threshold);
+        });
+        console.log("found color cost " + (core_1.getTime() - t1));
+        if (found) {
+            return [
+                {
+                    point: {
+                        x: headX,
+                        y: headY
+                    }
+                }
+            ];
+        }
+        else {
+            return [];
+        }
+    }
+    else {
+        return [];
+    }
+}
 /**
  * 找图函数，此函数为异步函数！
  * @param {string} path 待查图片路径
@@ -87,11 +162,14 @@ exports.readImg = readImg;
 function findImg(param) {
     return rxjs_1.defer(function () {
         var path = param.path || '';
+        if (!path) {
+            return rxjs_1.throwError('path为空');
+        }
         var option = param.option || {};
         var index = param.index;
         var useCache = param.useCache;
-        var cachePath = useCache && (path + useCache.key || '__cache__') || null;
-        var cacheOffset = useCache && useCache.offset || 2;
+        var cachePath = useCache && (path + (useCache.key || '__CACHE__')) || null;
+        var cacheOffset = useCache && useCache.offset || 0;
         var eachTime = param.eachTime || 100;
         var nextTime = param.nextTime || 0;
         var DO_IF_NOT_FOUND = param.doIfNotFound;
@@ -100,43 +178,61 @@ function findImg(param) {
         // 如果提供了截图cap，则只找一次
         var ONCE = image ? true : param.once;
         var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
-        var template = readImg(path);
-        if (!template) {
-            return rxjs_1.throwError('template path is null');
-        }
-        template = images.scale(template, core_1.scale, core_1.scale);
         var queryOption = __assign({}, option);
+        var template, scaleTemplate;
         queryOption.threshold = queryOption.threshold || 0.8;
-        // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值
+        // 如果该图片已经缓存成色点，则不需要再读取图片，并可直接获得缓存的region
         if (cachePath && cache[cachePath]) {
             queryOption.region = cache[cachePath];
         }
-        else if (queryOption.region) {
-            var region_1 = queryOption.region;
-            if (region_1[0] < 0) {
-                region_1[0] = 0;
+        // 若无缓存，则需要读取图片，并校对region参数
+        if (!(cachePath && cache[cachePath] && index)) {
+            template = readImg(path);
+            if (!template) {
+                return rxjs_1.throwError('template path is null');
             }
-            if (region_1[1] < 0) {
-                region_1[1] = 0;
-            }
-            if (region_1.length == 4) {
-                var x = region_1[0] + region_1[2];
-                var y = region_1[1] + region_1[3];
-                if (x > core_1.width) {
-                    region_1[2] = core_1.width - region_1[0];
+            scaleTemplate = images.scale(template, core_1.scale, core_1.scale);
+            if (queryOption.region) {
+                var region_1 = queryOption.region || [0, 0];
+                if (region_1[0] < 0) {
+                    region_1[0] = 0;
                 }
-                if (y > core_1.height) {
-                    region_1[3] = core_1.height - region_1[1];
+                if (region_1[1] < 0) {
+                    region_1[1] = 0;
                 }
+                if (region_1.length == 4) {
+                    var x = region_1[0] + region_1[2];
+                    var y = region_1[1] + region_1[3];
+                    if (x > core_1.width) {
+                        region_1[2] = core_1.width - region_1[0];
+                    }
+                    if (y > core_1.height) {
+                        region_1[3] = core_1.height - region_1[1];
+                    }
+                }
+                queryOption.region = region_1;
             }
-            queryOption.region = region_1;
         }
         var isPass = true;
         var t;
         return rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return !core_1.isPause && isPass; }), operators_1.exhaustMap(function () {
-            var match = images.matchTemplate(image || core_1.cap(), template, queryOption).matches;
+            var t1 = core_1.getTime();
+            var match;
+            var colorCache = cachePath && cache[cachePath];
+            // 如果已经存在缓存，且指定了index，则使用找色
+            if (colorCache && index) {
+                match = matchByColor(image || core_1.cap(), colorCache);
+                // 否则使用模板匹配
+            }
+            else {
+                match = images.matchTemplate(image || core_1.cap(), scaleTemplate, queryOption).matches;
+            }
             if (match.length == 0 && DO_IF_NOT_FOUND) {
                 DO_IF_NOT_FOUND();
+            }
+            var t2 = core_1.getTime();
+            if (match.length > 0) {
+                console.log("-------------" + (colorCache && index ? 'color' : 'image') + " match cost " + (t2 - t1));
             }
             return rxjs_1.of(match);
         }), operators_1.take(ONCE ? 1 : 99999999), operators_1.filter(function (v) { return ONCE ? true : v.length > 0; }), operators_1.take(TAKE_NUM), operators_1.map(function (res) {
@@ -175,13 +271,28 @@ function findImg(param) {
             if (res && res.length > 0 && useCache && cachePath && !cache[cachePath]) {
                 var xArray = res.map(function (e) { return e[0]; });
                 var yArray = res.map(function (e) { return e[1]; });
-                cache[cachePath] = region([
+                var cacheRegion = region([
                     Math.min.apply(Math, xArray) - cacheOffset,
                     Math.min.apply(Math, yArray) - cacheOffset,
-                    Math.max.apply(Math, xArray) + template.width + cacheOffset * 2,
-                    Math.max.apply(Math, yArray) + template.height + cacheOffset * 2
+                    Math.max.apply(Math, xArray) + scaleTemplate.width + 1 + cacheOffset * 2,
+                    Math.max.apply(Math, yArray) + scaleTemplate.height + 1 + cacheOffset * 2
                 ]);
-                queryOption.region = cache[cachePath];
+                // 如果指定了index，则将模板转换为特征点，并保存颜色、坐标、区域
+                if (index) {
+                    cache[cachePath] = {
+                        headColor: images.pixel(template, 0, 0),
+                        // 使用的是未经过裁剪的模板图片，因此结果应该进行scale处理
+                        body: getMatches(template),
+                        region: __spreadArrays(cacheRegion)
+                    };
+                    // 如果不指定index，则指保存区域
+                }
+                else {
+                    cache[cachePath] = {
+                        region: __spreadArrays(cacheRegion)
+                    };
+                }
+                queryOption.region = __spreadArrays(cacheRegion);
             }
         }), operators_1.map(function (res) {
             var result;
@@ -213,7 +324,12 @@ function findImg(param) {
             if (t) {
                 clearTimeout(t);
             }
-            template.recycle();
+            if (template) {
+                template.recycle();
+            }
+            if (scaleTemplate) {
+                scaleTemplate.recycle();
+            }
         }));
     });
 }

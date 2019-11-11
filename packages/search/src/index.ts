@@ -1,10 +1,60 @@
+import 'es6-shim'
+import { throwError, of, timer, Observable, defer, from } from 'rxjs'
+import { map, filter, take, tap, exhaustMap, finalize, distinct, toArray, switchMap } from 'rxjs/operators'
 
-import { throwError, of, timer, Observable, defer } from 'rxjs'
-import { map, filter, take, tap, exhaustMap, finalize } from 'rxjs/operators'
+import {Plugin, cap, scale, width, height, isPause, getPrototype, getTime} from '@auto.pro/core'
 
-import {Plugin, cap, scale, width, height, isPause, getPrototype} from '@auto.pro/core'
+declare const FastFeatureDetector
+declare const MatOfKeyPoint
 
-const cache: Record<string, any> = {}
+importClass(org.opencv.core.MatOfKeyPoint)
+importClass(org.opencv.features2d.FastFeatureDetector)
+
+const cache: Record<string, ColorCache> = {}
+const colorCache: Record<string, any> = {}
+
+function getMatches (template) {
+    var gray = images.grayscale(template)
+
+    var sift = FastFeatureDetector.create()
+    var keyPoints = new MatOfKeyPoint()
+    sift.detect(gray.mat, keyPoints)
+
+    gray.recycle()
+
+    let result: any[] = []
+    const ks: [] = keyPoints.toArray()
+    for(let i=0; i<ks.length && i <= 6; i++) {
+        result.push(ks[i]['pt'])
+    }
+    // result = [
+    //     ...result,
+    //     {x: template.width / 4, y: template.height / 4},
+    //     {x: template.width / 2, y: template.height / 4},
+    //     {x: template.width * 3 / 4, y: template.height / 4},
+
+    //     {x: template.width / 4, y: template.height / 2},
+    //     {x: template.width / 2, y: template.height / 2},
+    //     {x: template.width * 3 / 4, y: template.height / 2},
+
+    //     {x: template.width / 4, y: template.height * 3 / 4},
+    //     {x: template.width / 2, y: template.height * 3 / 4},
+    //     {x: template.width * 3 / 4, y: template.height * 3 / 4}
+    // ]
+
+    return result.map(({x, y}) => {
+        // 先取色，后对坐标进行伸缩
+        let color = images.pixel(template, x, y)
+        x = Math.floor(x * scale)
+        y = Math.floor(y * scale)
+        return {
+            x,
+            y,
+            color
+        }
+
+    })
+}
 
 /**
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
@@ -55,6 +105,54 @@ export function readImg (imgPath: Image | string, mode?: number) {
     return result
 }
 
+interface ColorCache {
+    headColor?: any,
+    body?: Array<{
+        x: number,
+        y: number,
+        color: any
+    }>,
+    region: Array<any>
+}
+
+declare const util
+
+function matchByColor (img, option: ColorCache, threshold=10) {
+
+    let headX = option.region[0]
+    let headY = option.region[1]
+    let headColor = option.headColor
+
+    let body = option.body
+
+    let bitmap = img.getBitmap()
+    let w = bitmap.getWidth()
+    let h = bitmap.getHeight()
+    let pixels = util.java.array("int", w * h)
+    bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
+
+    if (colors.isSimilar(headColor, pixels[headX + headY * w], threshold)) {
+        let t1 = getTime()
+        const found = body && body.every(b => {
+            return colors.isSimilar(b.color, pixels[headX + b.x + w * (headY + b.y)], threshold)
+        })
+        console.log(`found color cost ${getTime() - t1}`)
+        if (found) {
+            return [
+                {
+                    point: {
+                        x: headX,
+                        y: headY
+                    }
+                }
+            ]
+        } else {
+            return []
+        }
+    } else {
+        return []
+    }
+}
 
 /**
  * 找图函数，此函数为异步函数！
@@ -76,7 +174,7 @@ export function findImg (param: {
     index?: number
     useCache?: {
         key: string,
-        offset: number
+        offset: number,
     },
     eachTime?: number
     nextTime?: number
@@ -87,12 +185,17 @@ export function findImg (param: {
 }): Observable<any> {
     return defer(() => {
         const path = param.path || ''
+
+        if (!path) {
+            return throwError('path为空')
+        }
+
         const option = param.option || {}
         const index = param.index
 
         const useCache = param.useCache
-        const cachePath = useCache && (path + useCache.key || '__cache__') || null
-        const cacheOffset = useCache && useCache.offset || 2
+        const cachePath = useCache && (path + (useCache.key || '__CACHE__')) || null
+        const cacheOffset = useCache && useCache.offset || 0
 
         const eachTime = param.eachTime || 100
         const nextTime = param.nextTime || 0
@@ -103,22 +206,28 @@ export function findImg (param: {
         // 如果提供了截图cap，则只找一次
         const ONCE = image ? true : param.once
         const TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999
+        const queryOption = { ...option }
 
-        let template = readImg(path)
+        let template, scaleTemplate
+
+        queryOption.threshold = queryOption.threshold || 0.8
+
+        // 如果该图片已经缓存成色点，则不需要再读取图片，并可直接获得缓存的region
+        if (cachePath && cache[cachePath]) {
+            queryOption.region = cache[cachePath]
+        }
+
+        // 若无缓存，则需要读取图片，并校对region参数
+        if (!(cachePath && cache[cachePath] && index)) {
+            template = readImg(path)
             if (!template) {
                 return throwError('template path is null')
             }
 
-        template = images.scale(template, scale, scale)
+            scaleTemplate = images.scale(template, scale, scale)
 
-        let queryOption = { ...option }
-        queryOption.threshold = queryOption.threshold || 0.8
-
-        // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值
-        if (cachePath && cache[cachePath]) {
-            queryOption.region = cache[cachePath]
-        } else if (queryOption.region) {
-            let region = queryOption.region
+            if (queryOption.region) {
+                let region = queryOption.region || [0, 0]
                 if (region[0] < 0) {
                     region[0] = 0
                 }
@@ -137,15 +246,29 @@ export function findImg (param: {
                 }
                 queryOption.region = region
             }
+        }
 
         let isPass = true
         let t: any
         return timer(0, eachTime).pipe(
             filter(() => !isPause && isPass),
             exhaustMap(() => {
-                let match = images.matchTemplate(image || cap(), template, queryOption).matches
+                let t1 = getTime()
+                let match
+                let colorCache = cachePath && cache[cachePath]
+                // 如果已经存在缓存，且指定了index，则使用找色
+                if (colorCache && index) {
+                    match = matchByColor(image || cap(), colorCache)
+                // 否则使用模板匹配
+                } else {
+                    match = images.matchTemplate(image || cap(), scaleTemplate, queryOption).matches
+                }
                 if (match.length == 0 && DO_IF_NOT_FOUND) {
                     DO_IF_NOT_FOUND()
+                }
+                let t2 = getTime()
+                if (match.length > 0) {
+                    console.log(`-------------${colorCache && index ? 'color' : 'image'} match cost ${t2 - t1}`)
                 }
                 return of(match)
             }),
@@ -190,13 +313,27 @@ export function findImg (param: {
                     const xArray = res.map(e => e[0])
                     const yArray = res.map(e => e[1])
 
-                    cache[cachePath] = region([
+                    const cacheRegion: [number, number, number, number] = region([
                         Math.min(...xArray) - cacheOffset,
                         Math.min(...yArray) - cacheOffset,
-                        Math.max(...xArray) + template.width + cacheOffset * 2,
-                        Math.max(...yArray) + template.height + cacheOffset * 2
+                        Math.max(...xArray) + scaleTemplate.width + 1 + cacheOffset * 2,
+                        Math.max(...yArray) + scaleTemplate.height + 1 + cacheOffset * 2
                     ])
-                    queryOption.region = cache[cachePath]
+                    // 如果指定了index，则将模板转换为特征点，并保存颜色、坐标、区域
+                    if (index) {
+                        cache[cachePath] = {
+                            headColor: images.pixel(template, 0, 0),
+                            // 使用的是未经过裁剪的模板图片，因此结果应该进行scale处理
+                            body: getMatches(template),
+                            region: [...cacheRegion]
+                        }
+                    // 如果不指定index，则指保存区域
+                    } else {
+                        cache[cachePath] = {
+                            region: [...cacheRegion]
+                        }
+                    }
+                    queryOption.region = [...cacheRegion]
                 }
             }),
             map(res => {
@@ -229,7 +366,12 @@ export function findImg (param: {
                 if (t) {
                     clearTimeout(t)
                 }
+                if (template) {
                     template.recycle()
+                }
+                if (scaleTemplate) {
+                    scaleTemplate.recycle()
+                }
             })
         )
     })

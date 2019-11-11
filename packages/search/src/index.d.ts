@@ -1,3 +1,4 @@
+import 'es6-shim';
 import { Observable } from 'rxjs';
 import { Plugin } from '@auto.pro/core';
 /**
