@@ -134,9 +134,13 @@ function matchByColor (img, option: ColorCache, threshold=10) {
     if (colors.isSimilar(headColor, pixels[headX + headY * w], threshold)) {
         let t1 = getTime()
         const found = body && body.every(b => {
-            return colors.isSimilar(b.color, pixels[headX + b.x + w * (headY + b.y)], threshold)
+            let start = getTime()
+            let result = colors.isSimilar(b.color, pixels[headX + b.x + w * (headY + b.y)], threshold)
+            let end = getTime()
+            console.log(`${result} ${end - start}`)
+            return result
         })
-        console.log(`found color cost ${getTime() - t1}`)
+        console.log(`total ${found} ${getTime() - t1}`)
         if (found) {
             return [
                 {
@@ -215,6 +219,25 @@ export function findImg (param: {
         // 如果该图片已经缓存成色点，则不需要再读取图片，并可直接获得缓存的region
         if (cachePath && cache[cachePath]) {
             queryOption.region = cache[cachePath]
+        } else if (queryOption.region) {
+            let region = queryOption.region || [0, 0]
+            if (region[0] < 0) {
+                region[0] = 0
+            }
+            if (region[1] < 0) {
+                region[1] = 0
+            }
+            if (region.length == 4) {
+                let x = region[0] + region[2]
+                let y = region[1] + region[3]
+                if (x > width) {
+                    region[2] = width - region[0]
+                }
+                if (y > height) {
+                    region[3] = height - region[1]
+                }
+            }
+            queryOption.region = region
         }
 
         // 若无缓存，则需要读取图片，并校对region参数
@@ -225,27 +248,6 @@ export function findImg (param: {
             }
 
             scaleTemplate = images.scale(template, scale, scale)
-
-            if (queryOption.region) {
-                let region = queryOption.region || [0, 0]
-                if (region[0] < 0) {
-                    region[0] = 0
-                }
-                if (region[1] < 0) {
-                    region[1] = 0
-                }
-                if (region.length == 4) {
-                    let x = region[0] + region[2]
-                    let y = region[1] + region[3]
-                    if (x > width) {
-                        region[2] = width - region[0]
-                    }
-                    if (y > height) {
-                        region[3] = height - region[1]
-                    }
-                }
-                queryOption.region = region
-            }
         }
 
         let isPass = true

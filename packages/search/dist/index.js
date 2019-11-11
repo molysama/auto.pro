@@ -140,9 +140,13 @@ function matchByColor(img, option, threshold) {
     if (colors.isSimilar(headColor, pixels[headX + headY * w], threshold)) {
         var t1 = core.getTime();
         var found = body && body.every(function (b) {
-            return colors.isSimilar(b.color, pixels[headX + b.x + w * (headY + b.y)], threshold);
+            var start = core.getTime();
+            var result = colors.isSimilar(b.color, pixels[headX + b.x + w * (headY + b.y)], threshold);
+            var end = core.getTime();
+            console.log(result + " " + (end - start));
+            return result;
         });
-        console.log("found color cost " + (core.getTime() - t1));
+        console.log("total " + found + " " + (core.getTime() - t1));
         if (found) {
             return [
                 {
@@ -201,6 +205,26 @@ function findImg(param) {
         if (cachePath && cache[cachePath]) {
             queryOption.region = cache[cachePath];
         }
+        else if (queryOption.region) {
+            var region_1 = queryOption.region || [0, 0];
+            if (region_1[0] < 0) {
+                region_1[0] = 0;
+            }
+            if (region_1[1] < 0) {
+                region_1[1] = 0;
+            }
+            if (region_1.length == 4) {
+                var x = region_1[0] + region_1[2];
+                var y = region_1[1] + region_1[3];
+                if (x > core.width) {
+                    region_1[2] = core.width - region_1[0];
+                }
+                if (y > core.height) {
+                    region_1[3] = core.height - region_1[1];
+                }
+            }
+            queryOption.region = region_1;
+        }
         // 若无缓存，则需要读取图片，并校对region参数
         if (!(cachePath && cache[cachePath] && index)) {
             template = readImg(path);
@@ -208,26 +232,6 @@ function findImg(param) {
                 return rxjs.throwError('template path is null');
             }
             scaleTemplate = images.scale(template, core.scale, core.scale);
-            if (queryOption.region) {
-                var region_1 = queryOption.region || [0, 0];
-                if (region_1[0] < 0) {
-                    region_1[0] = 0;
-                }
-                if (region_1[1] < 0) {
-                    region_1[1] = 0;
-                }
-                if (region_1.length == 4) {
-                    var x = region_1[0] + region_1[2];
-                    var y = region_1[1] + region_1[3];
-                    if (x > core.width) {
-                        region_1[2] = core.width - region_1[0];
-                    }
-                    if (y > core.height) {
-                        region_1[3] = core.height - region_1[1];
-                    }
-                }
-                queryOption.region = region_1;
-            }
         }
         var isPass = true;
         var t;
