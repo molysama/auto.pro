@@ -62,7 +62,8 @@
     "paths": {
       "@auto.pro/core": ["packages/core/src"],
       "@auto.pro/action": ["packages/action/src"],
-      "@auto.pro/search": ["packages/search/src"]
+      "@auto.pro/search": ["packages/search/src"],
+      "@auto.pro/stream": ["packages/stream/src"]
     }
   },
   "include": [

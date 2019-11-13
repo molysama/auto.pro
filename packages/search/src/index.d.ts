@@ -1,3 +1,18 @@
+export declare type findImgParam = {
+    path: string;
+    option: any;
+    index?: number;
+    useCache?: {
+        key: string;
+        offset: number;
+    };
+    eachTime?: number;
+    nextTime?: number;
+    once?: boolean;
+    take?: number;
+    doIfNotFound?: Function;
+    image?: Image;
+};
 import { Observable } from 'rxjs';
 import { Plugin } from '@auto.pro/core';
 /**
@@ -21,21 +36,7 @@ export declare function readImg(imgPath: Image | string, mode?: number): any;
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
-export declare function findImg(param: {
-    path: string;
-    option: any;
-    index?: number;
-    useCache?: {
-        key: string;
-        offset: number;
-    };
-    eachTime?: number;
-    nextTime?: number;
-    once?: boolean;
-    take?: number;
-    doIfNotFound?: Function;
-    image?: Image;
-}): Observable<any>;
+export declare function findImg(param: findImgParam): Observable<any>;
 /**
  * (精确查找)
  * 判断区域内是否不含有colors中的任意一个，不含有则返回true，含有则返回false

@@ -1,0 +1,36 @@
+{
+  "name": "@auto.pro/stream",
+  "version": "7.5.0",
+  "description": "run task as stream",
+  "keywords": [
+    "auto.pro"
+  ],
+  "author": "molysama <molysama.i@gmail.com>",
+  "homepage": "https://github.com/molysama/auto.pro#readme",
+  "license": "MIT",
+  "main": "lib/stream.js",
+  "type": "src/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "publishConfig": {
+    "registry": "http://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/molysama/auto.pro.git"
+  },
+  "scripts": {
+    "build": "tsc && rollup -c rollup.config.js",
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/molysama/auto.pro/issues"
+  }
+}
