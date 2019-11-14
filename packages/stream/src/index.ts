@@ -39,7 +39,7 @@ const createDefer = (param: (findImgParam | String | Function), source: Observab
  * @param target 要检测的目标
  * @param doSomething 
  */
-export const add = (param: any, target?: any, maxErrorTime: number = 1) => (source: Observable<any>) => {
+export const add = (param: (Function | findImgParam | string | boolean | number | undefined | null), target?: (Function | findImgParam | string | boolean | number | null | undefined), maxErrorTime: number = 1) => (source: Observable<any>) => {
 
     return source.pipe(mergeMap(v => defer(() => {
         const paramType = getPrototype(param)
