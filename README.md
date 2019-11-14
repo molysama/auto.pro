@@ -13,7 +13,7 @@
 @auto.pro/stream | ![](https://img.shields.io/npm/v/@auto.pro/stream.svg) | 流程插件 |
 
 ## 安装工具
-cli预置了一些项目模板，预置了webpack、babel、ts等工具，能帮助您快速创建复杂功能的应用。请确保你已经安装了node.js。
+cli预置了一些项目模板，含有webpack、babel、ts等工具，能帮助您快速创建复杂功能的应用。请确保你已经安装了node.js。
 ```
 npm i -g "@auto.pro/cli"
 ```
@@ -42,7 +42,10 @@ npm i --registry=https://registry.npm.taobao.org
 安装完毕后，```src```目录就是我们写逻辑代码的地方了(UI代码依旧写在```main.js```里)，```src```内的文件可直接无缝使用```main.js```里的变量，且可加载npm包。
 
 ## 运行
-```src```内是源码，不适合直接发布成项目，在命令行执行```npm run build```后，会将```src```内的所有代码打包编译成```dist/app.js```文件，这个文件才是```main.js```真正发布和加载的。
+```src```内是源码，不适合直接发布成项目，在命令行执行```npm run build```后，会将```src```内的所有代码打包编译成```dist/app.js```文件，这个文件才是项目真正发布和加载的，执行```npm run build```只会进行一次打包，执行```npm start```则会实时监听```src```目录内的文件并更新最终编译产物。
+
+## 缺憾
+auto.pro截至目前(v8.0.2)，在运行和保存项目时会扫描所有文件（哪怕已经通过ignore忽略了），```node_modules```又含有大量文件，因此项目的运行和保存会比较耗时。
 
 # LICENSE
 MIT
