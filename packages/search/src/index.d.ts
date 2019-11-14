@@ -1,10 +1,10 @@
 export declare type findImgParam = {
     path: string;
-    option: any;
+    option?: any;
     index?: number;
     useCache?: {
-        key: string;
-        offset: number;
+        key?: string;
+        offset?: number;
     };
     eachTime?: number;
     nextTime?: number;

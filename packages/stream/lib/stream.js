@@ -12,40 +12,104 @@ var operators = require('rxjs/operators');
  * @param target 要检测的目标
  * @param doSomething
  */
-function add(target, doSomething, ensure) {
-    var target$;
-    var targetType = core.getPrototype(target);
-    if (targetType === 'Function') {
-        target$ = rxjs.of(target());
-    }
-    else if (targetType === 'Object') {
-        target$ = search.findImg(target);
-    }
-    var ensure$;
-    var ensureType = core.getPrototype(ensure);
-    if (ensureType === 'Object') {
-        ensure$ = function () { return search.findImg(ensure); };
-    }
-    else if (ensureType === 'Function') {
-        ensure$ = function (param) { return rxjs.of(ensure(param)); };
-    }
-    else {
-        ensure$ = function () { return rxjs.of(true); };
-    }
-    return target$.pipe(operators.mergeMap(function (value) {
-        var result = doSomething && doSomething(value);
-        return ensure$(result).pipe(operators.map(function (v) {
-            if (v) {
-                return result;
+var add = function (param, target, maxErrorTime) {
+    if (maxErrorTime === void 0) { maxErrorTime = 1; }
+    return function (source) {
+        return source.pipe(operators.mergeMap(function (v) { return rxjs.defer(function () {
+            var paramType = core.getPrototype(param);
+            if (paramType === 'Function') {
+                var valueIsArray = core.getPrototype(v) === 'Array';
+                var paramResult = void 0;
+                if (valueIsArray) {
+                    paramResult = param.apply(void 0, v);
+                }
+                else {
+                    paramResult = param(v);
+                }
+                if (rxjs.isObservable(paramResult)) {
+                    return paramResult;
+                }
+                else {
+                    return rxjs.of(paramResult);
+                }
+            }
+            else if (paramType === 'Object') {
+                return search.findImg(param);
+            }
+            else if (paramType === 'String') {
+                return search.findImg({
+                    path: v,
+                    useCache: {
+                        key: '__CACHE__'
+                    },
+                    index: 1
+                });
             }
             else {
-                throw "invalid value: " + v;
+                return rxjs.of(param);
             }
-        }));
-    }), operators.retry(10), operators.catchError(function (err) {
-        return rxjs.of(err);
-    }));
-}
+        }).pipe(operators.mergeMap(function (paramValue) {
+            var targetType = core.getPrototype(target);
+            if (targetType === 'Function') {
+                var targetResult = target(paramValue);
+                if (rxjs.isObservable(targetResult)) {
+                    return targetResult.pipe(operators.filter(function (v) { return Boolean(v); }), operators.last(), operators.map(function (v) { return [paramValue, v]; }), operators.catchError(function (v) {
+                        return rxjs.throwError("invalid target result: " + v);
+                    }));
+                }
+                else {
+                    return rxjs.of(targetResult).pipe(operators.map(function (v) {
+                        if (v) {
+                            return [paramValue, v];
+                        }
+                        else {
+                            throw "invalid target result: " + v;
+                        }
+                    }));
+                }
+            }
+            else if (targetType === 'Object') {
+                return search.findImg(target).pipe(operators.map(function (v) {
+                    if (v) {
+                        return [paramValue, v];
+                    }
+                    else {
+                        throw "invalid target result: " + v;
+                    }
+                }));
+            }
+            else if (targetType === 'String') {
+                return search.findImg({
+                    path: target,
+                    useCache: {
+                        key: '__CACHE__'
+                    },
+                    index: 1
+                }).pipe(operators.map(function (v) {
+                    if (v) {
+                        return [paramValue, v];
+                    }
+                    else {
+                        throw "invalid target result: " + v;
+                    }
+                }));
+            }
+            else if (targetType === 'Undefined') {
+                return rxjs.of(paramValue);
+            }
+            else {
+                return rxjs.of(target).pipe(operators.map(function (v) {
+                    if (v) {
+                        return [paramValue, v];
+                    }
+                    else {
+                        throw "invalid target result: " + v;
+                    }
+                }));
+            }
+        }), operators.retry(maxErrorTime)); }));
+    };
+};
 var index = {
     install: function () {
     }

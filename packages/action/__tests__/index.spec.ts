@@ -10,7 +10,7 @@ describe('ActionPlugin', () => {
     test('bezier', () => {
         var curve = new Bezier(60, 40, 180, 90, 105, 60, 120, 50);
         var LUT = curve.getLUT(16);
-        console.log(LUT)
+        // console.log(LUT)
         expect(LUT).not.toBeUndefined()
     })
 

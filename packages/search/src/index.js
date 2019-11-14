@@ -90,7 +90,7 @@ function findImg(param) {
         var option = param.option || {};
         var index = param.index;
         var useCache = param.useCache;
-        var cachePath = useCache && (path + useCache.key || '__cache__') || null;
+        var cachePath = useCache && (path + useCache.key || '__CACHE__') || null;
         var cacheOffset = useCache && useCache.offset || 2;
         var eachTime = param.eachTime || 100;
         var nextTime = param.nextTime || 0;

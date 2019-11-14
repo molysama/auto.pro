@@ -1,10 +1,10 @@
 export type findImgParam = {
     path: string
-    option: any
+    option?: any
     index?: number
     useCache?: {
-        key: string,
-        offset: number
+        key?: string,
+        offset?: number
     },
     eachTime?: number
     nextTime?: number
@@ -92,7 +92,7 @@ export function findImg (param: findImgParam): Observable<any> {
         const index = param.index
 
         const useCache = param.useCache
-        const cachePath = useCache && (path + useCache.key || '__cache__') || null
+        const cachePath = useCache && (path + useCache.key || '__CACHE__') || null
         const cacheOffset = useCache && useCache.offset || 2
 
         const eachTime = param.eachTime || 100
