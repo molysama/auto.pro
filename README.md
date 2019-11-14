@@ -1,4 +1,4 @@
-# auto.pro
+# 简介
 针对auto.pro的npm扩展包，主要包括
 - 对pro的函数进行封装和安卓版本兼容
 - 添加找图找色的分辨率适配和缓存机制
@@ -7,7 +7,7 @@
 包名 | 版本 |  描述  
 -|-|-
 @auto.pro/cli | ![](https://img.shields.io/npm/v/@auto.pro/cli.svg) | 工具包 |
-@auto.pro/core | ![](https://img.shields.io/npm/v/@auto.pro/core.svg) | 核心(必须) |
+@auto.pro/core | ![](https://img.shields.io/npm/v/@auto.pro/core.svg) | 扩展包核心 |
 @auto.pro/action | ![](https://img.shields.io/npm/v/@auto.pro/action.svg) | 操作插件，提供点击、滑动等功能 |
 @auto.pro/search | ![](https://img.shields.io/npm/v/@auto.pro/search.svg) | 图色插件 |
 @auto.pro/stream | ![](https://img.shields.io/npm/v/@auto.pro/stream.svg) | 流程插件 |
