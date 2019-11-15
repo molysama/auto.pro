@@ -1,37 +1,19 @@
 
 import { width, height, isPause, scale, getPrototype } from '@auto.pro/core'
-import { findImg, findImgParam } from '@auto.pro/search'
+import { findImg, FindImgParam } from '@auto.pro/search'
 import { of, defer, merge, Observable, isObservable, throwError } from 'rxjs'
 import { map, mergeMap, retry, catchError, mapTo, tap, filter, last } from 'rxjs/operators'
 
 export { concat } from 'rxjs'
 
-const createDefer = (param: (findImgParam | String | Function), source: Observable<any>) => {
-    return defer(() => {
-
-        const paramType = getPrototype(param)
-        if (paramType === 'Function') {
-            return source.pipe(
-                map(v => {
-                    return (param as Function)(v)
-                })
-            )
-        } else if (paramType === 'Object') {
-            return source.pipe(
-                mergeMap(() => findImg(param as findImgParam))
-            )
-        } else if (paramType === 'String') {
-            return source.pipe(
-                mergeMap(path => findImg({
-                    path,
-                    useCache: {
-                        key: '__CACHE__'
-                    },
-                    index: 1
-                }))
-            )
-        }
-    })
+function isFindImgParam (param: Function | FindImgParam | string | any): param is FindImgParam {
+    return getPrototype(<FindImgParam>param) === 'Object' && (<FindImgParam>param).path !== undefined
+}
+function isFunction (param: Function | FindImgParam | string | any): param is Function {
+    return getPrototype(<Function>param) === 'Function'
+}
+function isString (param: Function | FindImgParam | string | any): param is string {
+    return getPrototype(<string>param) === 'String'
 }
 
 /**
@@ -39,26 +21,19 @@ const createDefer = (param: (findImgParam | String | Function), source: Observab
  * @param target 要检测的目标
  * @param doSomething 
  */
-export const add = (param: (Function | findImgParam | string | boolean | number | undefined | null), target?: (Function | findImgParam | string | boolean | number | null | undefined), maxErrorTime: number = 1) => (source: Observable<any>) => {
+export const add = (param: (Function | FindImgParam | string ) & any, target?: (Function | FindImgParam | string | any), maxErrorTime: number = 1) => (source: Observable<any>) => {
 
     return source.pipe(mergeMap(v => defer(() => {
-        const paramType = getPrototype(param)
-        if (paramType === 'Function') {
-            const valueIsArray = getPrototype(v) === 'Array'
-            let paramResult
-            if (valueIsArray) {
-                paramResult = (param as Function)(...v)
-            } else {
-                paramResult = (param as Function)(v)
-            }
+        if (isFunction(param)) {
+            let paramResult = param(v)
             if (isObservable(paramResult)) {
                 return paramResult
             } else {
                 return of(paramResult)
             }
-        } else if (paramType === 'Object') {
-            return findImg(param as findImgParam)
-        } else if (paramType === 'String') {
+        } else if (isFindImgParam(param)) {
+            return findImg(param)
+        } else if (isString(param)) {
             return findImg({
                 path: v,
                 useCache: {
@@ -97,7 +72,7 @@ export const add = (param: (Function | findImgParam | string | boolean | number 
                     )
                 }
             } else if (targetType === 'Object') {
-                return findImg(target as findImgParam).pipe(
+                return findImg(target as FindImgParam).pipe(
                     map(v => {
                         if (v) {
                             return [paramValue, v]

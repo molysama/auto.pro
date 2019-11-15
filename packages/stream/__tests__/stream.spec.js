@@ -42,4 +42,15 @@ describe('stream', function () {
         var $ = rxjs_1.of(true).pipe(index_1.add(function (v) { return rxjs_1.of(10); }, function (v) { return rxjs_1.of(v - 1).pipe(operators_1.filter(function (v) { return v < 0; })); }));
         return expect($.toPromise()).rejects.toMatch('invalid');
     });
+    test('add() * 2', function () {
+        var $ = rxjs_1.of(10).pipe(index_1.add(function (v) { return v + 1; }), index_1.add(function (v) { return v + 2; }));
+        return expect($.toPromise()).resolves.toEqual(13);
+    });
+    test('add(,) * 2', function () {
+        var $ = rxjs_1.of(10).pipe(index_1.add(function (v) { return v + 1; }, true), index_1.add(function (_a) {
+            var v = _a[0], passValue = _a[1];
+            return v + 2;
+        }));
+        return expect($.toPromise()).resolves.toEqual(13);
+    });
 });

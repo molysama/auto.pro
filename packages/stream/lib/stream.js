@@ -7,6 +7,15 @@ var search = require('@auto.pro/search');
 var rxjs = require('rxjs');
 var operators = require('rxjs/operators');
 
+function isFindImgParam(param) {
+    return core.getPrototype(param) === 'Object' && param.path !== undefined;
+}
+function isFunction(param) {
+    return core.getPrototype(param) === 'Function';
+}
+function isString(param) {
+    return core.getPrototype(param) === 'String';
+}
 /**
  * 添加事件流
  * @param target 要检测的目标
@@ -16,16 +25,8 @@ var add = function (param, target, maxErrorTime) {
     if (maxErrorTime === void 0) { maxErrorTime = 1; }
     return function (source) {
         return source.pipe(operators.mergeMap(function (v) { return rxjs.defer(function () {
-            var paramType = core.getPrototype(param);
-            if (paramType === 'Function') {
-                var valueIsArray = core.getPrototype(v) === 'Array';
-                var paramResult = void 0;
-                if (valueIsArray) {
-                    paramResult = param.apply(void 0, v);
-                }
-                else {
-                    paramResult = param(v);
-                }
+            if (isFunction(param)) {
+                var paramResult = param(v);
                 if (rxjs.isObservable(paramResult)) {
                     return paramResult;
                 }
@@ -33,10 +34,10 @@ var add = function (param, target, maxErrorTime) {
                     return rxjs.of(paramResult);
                 }
             }
-            else if (paramType === 'Object') {
+            else if (isFindImgParam(param)) {
                 return search.findImg(param);
             }
-            else if (paramType === 'String') {
+            else if (isString(param)) {
                 return search.findImg({
                     path: v,
                     useCache: {

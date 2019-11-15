@@ -1,4 +1,4 @@
-export type findImgParam = {
+export type FindImgParam = {
     path: string
     option?: any
     index?: number
@@ -85,7 +85,7 @@ export function readImg (imgPath: Image | string, mode?: number) {
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
-export function findImg (param: findImgParam): Observable<any> {
+export function findImg (param: FindImgParam): Observable<any> {
     return defer(() => {
         const path = param.path || ''
         const option = param.option || {}

@@ -55,7 +55,7 @@ describe('stream', () => {
 
     test('add(fn, fn, 1) err', () => {
         let $ = of(1).pipe(
-            add(v => v + 5, v => v === 5),
+            add(v => v + 5, v => v === 5)
         )
         return expect($.toPromise()).rejects.toMatch('invalid')
     })
@@ -73,4 +73,21 @@ describe('stream', () => {
         )
         return expect($.toPromise()).rejects.toMatch('invalid')
     })
+
+    test('add() * 2', () => {
+        let $ = of(10).pipe(
+            add(v => v + 1),
+            add(v => v + 2)
+        )
+        return expect($.toPromise()).resolves.toEqual(13)
+    })
+
+    test('add(,) * 2', () => {
+        let $ = of(10).pipe(
+            add(v => v + 1, true),
+            add(([v, passValue]) => v + 2)
+        )
+        return expect($.toPromise()).resolves.toEqual(13)
+    })
+
 });
