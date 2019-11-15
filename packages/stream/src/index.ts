@@ -21,7 +21,7 @@ function isString (param: Function | FindImgParam | string | any): param is stri
  * @param target 要检测的目标
  * @param doSomething 
  */
-export const add = (param: (Function | FindImgParam | string ) & any, target?: (Function | FindImgParam | string | any), maxErrorTime: number = 1) => (source: Observable<any>) => {
+export const add = (param: (Function | FindImgParam | string | any), target?: (Function | FindImgParam | string | any), maxErrorTime: number = 1) => (source: Observable<any>) => {
 
     return source.pipe(mergeMap(v => defer(() => {
         if (isFunction(param)) {
