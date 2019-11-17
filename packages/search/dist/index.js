@@ -91,7 +91,7 @@ function readImg(imgPath, mode) {
  * 找图函数，此函数为异步函数！
  * @param {string} path 待查图片路径
  * @param {object} option 查询参数
- * @param {number} index 取范围内的第几个结果，值从1开始，设置该值后将转换返回值为该index的坐标或null
+ * @param {number} index 取范围内的第几个结果，值从1开始。默认为1，设置为null、fale时返回所有结果
  * @param {object} useCache 缓存配置
  * @param {number} eachTime 找图定时器的间隔，默认为100(ms)
  * @param {number} nextTime 匹配到图片后，下一次匹配的间隔，默认为0(ms)
@@ -105,7 +105,7 @@ function findImg(param) {
     return rxjs.defer(function () {
         var path = param.path || '';
         var option = param.option || {};
-        var index = param.index;
+        var index = param.index === undefined ? 1 : param.index;
         var useCache = param.useCache;
         var cachePath = useCache && (path + useCache.key || '__CACHE__') || null;
         var cacheOffset = useCache && useCache.offset || 2;
