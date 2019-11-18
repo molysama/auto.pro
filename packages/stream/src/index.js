@@ -17,11 +17,14 @@ function isString(param) {
 }
 /**
  * 添加事件流
- * @param target 要检测的目标
- * @param doSomething
+ * @param param 要做的事
+ * @param target 完成标志
+ * @param {boolean} passValue 过滤器的值，默认为true
+ * @param {number} maxRetryTimes 最大重试次数
  */
-exports.add = function (param, target, maxErrorTime) {
-    if (maxErrorTime === void 0) { maxErrorTime = 1; }
+exports.add = function (param, target, passValue, maxRetryTimes) {
+    if (passValue === void 0) { passValue = true; }
+    if (maxRetryTimes === void 0) { maxRetryTimes = 1; }
     return function (source) {
         return source.pipe(operators_1.mergeMap(function (v) { return rxjs_1.defer(function () {
             if (isFunction(param)) {
@@ -50,33 +53,27 @@ exports.add = function (param, target, maxErrorTime) {
             }
         }).pipe(operators_1.mergeMap(function (paramValue) {
             var targetType = core_1.getPrototype(target);
+            var filterValue = function () { return operators_1.map(function (v) {
+                if (Boolean(v) === Boolean(passValue)) {
+                    return [paramValue, v];
+                }
+                else {
+                    throw "invalid target result: " + v + " is not " + passValue;
+                }
+            }); };
             if (targetType === 'Function') {
                 var targetResult = target(paramValue);
                 if (rxjs_1.isObservable(targetResult)) {
-                    return targetResult.pipe(operators_1.filter(function (v) { return Boolean(v); }), operators_1.last(), operators_1.map(function (v) { return [paramValue, v]; }), operators_1.catchError(function (v) {
+                    return targetResult.pipe(operators_1.filter(function (v) { return Boolean(v) === Boolean(passValue); }), operators_1.last(), operators_1.map(function (v) { return [paramValue, v]; }), operators_1.catchError(function (v) {
                         return rxjs_1.throwError("invalid target result: " + v);
                     }));
                 }
                 else {
-                    return rxjs_1.of(targetResult).pipe(operators_1.map(function (v) {
-                        if (v) {
-                            return [paramValue, v];
-                        }
-                        else {
-                            throw "invalid target result: " + v;
-                        }
-                    }));
+                    return rxjs_1.of(targetResult).pipe(filterValue());
                 }
             }
             else if (targetType === 'Object') {
-                return search_1.findImg(target).pipe(operators_1.map(function (v) {
-                    if (v) {
-                        return [paramValue, v];
-                    }
-                    else {
-                        throw "invalid target result: " + v;
-                    }
-                }));
+                return search_1.findImg(target).pipe(filterValue());
             }
             else if (targetType === 'String') {
                 return search_1.findImg({
@@ -85,29 +82,15 @@ exports.add = function (param, target, maxErrorTime) {
                         key: '__CACHE__'
                     },
                     index: 1
-                }).pipe(operators_1.map(function (v) {
-                    if (v) {
-                        return [paramValue, v];
-                    }
-                    else {
-                        throw "invalid target result: " + v;
-                    }
-                }));
+                }).pipe(filterValue());
             }
             else if (targetType === 'Undefined') {
                 return rxjs_1.of(paramValue);
             }
             else {
-                return rxjs_1.of(target).pipe(operators_1.map(function (v) {
-                    if (v) {
-                        return [paramValue, v];
-                    }
-                    else {
-                        throw "invalid target result: " + v;
-                    }
-                }));
+                return rxjs_1.of(target).pipe(filterValue());
             }
-        }), operators_1.retry(maxErrorTime)); }));
+        }), operators_1.retry(maxRetryTimes)); }));
     };
 };
 exports.default = {

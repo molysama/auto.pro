@@ -18,7 +18,7 @@ describe('stream', function () {
         var p = function () { return rxjs_1.of(true).pipe(operators_1.tap(function (v) { return console.log('of'); }), index_1.add(function () {
             console.log('add');
             return true;
-        }, false, 2)).toPromise(); };
+        }, false, true, 2)).toPromise(); };
         return expect(p()).rejects.toMatch('invalid');
     });
     test('add(fn:() => ob)', function () {
@@ -30,7 +30,7 @@ describe('stream', function () {
     test('add(fn, fn)', function () {
         return rxjs_1.of(1).pipe(index_1.add(function (v) { return v + 5; }, function (v) { return v === 6; })).toPromise().then(function (v) { return expect(v).toEqual([6, true]); });
     });
-    test('add(fn, fn, 1) err', function () {
+    test('add(fn, fn) err', function () {
         var $ = rxjs_1.of(1).pipe(index_1.add(function (v) { return v + 5; }, function (v) { return v === 5; }));
         return expect($.toPromise()).rejects.toMatch('invalid');
     });
@@ -52,5 +52,21 @@ describe('stream', function () {
             return v + 2;
         }));
         return expect($.toPromise()).resolves.toEqual(13);
+    });
+    test('add(fn, fn, true)', function () {
+        var $ = rxjs_1.of(1).pipe(index_1.add(function (v) { return 1 + 2; }, function (v) { return v === 3; }));
+        return expect($.toPromise()).resolves.toEqual([3, true]);
+    });
+    test('add(fn, fn, false)', function () {
+        var $ = rxjs_1.of(1).pipe(index_1.add(function (v) { return 1 + 2; }, function (v) { return v === 3; }, false));
+        return expect($.toPromise()).rejects.toMatch('invalid');
+    });
+    test('add(fn, ob, true)', function () {
+        var $ = rxjs_1.of(1).pipe(index_1.add(function (v) { return 1 + 2; }, function (v) { return rxjs_1.of(v); }, true));
+        return expect($.toPromise()).resolves.toEqual([3, 3]);
+    });
+    test('add(fn, ob, false)', function () {
+        var $ = rxjs_1.of(1).pipe(index_1.add(function (v) { return 1 + 2; }, function (v) { return rxjs_1.of(v); }, false));
+        return expect($.toPromise()).rejects.toMatch('invalid');
     });
 });

@@ -18,10 +18,12 @@ function isString (param: Function | FindImgParam | string | any): param is stri
 
 /**
  * 添加事件流
- * @param target 要检测的目标
- * @param doSomething 
+ * @param param 要做的事
+ * @param target 完成标志
+ * @param {boolean} passValue 过滤器的值，默认为true
+ * @param {number} maxRetryTimes 最大重试次数
  */
-export const add = (param: (Function | FindImgParam | string | any), target?: (Function | FindImgParam | string | any), maxErrorTime: number = 1) => (source: Observable<any>) => {
+export const add = (param: (Function | FindImgParam | string | any), target?: (Function | FindImgParam | string | any), passValue: boolean = true, maxRetryTimes: number = 1) => (source: Observable<any>) => {
 
     return source.pipe(mergeMap(v => defer(() => {
         if (isFunction(param)) {
@@ -48,11 +50,18 @@ export const add = (param: (Function | FindImgParam | string | any), target?: (F
         mergeMap(paramValue => {
 
             const targetType = getPrototype(target)
+            const filterValue = () => map(v => {
+                if (Boolean(v) === Boolean(passValue)) {
+                    return [paramValue, v]
+                } else {
+                    throw `invalid target result: ${v} is not ${passValue}`
+                }
+            })
             if (targetType === 'Function') {
                 const targetResult = (target as Function)(paramValue)
                 if (isObservable(targetResult)) {
                     return targetResult.pipe(
-                        filter(v => Boolean(v)),
+                        filter(v => Boolean(v) === Boolean(passValue)),
                         last(),
                         map(v => [paramValue, v]),
                         catchError(v => {
@@ -61,25 +70,12 @@ export const add = (param: (Function | FindImgParam | string | any), target?: (F
                     )
                 } else {
                     return of(targetResult).pipe(
-                        map(v => {
-                            if (v) {
-                                return [paramValue, v]
-                            } else {
-                                throw `invalid target result: ${v}`
-                            }
-                        })
-
+                        filterValue()
                     )
                 }
             } else if (targetType === 'Object') {
                 return findImg(target as FindImgParam).pipe(
-                    map(v => {
-                        if (v) {
-                            return [paramValue, v]
-                        } else {
-                            throw `invalid target result: ${v}`
-                        }
-                    })
+                    filterValue()
                 )
             } else if (targetType === 'String') {
                 return findImg({
@@ -89,29 +85,17 @@ export const add = (param: (Function | FindImgParam | string | any), target?: (F
                     },
                     index: 1
                 }).pipe(
-                    map(v => {
-                        if (v) {
-                            return [paramValue, v]
-                        } else {
-                            throw `invalid target result: ${v}`
-                        }
-                    })
+                    filterValue()
                 )
             } else if (targetType === 'Undefined') {
                 return of(paramValue)
             } else {
                 return of(target).pipe(
-                    map(v => {
-                        if (v) {
-                            return [paramValue, v]
-                        } else {
-                            throw `invalid target result: ${v}`
-                        }
-                    })
+                    filterValue()
                 )
             }
         }),
-        retry(maxErrorTime)
+        retry(maxRetryTimes)
     )))
 }
 

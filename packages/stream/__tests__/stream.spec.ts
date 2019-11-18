@@ -3,7 +3,7 @@
 const stream = require('../src/index');
 import { add, concat } from '../src/index'
 import { empty, of } from 'rxjs';
-import { tap, filter } from 'rxjs/operators';
+import { tap, filter, map } from 'rxjs/operators';
 
 describe('stream', () => {
     test('add(1)', () => {
@@ -30,7 +30,7 @@ describe('stream', () => {
             add(() => {
                 console.log('add')
                 return true
-            }, false, 2)
+            }, false, true, 2)
         ).toPromise()
         return expect(p()).rejects.toMatch('invalid')
     })
@@ -53,7 +53,7 @@ describe('stream', () => {
         ).toPromise().then(v => expect(v).toEqual([6, true]))
     })
 
-    test('add(fn, fn, 1) err', () => {
+    test('add(fn, fn) err', () => {
         let $ = of(1).pipe(
             add(v => v + 5, v => v === 5)
         )
@@ -88,6 +88,34 @@ describe('stream', () => {
             add(([v, passValue]) => v + 2)
         )
         return expect($.toPromise()).resolves.toEqual(13)
+    })
+
+    test('add(fn, fn, true)', () => {
+        let $ = of(1).pipe(
+            add(v => 1 + 2, v => v === 3)
+        )
+        return expect($.toPromise()).resolves.toEqual([3, true])
+    })
+
+    test('add(fn, fn, false)', () => {
+        let $ = of(1).pipe(
+            add(v => 1 + 2, v => v === 3, false)
+        )
+        return expect($.toPromise()).rejects.toMatch('invalid')
+    })
+
+    test('add(fn, ob, true)', () => {
+        let $ = of(1).pipe(
+            add(v => 1 + 2, v => of(v), true)
+        )
+        return expect($.toPromise()).resolves.toEqual([3, 3])
+    })
+
+    test('add(fn, ob, false)', () => {
+        let $ = of(1).pipe(
+            add(v => 1 + 2, v => of(v), false)
+        )
+        return expect($.toPromise()).rejects.toMatch('invalid')
     })
 
 });
