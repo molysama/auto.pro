@@ -39,13 +39,21 @@ auto-cli create project-name
 npm i --registry=https://registry.npm.taobao.org
 ```
 
-安装完毕后，```src```目录就是我们写逻辑代码的地方了(UI代码依旧写在```main.js```里)，```src```内的文件可直接无缝使用```main.js```里的变量，且可加载npm包。
+安装完毕后，```src```目录就是我们写逻辑代码的地方了，```src```内的文件可直接无缝使用```main.js```里的变量，且可直接加载npm包。  
+由于webpack无法直接使用xml格式，因此无法在src内直接写UI。折衷的办法有两种：
+- 将UI部分写在```main.js```里。
+- ```src```内通过```files.read```读取外部xml文件。
 
 ## 运行
-```src```内是源码，不适合直接发布成项目，在命令行执行```npm run build```后，会将```src```内的所有代码打包编译成```dist/app.js```文件，这个文件才是项目真正发布和加载的，执行```npm run build```只会进行一次打包，执行```npm start```则会实时监听```src```目录内的文件并更新最终编译产物。
+```src```内是源码，不适合直接发布成项目，应将其编译成```dist/app.js```文件，```main.js```引入的是后者。  
+以下两个命令可以进行编译：
+- ```npm run build``` 进行一次编译
+- ```npm start``` 实时监听```src```目录内的文件并更新最终编译产物。
 
 ## 缺憾
 auto.pro截至目前(v8.0.2)，在运行和保存项目时会扫描所有文件（哪怕已经通过ignore忽略了），```node_modules```又含有大量文件，因此项目的运行和保存会比较耗时。
+
+有任何疑问、意见或建议，欢迎直接联系本人QQ或提issue。(*^_^*)
 
 # LICENSE
 MIT
