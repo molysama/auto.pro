@@ -45,7 +45,7 @@ npm i --registry=https://registry.npm.taobao.org
 - ```src```内通过```files.read```读取外部xml文件。
 
 ## 运行
-```src```内是源码，不适合直接发布成项目，应将其编译成```dist/app.js```文件，```main.js```引入的是后者。  
+```src```内是源码，不适合直接发布成项目，应将其编译成```dist/app.js```文件，并让```main.js```引入(模板已经默认引用了这个文件)。  
 以下两个命令可以进行编译：
 - ```npm run build``` 进行一次编译
 - ```npm start``` 实时监听```src```目录内的文件并更新最终编译产物。
