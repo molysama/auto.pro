@@ -31,7 +31,7 @@ auto-cli create project-name
 - html  
 预置了webpack、html(webview)的项目模板  
 - android  
-实施中，尚不可用 
+预置了webpack、auto UI示例，[查看说明](https://github.com/molysama/auto-template-android)。
 
 ## 初始化
 使用vscode打开刚才创建的项目，执行以下命令使用淘宝源进行安装
