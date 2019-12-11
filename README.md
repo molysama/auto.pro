@@ -1,16 +1,17 @@
 # 简介
-针对auto.pro的npm扩展包，主要包括
-- 对pro的函数进行封装和安卓版本兼容
-- 添加找图找色的分辨率适配和缓存机制
-- 提供一套合理的脚本流程机制
+开箱即用的auto.pro的npm扩展包，主要有webpack、babel、ts、完整es6、压缩混淆、webview的配置，让你轻松开发复杂auto应用。
+
+
+## 特点
+- webpack：开箱即用，混淆
 
 包名 | 版本 |  描述  
 -|-|-
 @auto.pro/cli | ![](https://img.shields.io/npm/v/@auto.pro/cli.svg) | 工具包 |
-@auto.pro/core | ![](https://img.shields.io/npm/v/@auto.pro/core.svg) | 扩展包核心 |
-@auto.pro/action | ![](https://img.shields.io/npm/v/@auto.pro/action.svg) | 操作插件，提供点击、滑动等功能 |
-@auto.pro/search | ![](https://img.shields.io/npm/v/@auto.pro/search.svg) | 图色插件 |
-@auto.pro/stream | ![](https://img.shields.io/npm/v/@auto.pro/stream.svg) | 流程插件 |
+@auto.pro/core | ![](https://img.shields.io/npm/v/@auto.pro/core.svg) | 核心，提供应用和其他插件所需的各种属性、服务 |
+@auto.pro/action | ![](https://img.shields.io/npm/v/@auto.pro/action.svg) | 动作插件，兼容高低安卓版本的点击、滑动等功能，配有贝塞尔函数等 |
+@auto.pro/search | ![](https://img.shields.io/npm/v/@auto.pro/search.svg) | 图色插件，封装了分辨率适配、循环找图、缓存及其他增强型函数 |
+@auto.pro/stream | ![](https://img.shields.io/npm/v/@auto.pro/stream.svg) | 流程插件，提供了RxJS拓展操作符，便于检验和重做失效操作 |
 
 ## 安装工具
 cli预置了一些项目模板，含有webpack、babel、ts等工具，能帮助您快速创建复杂功能的应用。请确保你已经安装了node.js。
@@ -53,7 +54,7 @@ npm i --registry=https://registry.npm.taobao.org
 ## 缺憾
 auto.pro截至目前(v8.0.2)，在运行和保存项目时会扫描所有文件（哪怕已经通过ignore忽略了），```node_modules```又含有大量文件，因此项目的运行和保存会比较耗时。
 
-有任何疑问、意见或建议，欢迎直接联系本人QQ或提issue。(*^_^*)
+有任何疑问、意见或建议，欢迎直接联系本人QQ(258457708)或提issue。(*^_^*)
 
 # LICENSE
 MIT
