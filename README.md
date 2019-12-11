@@ -1,10 +1,6 @@
 # 简介
 开箱即用的auto.pro的npm扩展包，主要有webpack、babel、ts、完整es6、压缩混淆、webview的配置，让你轻松开发复杂auto应用。
 
-
-## 特点
-- webpack：开箱即用，混淆
-
 包名 | 版本 |  描述  
 -|-|-
 @auto.pro/cli | ![](https://img.shields.io/npm/v/@auto.pro/cli.svg) | 工具包 |
@@ -30,7 +26,7 @@ auto-cli create project-name
 - 无  
 预置了webpack的基础项目模板  
 - html  
-预置了webpack、html(webview)的项目模板  
+预置了webpack、html(webview)的项目模板，Pro 7.0.4-0及之前、8.0.3可用。
 - android  
 预置了webpack、auto UI示例，[查看说明](https://github.com/molysama/auto-template-android)。
 
@@ -55,6 +51,9 @@ npm i --registry=https://registry.npm.taobao.org
 auto.pro截至目前(v8.0.2)，在运行和保存项目时会扫描所有文件（哪怕已经通过ignore忽略了），```node_modules```又含有大量文件，因此项目的运行和保存会比较耗时。
 
 有任何疑问、意见或建议，欢迎直接联系本人QQ(258457708)或提issue。(*^_^*)
+
+## 其他细节
+- 关于混淆 默认配置已经够用，如果不希望出现字符串明文，可以将```webpack.config.js```里注释的```unicodeEscapeSequence```设为true来开启。
 
 # LICENSE
 MIT
