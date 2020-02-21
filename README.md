@@ -37,9 +37,10 @@ npm i --registry=https://registry.npm.taobao.org
 ```
 
 安装完毕后，```src```目录就是我们写逻辑代码的地方了，```src```内的文件可直接无缝使用```main.js```里的变量，且可直接加载npm包。  
-由于webpack无法直接使用xml格式，因此无法在src内直接写UI。折衷的办法有两种：
+由于webpack无法直接使用xml格式，因此无法在src内直接写UI。折衷的办法有以下几种：
 - 将UI部分写在```main.js```里。
 - ```src```内通过```files.read```读取外部xml文件。
+- 用\`符号包起xml格式代码，示例可在android模板找到。
 
 ## 运行
 ```src```内是源码，不适合直接发布成项目，应将其编译成```dist/app.js```文件，并让```main.js```引入(模板已经默认引用了这个文件)。  
