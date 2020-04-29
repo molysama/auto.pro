@@ -1,6 +1,6 @@
 {
   "name": "@auto.pro/core",
-  "version": "7.5.0",
+  "version": "7.6.7",
   "description": "core of auto.pro npm module",
   "main": "dist/index.js",
   "types": "src/index.d.ts",
