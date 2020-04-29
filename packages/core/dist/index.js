@@ -149,8 +149,7 @@ function index (param) {
     exports.scale = Math.min(exports.width / baseWidth, exports.height / baseHeight);
     threads && threads.start && threads.start(function () {
         if (needCap) {
-            var _a = exports.screenType === 'w' ? [exports.width, exports.height] : [exports.height, exports.width], w = _a[0], h = _a[1];
-            if (!requestScreenCapture(w, h)) {
+            if (!requestScreenCapture(exports.width, exports.height)) {
                 toast("请求截图失败");
                 exit();
             }

@@ -187,8 +187,7 @@ export default function (param: {
     threads && threads.start && threads.start(function () {
 
         if (needCap) {
-            const [w, h] = screenType === 'w' ? [width, height] : [height, width]
-            if (!requestScreenCapture(w, h)) {
+            if (!requestScreenCapture(width, height)) {
                 toast("请求截图失败");
                 exit();
             }
