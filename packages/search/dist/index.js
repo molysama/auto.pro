@@ -121,7 +121,9 @@ function findImg(param) {
         if (!template) {
             return rxjs.throwError('template path is null');
         }
-        template = images.scale(template, core.scale, core.scale);
+        if (core.scale !== 1) {
+            template = images.scale(template, core.scale, core.scale);
+        }
         var queryOption = __assign({}, option);
         queryOption.threshold = queryOption.threshold || 0.8;
         // 如果确认使用缓存，且缓存里已经设置有region的话，直接赋值

@@ -110,11 +110,13 @@ export function findImg (param: FindImgParam): Observable<any> {
         const TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999
 
         let template = readImg(path)
-            if (!template) {
-                return throwError('template path is null')
-            }
+        if (!template) {
+            return throwError('template path is null')
+        }
 
-        template = images.scale(template, scale, scale)
+        if (scale !== 1) {
+            template = images.scale(template, scale, scale)
+        }
 
         let queryOption = { ...option }
         queryOption.threshold = queryOption.threshold || 0.8
