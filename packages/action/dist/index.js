@@ -58,7 +58,7 @@ function setAction() {
         var points = curve.getLUT(16).map(function (p) { return [Math.floor(p['x']), Math.floor(p['y'])]; });
         gesture.apply(void 0, __spreadArrays([duration], points));
     };
-    exports.click = function (x, y, delay) {
+    exports.click = function (x, y, delay, randomOffsetX, randomOffsetY) {
         if (delay === void 0) { delay = [600, 800]; }
         if (x == null || y == null) {
             return;
@@ -71,9 +71,11 @@ function setAction() {
             press(x, y, random.apply(void 0, delay));
         }
     };
-    exports.clickRes = function (x, y, delay) {
+    exports.clickRes = function (x, y, delay, randomOffsetX, randomOffsetY) {
         if (delay === void 0) { delay = [600, 800]; }
-        exports.click(x * core.scale, y * core.scale, delay);
+        if (randomOffsetX === void 0) { randomOffsetX = 0; }
+        if (randomOffsetY === void 0) { randomOffsetY = 0; }
+        exports.click(x * core.scale, y * core.scale, delay, randomOffsetX, randomOffsetY);
     };
 }
 var Action = {

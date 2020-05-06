@@ -1,6 +1,6 @@
 'use strict';
 
-import { Plugin, isRoot, isPause, scale} from '@auto.pro/core'
+import { Plugin, isRoot, isPause, scale, width, height} from '@auto.pro/core'
 const Bezier = require('bezier-js')
 
 /**
@@ -8,13 +8,15 @@ const Bezier = require('bezier-js')
  * @param {number} x 要点击的横坐标
  * @param {number} y 要点击的纵坐标
  * @param {[number, number]} delay 点击后的等待延迟，默认是[600, 800]，600-800毫秒
+ * @param { number } randomOffsetX 随机x轴偏差，默认0
+ * @param { number } randomOffsetY 随机y轴偏差，默认0
  */
-export let click: (x: number, y: number, delay?: [number, number] | [600, 800]) => any
+export let click: (x: number, y: number, delay?: [number, number] | [600, 800], randomOffsetX?: number, randomOffsetY?: number) => any
 
 /**
  * 根据坐标进行点击，并按设置的标准分辨率进行适配
  */
-export let clickRes: (x: number, y: number, delay?: [number, number] | [600, 800]) => any
+export let clickRes: (x: number, y: number, delay?: [number, number] | [600, 800], randomOffsetX?: number, randomOffsetY?: number) => any
 
 /**
  * 根据给定的两个点进行滑动，root模式直接使用两点滑动，无障碍模式下使用贝塞尔曲线
@@ -59,10 +61,16 @@ function setAction () {
         const points = curve.getLUT(16).map(p => [Math.floor(p['x']), Math.floor(p['y'])])
         gesture(duration, ...points)
     } 
-    click = (x: number, y: number, delay: [number, number] = [600, 800]) => {
+    click = (x: number, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0) => {
         if (x == null || y == null) {
             return
         }
+        let currentX = x + randomOffsetX * Math.random() * (Math.random() > 0.5 ? 1 : -1)
+        let currentY = y + randomOffsetY * Math.random() * (Math.random() > 0.5 ? 1 : -1)
+
+        currentX = Math.max(0, Math.min(currentX, width))
+        currentY = Math.max(0, Math.min(currentY, height))
+
         if (isRoot) {
             Tap(x, y)
             sleep(300)
@@ -70,8 +78,8 @@ function setAction () {
             press(x, y, random(...delay))
         }
     }
-    clickRes = (x: number, y: number, delay: [number, number] = [600, 800]) => {
-        click(x * scale, y * scale, delay)
+    clickRes = (x: number, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0) => {
+        click(x * scale, y * scale, delay, randomOffsetX, randomOffsetY)
     }
 }
 
