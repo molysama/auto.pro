@@ -46,16 +46,16 @@ function setAction() {
         if (x == null || y == null) {
             return;
         }
-        var currentX = x + randomOffsetX * Math.random() * (Math.random() > 0.5 ? 1 : -1);
-        var currentY = y + randomOffsetY * Math.random() * (Math.random() > 0.5 ? 1 : -1);
+        var currentX = x + randomOffsetX * Math.random() * (Math.random() >= 0.5 ? 1 : -1);
+        var currentY = y + randomOffsetY * Math.random() * (Math.random() >= 0.5 ? 1 : -1);
         currentX = Math.max(0, Math.min(currentX, core_1.width));
         currentY = Math.max(0, Math.min(currentY, core_1.height));
         if (core_1.isRoot) {
-            Tap(x, y);
+            Tap(currentX, currentY);
             sleep(300);
         }
         else {
-            press(x, y, random.apply(void 0, delay));
+            press(currentX, currentY, random.apply(void 0, delay));
         }
     };
     exports.clickRes = function (x, y, delay, randomOffsetX, randomOffsetY) {

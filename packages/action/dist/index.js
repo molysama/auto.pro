@@ -60,15 +60,21 @@ function setAction() {
     };
     exports.click = function (x, y, delay, randomOffsetX, randomOffsetY) {
         if (delay === void 0) { delay = [600, 800]; }
+        if (randomOffsetX === void 0) { randomOffsetX = 0; }
+        if (randomOffsetY === void 0) { randomOffsetY = 0; }
         if (x == null || y == null) {
             return;
         }
+        var currentX = x + randomOffsetX * Math.random() * (Math.random() >= 0.5 ? 1 : -1);
+        var currentY = y + randomOffsetY * Math.random() * (Math.random() >= 0.5 ? 1 : -1);
+        currentX = Math.max(0, Math.min(currentX, core.width));
+        currentY = Math.max(0, Math.min(currentY, core.height));
         if (core.isRoot) {
-            Tap(x, y);
+            Tap(currentX, currentY);
             sleep(300);
         }
         else {
-            press(x, y, random.apply(void 0, delay));
+            press(currentX, currentY, random.apply(void 0, delay));
         }
     };
     exports.clickRes = function (x, y, delay, randomOffsetX, randomOffsetY) {

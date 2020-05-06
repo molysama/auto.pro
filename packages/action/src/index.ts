@@ -65,17 +65,17 @@ function setAction () {
         if (x == null || y == null) {
             return
         }
-        let currentX = x + randomOffsetX * Math.random() * (Math.random() > 0.5 ? 1 : -1)
-        let currentY = y + randomOffsetY * Math.random() * (Math.random() > 0.5 ? 1 : -1)
+        let currentX = x + randomOffsetX * Math.random() * (Math.random() >= 0.5 ? 1 : -1)
+        let currentY = y + randomOffsetY * Math.random() * (Math.random() >= 0.5 ? 1 : -1)
 
         currentX = Math.max(0, Math.min(currentX, width))
         currentY = Math.max(0, Math.min(currentY, height))
 
         if (isRoot) {
-            Tap(x, y)
+            Tap(currentX, currentY)
             sleep(300)
         } else {
-            press(x, y, random(...delay))
+            press(currentX, currentY, random(...delay))
         }
     }
     clickRes = (x: number, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0) => {
