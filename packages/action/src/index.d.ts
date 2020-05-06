@@ -7,6 +7,10 @@ import { Plugin } from '@auto.pro/core';
  */
 export declare let click: (x: number, y: number, delay?: [number, number] | [600, 800]) => any;
 /**
+ * 根据坐标进行点击，并按设置的标准分辨率进行适配
+ */
+export declare let clickRes: (x: number, y: number, delay?: [number, number] | [600, 800]) => any;
+/**
  * 根据给定的两个点进行滑动，root模式直接使用两点滑动，无障碍模式下使用贝塞尔曲线
  * @param {[number, number]} startPoint 起点
  * @param {[number, number]} endPoint 终点

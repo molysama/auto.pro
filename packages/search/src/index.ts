@@ -54,7 +54,6 @@ function region (param: any) {
  * @returns {Image | null}
  */
 export function readImg (imgPath: Image | string, mode?: number) {
-    while (isPause) {}
     if (!imgPath) {
         return null
     }

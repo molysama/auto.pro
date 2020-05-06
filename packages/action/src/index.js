@@ -11,7 +11,6 @@ var core_1 = require("@auto.pro/core");
 var Bezier = require('bezier-js');
 function setAction() {
     exports.swipe = function (startPoint, endPoint, duration) {
-        while (core_1.isPause) { }
         var x1 = startPoint[0];
         var y1 = startPoint[1];
         var x2 = endPoint[0];
@@ -42,7 +41,6 @@ function setAction() {
     };
     exports.click = function (x, y, delay) {
         if (delay === void 0) { delay = [600, 800]; }
-        while (core_1.isPause) { }
         if (x == null || y == null) {
             return;
         }
@@ -53,6 +51,10 @@ function setAction() {
         else {
             press(x, y, random.apply(void 0, delay));
         }
+    };
+    exports.clickRes = function (x, y, delay) {
+        if (delay === void 0) { delay = [600, 800]; }
+        exports.click(x * core_1.scale, y * core_1.scale, delay);
     };
 }
 var Action = {

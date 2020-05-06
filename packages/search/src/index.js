@@ -53,7 +53,6 @@ function region(param) {
  * @returns {Image | null}
  */
 function readImg(imgPath, mode) {
-    while (core_1.isPause) { }
     if (!imgPath) {
         return null;
     }

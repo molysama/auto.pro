@@ -71,6 +71,10 @@ function setAction() {
             press(x, y, random.apply(void 0, delay));
         }
     };
+    exports.clickRes = function (x, y, delay) {
+        if (delay === void 0) { delay = [600, 800]; }
+        exports.click(x * core.scale, y * core.scale, delay);
+    };
 }
 var Action = {
     install: function (option) {

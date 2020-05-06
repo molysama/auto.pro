@@ -1,6 +1,6 @@
 'use strict';
 
-import { Plugin, isRoot, isPause} from '@auto.pro/core'
+import { Plugin, isRoot, isPause, scale} from '@auto.pro/core'
 const Bezier = require('bezier-js')
 
 /**
@@ -10,6 +10,11 @@ const Bezier = require('bezier-js')
  * @param {[number, number]} delay 点击后的等待延迟，默认是[600, 800]，600-800毫秒
  */
 export let click: (x: number, y: number, delay?: [number, number] | [600, 800]) => any
+
+/**
+ * 根据坐标进行点击，并按设置的标准分辨率进行适配
+ */
+export let clickRes: (x: number, y: number, delay?: [number, number] | [600, 800]) => any
 
 /**
  * 根据给定的两个点进行滑动，root模式直接使用两点滑动，无障碍模式下使用贝塞尔曲线
@@ -22,7 +27,6 @@ export let swipe: (startPoint: [number, number], endPoint: [number, number], dur
 function setAction () {
 
     swipe = (startPoint: [number, number], endPoint: [number, number], duration?: number) => {
-        while (isPause) {}
         const x1 = startPoint[0]
         const y1 = startPoint[1]
         const x2 = endPoint[0]
@@ -56,7 +60,6 @@ function setAction () {
         gesture(duration, ...points)
     } 
     click = (x: number, y: number, delay: [number, number] = [600, 800]) => {
-        while (isPause) {}
         if (x == null || y == null) {
             return
         }
@@ -66,6 +69,9 @@ function setAction () {
         } else {
             press(x, y, random(...delay))
         }
+    }
+    clickRes = (x: number, y: number, delay: [number, number] = [600, 800]) => {
+        click(x * scale, y * scale, delay)
     }
 }
 
