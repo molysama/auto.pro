@@ -46,10 +46,11 @@ function setAction() {
         if (x == null || y == null) {
             return;
         }
-        var currentX = x + randomOffsetX * Math.random() * (Math.random() >= 0.5 ? 1 : -1);
-        var currentY = y + randomOffsetY * Math.random() * (Math.random() >= 0.5 ? 1 : -1);
-        currentX = Math.max(0, Math.min(currentX, core_1.width));
-        currentY = Math.max(0, Math.min(currentY, core_1.height));
+        var currentX = x + randomOffsetX * Math.random();
+        var currentY = y + randomOffsetY * Math.random();
+        // 保留一位小数
+        currentX = Math.round(Math.max(0, Math.min(currentX, core_1.width)) * 10) / 10;
+        currentY = Math.round(Math.max(0, Math.min(currentY, core_1.height)) * 10) / 10;
         if (core_1.isRoot) {
             Tap(currentX, currentY);
             sleep(300);

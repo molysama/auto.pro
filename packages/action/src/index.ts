@@ -1,6 +1,6 @@
 'use strict';
 
-import { Plugin, isRoot, isPause, scale, width, height} from '@auto.pro/core'
+import { Plugin, isRoot, isPause, scale, width, height } from '@auto.pro/core'
 const Bezier = require('bezier-js')
 
 /**
@@ -26,7 +26,7 @@ export let clickRes: (x: number, y: number, delay?: [number, number] | [600, 800
  */
 export let swipe: (startPoint: [number, number], endPoint: [number, number], duration?: number) => any
 
-function setAction () {
+function setAction() {
 
     swipe = (startPoint: [number, number], endPoint: [number, number], duration?: number) => {
         const x1 = startPoint[0]
@@ -60,16 +60,17 @@ function setAction () {
         const curve = new Bezier(...startPoint, ...endPoint, ...c1, ...c2)
         const points = curve.getLUT(16).map(p => [Math.floor(p['x']), Math.floor(p['y'])])
         gesture(duration, ...points)
-    } 
+    }
     click = (x: number, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0) => {
         if (x == null || y == null) {
             return
         }
-        let currentX = x + randomOffsetX * Math.random() * (Math.random() >= 0.5 ? 1 : -1)
-        let currentY = y + randomOffsetY * Math.random() * (Math.random() >= 0.5 ? 1 : -1)
+        let currentX = x + randomOffsetX * Math.random()
+        let currentY = y + randomOffsetY * Math.random()
 
-        currentX = Math.max(0, Math.min(currentX, width))
-        currentY = Math.max(0, Math.min(currentY, height))
+        // 保留一位小数
+        currentX = Math.round(Math.max(0, Math.min(currentX, width)) * 10) / 10
+        currentY = Math.round(Math.max(0, Math.min(currentY, height)) * 10) / 10
 
         if (isRoot) {
             Tap(currentX, currentY)
@@ -84,7 +85,7 @@ function setAction () {
 }
 
 const Action: Plugin = {
-    install (option={}) {
+    install(option = {}) {
         setAction()
     }
 }
