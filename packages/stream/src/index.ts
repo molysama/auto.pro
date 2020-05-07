@@ -6,13 +6,13 @@ import { map, mergeMap, retry, catchError, mapTo, tap, filter, last } from 'rxjs
 
 export { concat } from 'rxjs'
 
-function isFindImgParam (param: Function | FindImgParam | string | any): param is FindImgParam {
+function isFindImgParam(param: Function | FindImgParam | string | any): param is FindImgParam {
     return getPrototype(<FindImgParam>param) === 'Object' && (<FindImgParam>param).path !== undefined
 }
-function isFunction (param: Function | FindImgParam | string | any): param is Function {
+function isFunction(param: Function | FindImgParam | string | any): param is Function {
     return getPrototype(<Function>param) === 'Function'
 }
-function isString (param: Function | FindImgParam | string | any): param is string {
+function isString(param: Function | FindImgParam | string | any): param is string {
     return getPrototype(<string>param) === 'String'
 }
 
@@ -23,10 +23,12 @@ function isString (param: Function | FindImgParam | string | any): param is stri
  * @param {boolean} passValue 过滤器的值，默认为true
  * @param {number} maxRetryTimes 最大重试次数
  */
-export const add = (param: (Function | FindImgParam | string | any), target?: (Function | FindImgParam | string | any), passValue: boolean = true, maxRetryTimes: number = 1) => (source: Observable<any>) => {
+export const add = (param: (Function | FindImgParam | Observable<any> | string | any), target?: (Function | FindImgParam | Observable<any> | string | any), passValue: boolean = true, maxRetryTimes: number = 1) => (source: Observable<any>) => {
 
     return source.pipe(mergeMap(v => defer(() => {
-        if (isFunction(param)) {
+        if (isObservable(param)) {
+            return param
+        } else if (isFunction(param)) {
             let paramResult = param(v)
             if (isObservable(paramResult)) {
                 return paramResult
@@ -57,7 +59,11 @@ export const add = (param: (Function | FindImgParam | string | any), target?: (F
                     throw `invalid target result: ${v} is not ${passValue}`
                 }
             })
-            if (targetType === 'Function') {
+            if (isObservable(target)) {
+                return target.pipe(
+                    filterValue()
+                )
+            } else if (targetType === 'Function') {
                 const targetResult = (target as Function)(paramValue)
                 if (isObservable(targetResult)) {
                     return targetResult.pipe(
@@ -100,7 +106,7 @@ export const add = (param: (Function | FindImgParam | string | any), target?: (F
 }
 
 export default {
-    install () {
+    install() {
 
     }
 }

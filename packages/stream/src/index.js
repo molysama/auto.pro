@@ -27,7 +27,10 @@ exports.add = function (param, target, passValue, maxRetryTimes) {
     if (maxRetryTimes === void 0) { maxRetryTimes = 1; }
     return function (source) {
         return source.pipe(operators_1.mergeMap(function (v) { return rxjs_1.defer(function () {
-            if (isFunction(param)) {
+            if (rxjs_1.isObservable(param)) {
+                return param;
+            }
+            else if (isFunction(param)) {
                 var paramResult = param(v);
                 if (rxjs_1.isObservable(paramResult)) {
                     return paramResult;
@@ -61,7 +64,10 @@ exports.add = function (param, target, passValue, maxRetryTimes) {
                     throw "invalid target result: " + v + " is not " + passValue;
                 }
             }); };
-            if (targetType === 'Function') {
+            if (rxjs_1.isObservable(target)) {
+                return target.pipe(filterValue());
+            }
+            else if (targetType === 'Function') {
                 var targetResult = target(paramValue);
                 if (rxjs_1.isObservable(targetResult)) {
                     return targetResult.pipe(operators_1.filter(function (v) { return Boolean(v) === Boolean(passValue); }), operators_1.last(), operators_1.map(function (v) { return [paramValue, v]; }), operators_1.catchError(function (v) {

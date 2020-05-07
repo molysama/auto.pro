@@ -61,12 +61,20 @@ describe('stream', function () {
         var $ = rxjs_1.of(1).pipe(index_1.add(function (v) { return 1 + 2; }, function (v) { return v === 3; }, false));
         return expect($.toPromise()).rejects.toMatch('invalid');
     });
-    test('add(fn, ob, true)', function () {
+    test('add(fn, () => ob, true)', function () {
         var $ = rxjs_1.of(1).pipe(index_1.add(function (v) { return 1 + 2; }, function (v) { return rxjs_1.of(v); }, true));
         return expect($.toPromise()).resolves.toEqual([3, 3]);
     });
-    test('add(fn, ob, false)', function () {
+    test('add(fn, () => ob, false)', function () {
         var $ = rxjs_1.of(1).pipe(index_1.add(function (v) { return 1 + 2; }, function (v) { return rxjs_1.of(v); }, false));
+        return expect($.toPromise()).rejects.toMatch('invalid');
+    });
+    test('add(ob, ob)', function () {
+        var $ = rxjs_1.of(1).pipe(index_1.add(rxjs_1.of(false), rxjs_1.of(true)));
+        return expect($.toPromise()).resolves.toEqual([false, true]);
+    });
+    test('add(ob, ob, false)', function () {
+        var $ = rxjs_1.of(1).pipe(index_1.add(rxjs_1.of(false, rxjs_1.of(true)), false));
         return expect($.toPromise()).rejects.toMatch('invalid');
     });
 });
