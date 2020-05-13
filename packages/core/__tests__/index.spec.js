@@ -16,12 +16,4 @@ describe('Core', function () {
     test('isRoot exist', function () {
         expect(index_1.isRoot).not.toBeUndefined();
     });
-    test('pause', function () {
-        index_1.pause();
-        expect(index_1.isPause).toBe(true);
-    });
-    test('resume', function () {
-        index_1.resume();
-        expect(index_1.isPause).toBe(false);
-    });
 });

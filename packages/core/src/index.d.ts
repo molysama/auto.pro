@@ -1,3 +1,4 @@
+import { BehaviorSubject } from "rxjs";
 declare type PluginInstallFunction = (option?: any) => any;
 export declare type Plugin = PluginInstallFunction | {
     install: PluginInstallFunction;
@@ -37,7 +38,8 @@ declare function use(plugin: Plugin, option?: any): number | undefined;
 /**
  * 程序是否处于暂停状态
  */
-declare let isPause: boolean;
+declare const pauseState$: BehaviorSubject<boolean>;
+declare const pauseable: () => (source: any) => any;
 /**
  * 将程序暂停
  */
@@ -62,12 +64,12 @@ export declare function getTime(): any;
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
- * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean'
+ * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean' 'Array'
  * @param obj 要获取原型的对象
  * @returns {string}
  */
-export declare function getPrototype(obj: any): any;
-export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, isPause, pause, resume };
+export declare function getPrototype(obj: any): string;
+export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pauseable, pauseState$ };
 /**
  *
  * @param {number | 1280} param.baseWidth 基准宽度

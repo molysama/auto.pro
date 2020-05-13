@@ -1,5 +1,5 @@
 
-import { width, height, isPause, scale, getPrototype } from '@auto.pro/core'
+import { width, height, scale, getPrototype } from '@auto.pro/core'
 import { findImg, FindImgParam } from '@auto.pro/search'
 import { of, defer, merge, Observable, isObservable, throwError } from 'rxjs'
 import { map, mergeMap, retry, catchError, mapTo, tap, filter, last } from 'rxjs/operators'

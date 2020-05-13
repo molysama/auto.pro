@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
+var rxjs_1 = require("rxjs");
+var operators_1 = require("rxjs/operators");
 /**
  * 设备是否Root
  */
@@ -81,20 +83,26 @@ exports.use = use;
 /**
  * 程序是否处于暂停状态
  */
-var isPause = false;
-exports.isPause = isPause;
+var pauseState$ = new rxjs_1.BehaviorSubject(false);
+exports.pauseState$ = pauseState$;
+var pauseable = function () { return function (source) {
+    return source.pipe(operators_1.concatMap(function (value) {
+        return pauseState$.pipe(operators_1.filter(function (v) { return !v; }), operators_1.take(1), operators_1.map(function () { return value; }));
+    }));
+}; };
+exports.pauseable = pauseable;
 /**
  * 将程序暂停
  */
 function pause() {
-    exports.isPause = isPause = true;
+    pauseState$.next(true);
 }
 exports.pause = pause;
 /**
  * 将程序恢复运行
  */
 function resume() {
-    exports.isPause = isPause = false;
+    pauseState$.next(false);
 }
 exports.resume = resume;
 /**
@@ -124,7 +132,7 @@ exports.getTime = getTime;
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
- * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean'
+ * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean' 'Array'
  * @param obj 要获取原型的对象
  * @returns {string}
  */

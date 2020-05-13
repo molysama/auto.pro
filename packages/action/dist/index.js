@@ -3,6 +3,8 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var core = require('@auto.pro/core');
+var operators = require('rxjs/operators');
+var rxjs = require('rxjs');
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -83,6 +85,28 @@ function setAction() {
         if (randomOffsetX === void 0) { randomOffsetX = 0; }
         if (randomOffsetY === void 0) { randomOffsetY = 0; }
         exports.click(x * core.scale, y * core.scale, delay, randomOffsetX, randomOffsetY);
+    };
+    exports.clickOP = function (x, y, delay, randomOffsetX, randomOffsetY) {
+        if (delay === void 0) { delay = [600, 800]; }
+        if (randomOffsetX === void 0) { randomOffsetX = 0; }
+        if (randomOffsetY === void 0) { randomOffsetY = 0; }
+        return function (source) { return source.pipe(core.pauseable(), operators.map(function (pt) {
+            if (x == null && core.getPrototype(pt) === 'Array') {
+                exports.click.apply(void 0, pt);
+                return pt;
+            }
+            else if (core.getPrototype(x) === 'Array') {
+                exports.click.apply(void 0, x);
+                return [x, y, delay, randomOffsetX, randomOffsetY];
+            }
+            else if (x != null) {
+                exports.click(x, y, delay, randomOffsetX, randomOffsetY);
+                return [x, y, delay, randomOffsetX, randomOffsetY];
+            }
+            else {
+                return rxjs.of(null);
+            }
+        })); };
     };
 }
 var Action = {

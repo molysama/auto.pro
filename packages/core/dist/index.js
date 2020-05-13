@@ -2,6 +2,9 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+var rxjs = require('rxjs');
+var operators = require('rxjs/operators');
+
 var isFunction = function (val) { return typeof val === 'function'; };
 
 /**
@@ -77,18 +80,23 @@ function use(plugin, option) {
 /**
  * 程序是否处于暂停状态
  */
-exports.isPause = false;
+var pauseState$ = new rxjs.BehaviorSubject(false);
+var pauseable = function () { return function (source) {
+    return source.pipe(operators.concatMap(function (value) {
+        return pauseState$.pipe(operators.filter(function (v) { return !v; }), operators.take(1), operators.map(function () { return value; }));
+    }));
+}; };
 /**
  * 将程序暂停
  */
 function pause() {
-    exports.isPause = true;
+    pauseState$.next(true);
 }
 /**
  * 将程序恢复运行
  */
 function resume() {
-    exports.isPause = false;
+    pauseState$.next(false);
 }
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
@@ -114,7 +122,7 @@ function getTime() {
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
- * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean'
+ * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean' 'Array'
  * @param obj 要获取原型的对象
  * @returns {string}
  */
@@ -169,5 +177,7 @@ exports.getPrototype = getPrototype;
 exports.getTime = getTime;
 exports.getWidth = getWidth;
 exports.pause = pause;
+exports.pauseState$ = pauseState$;
+exports.pauseable = pauseable;
 exports.resume = resume;
 exports.use = use;

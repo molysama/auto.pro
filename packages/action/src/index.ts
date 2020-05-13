@@ -1,6 +1,11 @@
 'use strict';
 
-import { Plugin, isRoot, isPause, scale, width, height } from '@auto.pro/core'
+import { Plugin, isRoot, scale, width, height, pauseable, getPrototype } from '@auto.pro/core'
+import { Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import { of } from 'rxjs';
 const Bezier = require('bezier-js')
 
 /**
@@ -17,6 +22,8 @@ export let click: (x: number, y: number, delay?: [number, number] | [600, 800], 
  * 根据坐标进行点击，并按设置的标准分辨率进行适配
  */
 export let clickRes: (x: number, y: number, delay?: [number, number] | [600, 800], randomOffsetX?: number, randomOffsetY?: number) => any
+
+export let clickOP: (x: number, y: number, delay?: [number, number] | [600, 800], randomOffsetX?: number, randomOffsetY?: number) => (source) => Observable<[number, number]>
 
 /**
  * 根据给定的两个点进行滑动，root模式直接使用两点滑动，无障碍模式下使用贝塞尔曲线
@@ -81,6 +88,25 @@ function setAction() {
     }
     clickRes = (x: number, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0) => {
         click(x * scale, y * scale, delay, randomOffsetX, randomOffsetY)
+    }
+    clickOP = (x: number | Array<any>, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0) => {
+        return source => source.pipe(
+            pauseable(),
+            map((pt) => {
+                if (x == null && getPrototype(pt) === 'Array') {
+                    click(...(pt as [number, number, [number, number], number, number]))
+                    return pt
+                } else if (getPrototype(x) === 'Array') {
+                    click(...(x as [number, number, [number, number], number, number]))
+                    return [x, y, delay, randomOffsetX, randomOffsetY]
+                } else if (x != null) {
+                    click(x as number, y, delay, randomOffsetX, randomOffsetY)
+                    return [x, y, delay, randomOffsetX, randomOffsetY]
+                } else {
+                    return of(null)
+                }
+            })
+        )
     }
 }
 

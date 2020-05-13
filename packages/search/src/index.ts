@@ -14,13 +14,14 @@ export type FindImgParam = {
     once?: boolean
     take?: number
     doIfNotFound?: Function
-    image?: Image
+    image?: Image,
+    mode?: 'default' | 'surf'
 }
 
 import { throwError, of, timer, Observable, defer } from 'rxjs'
 import { map, filter, take, tap, exhaustMap, finalize } from 'rxjs/operators'
 
-import {Plugin, cap, scale, width, height, isPause, getPrototype} from '@auto.pro/core'
+import { Plugin, cap, scale, width, height, getPrototype, pauseable } from '@auto.pro/core'
 
 const cache: Record<string, any> = {}
 
@@ -28,7 +29,7 @@ const cache: Record<string, any> = {}
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
  * @param param 
  */
-function region (param: any) {
+function region(param: any) {
     if (param.length == 4) {
         const x = Math.max(0, param[0])
         const y = Math.max(0, param[1])
@@ -53,7 +54,7 @@ function region (param: any) {
  * @param {number | undefined} mode 获取模式，若为0则返回灰度图像
  * @returns {Image | null}
  */
-export function readImg (imgPath: Image | string, mode?: number) {
+export function readImg(imgPath: Image | string, mode?: number) {
     if (!imgPath) {
         return null
     }
@@ -85,9 +86,10 @@ export function readImg (imgPath: Image | string, mode?: number) {
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
+ * @param {'default' | 'surf'} 图片匹配方式，默认为模板匹配
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
-export function findImg (param: FindImgParam): Observable<any> {
+export function findImg(param: FindImgParam): Observable<any> {
     return defer(() => {
         const path = param.path || ''
         const option = param.option || {}
@@ -125,29 +127,30 @@ export function findImg (param: FindImgParam): Observable<any> {
             queryOption.region = cache[cachePath]
         } else if (queryOption.region) {
             let region = queryOption.region
-                if (region[0] < 0) {
-                    region[0] = 0
-                }
-                if (region[1] < 0) {
-                    region[1] = 0
-                }
-                if (region.length == 4) {
-                    let x = region[0] + region[2]
-                    let y = region[1] + region[3]
-                    if (x > width) {
-                        region[2] = width - region[0]
-                    }
-                    if (y > height) {
-                        region[3] = height - region[1]
-                    }
-                }
-                queryOption.region = region
+            if (region[0] < 0) {
+                region[0] = 0
             }
+            if (region[1] < 0) {
+                region[1] = 0
+            }
+            if (region.length == 4) {
+                let x = region[0] + region[2]
+                let y = region[1] + region[3]
+                if (x > width) {
+                    region[2] = width - region[0]
+                }
+                if (y > height) {
+                    region[3] = height - region[1]
+                }
+            }
+            queryOption.region = region
+        }
 
         let isPass = true
         let t: any
         return timer(0, eachTime).pipe(
-            filter(() => !isPause && isPass),
+            filter(() => isPass),
+            pauseable(),
             exhaustMap(() => {
                 let match = images.matchTemplate(image || cap(), template, queryOption).matches
                 if (match.length == 0 && DO_IF_NOT_FOUND) {
@@ -226,7 +229,7 @@ export function findImg (param: FindImgParam): Observable<any> {
             tap(v => {
                 if (v && nextTime && isPass) {
                     isPass = false
-                    t = setTimeout(function(){
+                    t = setTimeout(function () {
                         isPass = true
                     }, nextTime)
                 }
@@ -235,7 +238,7 @@ export function findImg (param: FindImgParam): Observable<any> {
                 if (t) {
                     clearTimeout(t)
                 }
-                    template.recycle()
+                template.recycle()
             })
         )
     })
@@ -250,7 +253,7 @@ export function findImg (param: FindImgParam): Observable<any> {
  * @param {Array} region    查找范围
  * @param {Array<Color>} colors    待查颜色数组 
  */
-export function noAnyColors (image: Image, region: [] = [], colors: [] = []) {
+export function noAnyColors(image: Image, region: [] = [], colors: [] = []) {
     let src = readImg(image)
     let result = !colors.some(c => {
         if (images.findColorEquals(src, c, ...region)) {
@@ -321,8 +324,8 @@ export function hasAnyColors(image: Image | string, colors: [] = [], option = {
 
 
 const SearchPlugin: Plugin = {
-    install (option: any) {
-    } 
+    install(option: any) {
+    }
 }
 
 export default SearchPlugin

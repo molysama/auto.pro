@@ -8,6 +8,8 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@auto.pro/core");
+var operators_1 = require("rxjs/operators");
+var rxjs_1 = require("rxjs");
 var Bezier = require('bezier-js');
 function setAction() {
     exports.swipe = function (startPoint, endPoint, duration) {
@@ -64,6 +66,28 @@ function setAction() {
         if (randomOffsetX === void 0) { randomOffsetX = 0; }
         if (randomOffsetY === void 0) { randomOffsetY = 0; }
         exports.click(x * core_1.scale, y * core_1.scale, delay, randomOffsetX, randomOffsetY);
+    };
+    exports.clickOP = function (x, y, delay, randomOffsetX, randomOffsetY) {
+        if (delay === void 0) { delay = [600, 800]; }
+        if (randomOffsetX === void 0) { randomOffsetX = 0; }
+        if (randomOffsetY === void 0) { randomOffsetY = 0; }
+        return function (source) { return source.pipe(core_1.pauseable(), operators_1.map(function (pt) {
+            if (x == null && core_1.getPrototype(pt) === 'Array') {
+                exports.click.apply(void 0, pt);
+                return pt;
+            }
+            else if (core_1.getPrototype(x) === 'Array') {
+                exports.click.apply(void 0, x);
+                return [x, y, delay, randomOffsetX, randomOffsetY];
+            }
+            else if (x != null) {
+                exports.click(x, y, delay, randomOffsetX, randomOffsetY);
+                return [x, y, delay, randomOffsetX, randomOffsetY];
+            }
+            else {
+                return rxjs_1.of(null);
+            }
+        })); };
     };
 }
 var Action = {

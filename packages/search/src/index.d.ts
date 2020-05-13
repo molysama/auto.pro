@@ -15,6 +15,7 @@ export declare type FindImgParam = {
     take?: number;
     doIfNotFound?: Function;
     image?: Image;
+    mode?: 'default' | 'surf';
 };
 import { Observable } from 'rxjs';
 import { Plugin } from '@auto.pro/core';
@@ -37,6 +38,7 @@ export declare function readImg(imgPath: Image | string, mode?: number): any;
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
+ * @param {'default' | 'surf'} 图片匹配方式，默认为模板匹配
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export declare function findImg(param: FindImgParam): Observable<any>;

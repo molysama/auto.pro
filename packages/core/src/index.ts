@@ -1,4 +1,6 @@
 import { isFunction } from "./utils"
+import { BehaviorSubject } from "rxjs"
+import { concatMap, filter, take, map } from "rxjs/operators"
 
 declare const requestScreenCapture: any
 declare const toast: any
@@ -6,7 +8,7 @@ declare const exit: any
 
 type PluginInstallFunction = (option?: any) => any
 
-export type Plugin = 
+export type Plugin =
     | PluginInstallFunction
     | {
         install: PluginInstallFunction
@@ -57,7 +59,7 @@ let screenType: ('w' | 'h')
  * @param path 要保存的图片路径
  * @returns {Image} 返回得到的截图
  */
-function cap (path?: string) {
+function cap(path?: string) {
     if (!needCap) {
         throw 'cap仅当needCap为真值时可用'
     }
@@ -74,9 +76,9 @@ const plugins: Plugin[] = []
  * @param plugin 要加载的插件
  * @param option 插件需要的参数
  */
-function use (plugin: Plugin, option?: any) {
+function use(plugin: Plugin, option?: any) {
     if (plugins.indexOf(plugin) !== -1) {
-        return 
+        return
     } else if (isFunction(plugin)) {
         plugin(option)
     } else if (isFunction(plugin.install)) {
@@ -84,28 +86,42 @@ function use (plugin: Plugin, option?: any) {
     }
     return plugins.push(plugin)
 }
+
 /**
  * 程序是否处于暂停状态
  */
-let isPause: boolean = false
+const pauseState$ = new BehaviorSubject(false)
+const pauseable = () => (source) => {
+    return source.pipe(
+        concatMap((value) =>
+            pauseState$.pipe(
+                filter((v) => !v),
+                take(1),
+                map(() => value)
+            )
+        )
+    )
+}
 /**
  * 将程序暂停
  */
-function pause () {
-    isPause = true
+function pause() {
+    pauseState$.next(true)
 }
 /**
  * 将程序恢复运行
  */
-function resume () {
-    isPause = false
+function resume() {
+    pauseState$.next(false)
 }
+
+
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
  * @param value 要获取的宽度百分比
  * @returns 当前设备宽度 * value
  */
-function getWidth (value: number = 1) {
+function getWidth(value: number = 1) {
     return Math.floor(width * value)
 }
 /**
@@ -113,7 +129,7 @@ function getWidth (value: number = 1) {
  * @param value 要获取的高度百分比
  * @returns 当前设备高度 * value
  */
-function getHeight (value: number = 1) {
+function getHeight(value: number = 1) {
     return Math.floor(height * value)
 }
 
@@ -125,11 +141,11 @@ export function getTime() {
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
- * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean'
+ * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean' 'Array'
  * @param obj 要获取原型的对象
  * @returns {string}
  */
-export function getPrototype (obj: any) {
+export function getPrototype(obj: any): string {
     const prototype = Object.prototype.toString.call(obj)
     if (prototype == '[object JavaObject]') {
         return obj.getClass().getSimpleName()
@@ -150,9 +166,10 @@ export {
     getHeight,
     screenType,
 
-    isPause,
     pause,
-    resume
+    resume,
+    pauseable,
+    pauseState$
 }
 
 /**

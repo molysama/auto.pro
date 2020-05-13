@@ -81,6 +81,7 @@ exports.readImg = readImg;
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
+ * @param {'default' | 'surf'} 图片匹配方式，默认为模板匹配
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
@@ -134,7 +135,7 @@ function findImg(param) {
         }
         var isPass = true;
         var t;
-        return rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return !core_1.isPause && isPass; }), operators_1.exhaustMap(function () {
+        return rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return isPass; }), core_1.pauseable(), operators_1.exhaustMap(function () {
             var match = images.matchTemplate(image || core_1.cap(), template, queryOption).matches;
             if (match.length == 0 && DO_IF_NOT_FOUND) {
                 DO_IF_NOT_FOUND();
