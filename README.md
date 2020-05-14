@@ -26,7 +26,7 @@ auto-cli create project-name
 - 无  
 预置了webpack的基础项目模板  
 - html  
-预置了webpack、html(webview)的项目模板，Pro 7.0.4-0及之前、8.0.3可用。
+预置了webpack、html(webview)的项目模板，适用的Pro版本：version <= 7.0.4-0，及 version >= 8.0.3。
 - android  
 预置了webpack、auto UI示例，[查看说明](https://github.com/molysama/auto-template-android)。
 
@@ -49,7 +49,7 @@ npm i --registry=https://registry.npm.taobao.org
 - ```npm start``` 实时监听```src```目录内的文件并更新最终编译产物。
 
 ## 缺憾
-auto.pro截至目前(v8.0.2)，在开发阶段运行、保存项目会扫描所有PC文件（哪怕已经通过ignore忽略了），```node_modules```又含有大量文件，因此项目的测试运行和保存会比较耗时。
+auto.pro截至目前(v8.0.3)，在开发阶段运行、保存项目会扫描所有PC文件（哪怕已经通过ignore忽略了），```node_modules```又含有大量文件，因此项目的测试运行和保存会比较耗时。
 
 有任何疑问、意见或建议，欢迎直接联系本人QQ(258457708)或提issue。(*^_^*)
 
