@@ -99,7 +99,7 @@ function readImg(imgPath, mode) {
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
- * @param {'default' | 'surf'} 图片匹配方式，默认为模板匹配
+ * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
@@ -114,6 +114,7 @@ function findImg(param) {
         var nextTime = param.nextTime || 0;
         var DO_IF_NOT_FOUND = param.doIfNotFound;
         var image = param.image || null;
+        var valid = ~~(param.valid || 20);
         // 是否只找一次，无论是否找到都返回结果，默认false
         // 如果提供了截图cap，则只找一次
         var ONCE = image ? true : param.once;
@@ -154,7 +155,13 @@ function findImg(param) {
         var isPass = true;
         var t;
         return rxjs.timer(0, eachTime).pipe(operators.filter(function () { return isPass; }), core.pauseable(), operators.exhaustMap(function () {
-            var match = images.matchTemplate(image || core.cap(), template, queryOption).matches;
+            var src = image || core.cap();
+            var match = images.matchTemplate(src, template, queryOption).matches;
+            if (valid > 0) {
+                match = match.filter(function (pt) {
+                    return images.detectsColor(src, images.pixel(template, 0, 0), pt.x, pt.y, valid);
+                });
+            }
             if (match.length == 0 && DO_IF_NOT_FOUND) {
                 DO_IF_NOT_FOUND();
             }

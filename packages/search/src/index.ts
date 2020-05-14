@@ -15,7 +15,7 @@ export type FindImgParam = {
     take?: number
     doIfNotFound?: Function
     image?: Image,
-    mode?: 'default' | 'surf'
+    valid?: number
 }
 
 import { throwError, of, timer, Observable, defer } from 'rxjs'
@@ -86,7 +86,7 @@ export function readImg(imgPath: Image | string, mode?: number) {
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
- * @param {'default' | 'surf'} 图片匹配方式，默认为模板匹配
+ * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export function findImg(param: FindImgParam): Observable<any> {
@@ -104,6 +104,8 @@ export function findImg(param: FindImgParam): Observable<any> {
         const nextTime = param.nextTime || 0
         const DO_IF_NOT_FOUND = param.doIfNotFound
         const image = param.image || null
+
+        const valid = ~~(param.valid || 20)
 
         // 是否只找一次，无论是否找到都返回结果，默认false
         // 如果提供了截图cap，则只找一次
@@ -152,7 +154,13 @@ export function findImg(param: FindImgParam): Observable<any> {
             filter(() => isPass),
             pauseable(),
             exhaustMap(() => {
-                let match = images.matchTemplate(image || cap(), template, queryOption).matches
+                const src = image || cap()
+                let match = images.matchTemplate(src, template, queryOption).matches
+                if (valid > 0) {
+                    match = match.filter(pt => {
+                        return images.detectsColor(src, images.pixel(template, 0, 0), pt.x, pt.y, valid)
+                    })
+                }
                 if (match.length == 0 && DO_IF_NOT_FOUND) {
                     DO_IF_NOT_FOUND()
                 }
