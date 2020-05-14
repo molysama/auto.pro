@@ -138,16 +138,16 @@ function findImg(param) {
         var t;
         return rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return isPass; }), core_1.pauseable(), operators_1.exhaustMap(function () {
             var src = image || core_1.cap();
-            var match = images.matchTemplate(src, template, queryOption).matches;
+            var matches = images.matchTemplate(src, template, queryOption).matches;
             if (valid > 0) {
-                match = match.filter(function (pt) {
-                    return images.detectsColor(src, images.pixel(template, 0, 0), pt.x, pt.y, valid);
+                matches = matches.filter(function (match) {
+                    return images.detectsColor(src, images.pixel(template, 0, 0), match.point.x, match.point.y, valid);
                 });
             }
-            if (match.length == 0 && DO_IF_NOT_FOUND) {
+            if (matches.length == 0 && DO_IF_NOT_FOUND) {
                 DO_IF_NOT_FOUND();
             }
-            return rxjs_1.of(match);
+            return rxjs_1.of(matches);
         }), operators_1.take(ONCE ? 1 : 99999999), operators_1.filter(function (v) { return ONCE ? true : v.length > 0; }), operators_1.take(TAKE_NUM), operators_1.map(function (res) {
             var result = res.map(function (p) {
                 return [

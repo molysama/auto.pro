@@ -156,16 +156,16 @@ function findImg(param) {
         var t;
         return rxjs.timer(0, eachTime).pipe(operators.filter(function () { return isPass; }), core.pauseable(), operators.exhaustMap(function () {
             var src = image || core.cap();
-            var match = images.matchTemplate(src, template, queryOption).matches;
+            var matches = images.matchTemplate(src, template, queryOption).matches;
             if (valid > 0) {
-                match = match.filter(function (pt) {
-                    return images.detectsColor(src, images.pixel(template, 0, 0), pt.x, pt.y, valid);
+                matches = matches.filter(function (match) {
+                    return images.detectsColor(src, images.pixel(template, 0, 0), match.point.x, match.point.y, valid);
                 });
             }
-            if (match.length == 0 && DO_IF_NOT_FOUND) {
+            if (matches.length == 0 && DO_IF_NOT_FOUND) {
                 DO_IF_NOT_FOUND();
             }
-            return rxjs.of(match);
+            return rxjs.of(matches);
         }), operators.take(ONCE ? 1 : 99999999), operators.filter(function (v) { return ONCE ? true : v.length > 0; }), operators.take(TAKE_NUM), operators.map(function (res) {
             var result = res.map(function (p) {
                 return [

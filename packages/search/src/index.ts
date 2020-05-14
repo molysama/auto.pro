@@ -155,16 +155,16 @@ export function findImg(param: FindImgParam): Observable<any> {
             pauseable(),
             exhaustMap(() => {
                 const src = image || cap()
-                let match = images.matchTemplate(src, template, queryOption).matches
+                let matches = images.matchTemplate(src, template, queryOption).matches
                 if (valid > 0) {
-                    match = match.filter(pt => {
-                        return images.detectsColor(src, images.pixel(template, 0, 0), pt.x, pt.y, valid)
+                    matches = matches.filter(match => {
+                        return images.detectsColor(src, images.pixel(template, 0, 0), match.point.x, match.point.y, valid)
                     })
                 }
-                if (match.length == 0 && DO_IF_NOT_FOUND) {
+                if (matches.length == 0 && DO_IF_NOT_FOUND) {
                     DO_IF_NOT_FOUND()
                 }
-                return of(match)
+                return of(matches)
             }),
             take(ONCE ? 1 : 99999999),
             filter(v => ONCE ? true : v.length > 0),
