@@ -1,6 +1,6 @@
 {
   "name": "@auto.pro/action",
-  "version": "8.0.3",
+  "version": "8.0.4",
   "description": "module for control app",
   "author": "molysama <molysama.i@gmail.com>",
   "publishConfig": {
@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
   },
-  "gitHead": "4957d581230f126c552ba4465a0532e5ebecb19b",
+  "gitHead": "9911016873152d8fbd930899e3b575d559be9e43",
   "dependencies": {
     "bezier-js": "^2.4.4",
     "rxjs": "^6.5.5"
