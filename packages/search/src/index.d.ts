@@ -16,6 +16,7 @@ export declare type FindImgParam = {
     doIfNotFound?: Function;
     image?: Image;
     valid?: number;
+    isPauseable?: boolean;
 };
 import { Observable } from 'rxjs';
 import { Plugin } from '@auto.pro/core';
@@ -39,6 +40,7 @@ export declare function readImg(imgPath: Image | string, mode?: number): any;
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差
+ * @param {boolean} isPauseable 是否受暂停状态影响，默认为true，受影响
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export declare function findImg(param: FindImgParam): Observable<any>;

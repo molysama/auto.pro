@@ -86,11 +86,12 @@ function setAction() {
         if (randomOffsetY === void 0) { randomOffsetY = 0; }
         exports.click(x * core.scale, y * core.scale, delay, randomOffsetX, randomOffsetY);
     };
-    exports.clickOP = function (x, y, delay, randomOffsetX, randomOffsetY) {
+    exports.clickOP = function (x, y, delay, randomOffsetX, randomOffsetY, isPauseable) {
         if (delay === void 0) { delay = [600, 800]; }
         if (randomOffsetX === void 0) { randomOffsetX = 0; }
         if (randomOffsetY === void 0) { randomOffsetY = 0; }
-        return function (source) { return source.pipe(core.pauseable(), operators.map(function (pt) {
+        if (isPauseable === void 0) { isPauseable = true; }
+        return function (source) { return source.pipe(core.pauseable(isPauseable), operators.map(function (pt) {
             if (x == null && core.getPrototype(pt) === 'Array') {
                 exports.click.apply(void 0, pt);
                 return pt;

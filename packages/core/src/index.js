@@ -85,11 +85,23 @@ exports.use = use;
  */
 var pauseState$ = new rxjs_1.BehaviorSubject(false);
 exports.pauseState$ = pauseState$;
-var pauseable = function () { return function (source) {
-    return source.pipe(operators_1.concatMap(function (value) {
-        return pauseState$.pipe(operators_1.filter(function (v) { return !v; }), operators_1.take(1), operators_1.map(function () { return value; }));
-    }));
-}; };
+/**
+ * 操作符，使流可暂停，可设isPauseable为false来强制关闭暂停效果
+ * @param isPauseable
+ */
+var pauseable = function (isPauseable) {
+    if (isPauseable === void 0) { isPauseable = true; }
+    return function (source) {
+        if (isPauseable) {
+            return source.pipe(operators_1.concatMap(function (value) {
+                return pauseState$.pipe(operators_1.filter(function (v) { return !v; }), operators_1.take(1), operators_1.map(function () { return value; }));
+            }));
+        }
+        else {
+            return source;
+        }
+    };
+};
 exports.pauseable = pauseable;
 /**
  * 将程序暂停

@@ -91,16 +91,25 @@ function use(plugin: Plugin, option?: any) {
  * 程序是否处于暂停状态
  */
 const pauseState$ = new BehaviorSubject(false)
-const pauseable = () => (source) => {
-    return source.pipe(
-        concatMap((value) =>
-            pauseState$.pipe(
-                filter((v) => !v),
-                take(1),
-                map(() => value)
+
+/**
+ * 操作符，使流可暂停，可设isPauseable为false来强制关闭暂停效果
+ * @param isPauseable
+ */
+const pauseable = (isPauseable = true) => (source) => {
+    if (isPauseable) {
+        return source.pipe(
+            concatMap((value) =>
+                pauseState$.pipe(
+                    filter((v) => !v),
+                    take(1),
+                    map(() => value)
+                )
             )
         )
-    )
+    } else {
+        return source
+    }
 }
 /**
  * 将程序暂停
