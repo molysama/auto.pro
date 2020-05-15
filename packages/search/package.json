@@ -29,7 +29,7 @@
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
   },
-  "gitHead": "b4f5ed863867923e081fe8b6da3b4fd42f0130dc",
+  "gitHead": "9911016873152d8fbd930899e3b575d559be9e43",
   "dependencies": {
     "rxjs": "^6.5.3"
   },
