@@ -103,7 +103,7 @@ function setAction() {
                     click(x as number, y, delay, randomOffsetX, randomOffsetY)
                     return [x, y, delay, randomOffsetX, randomOffsetY]
                 } else {
-                    return of(null)
+                    return null
                 }
             })
         )

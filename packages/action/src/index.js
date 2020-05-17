@@ -9,7 +9,6 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@auto.pro/core");
 var operators_1 = require("rxjs/operators");
-var rxjs_1 = require("rxjs");
 var Bezier = require('bezier-js');
 function setAction() {
     exports.swipe = function (startPoint, endPoint, duration) {
@@ -86,7 +85,7 @@ function setAction() {
                 return [x, y, delay, randomOffsetX, randomOffsetY];
             }
             else {
-                return rxjs_1.of(null);
+                return null;
             }
         })); };
     };

@@ -4,7 +4,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var core = require('@auto.pro/core');
 var operators = require('rxjs/operators');
-var rxjs = require('rxjs');
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -105,7 +104,7 @@ function setAction() {
                 return [x, y, delay, randomOffsetX, randomOffsetY];
             }
             else {
-                return rxjs.of(null);
+                return null;
             }
         })); };
     };
