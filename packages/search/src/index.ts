@@ -107,7 +107,7 @@ export function findImg(param: FindImgParam): Observable<any> {
         const DO_IF_NOT_FOUND = param.doIfNotFound
         const image = param.image || null
 
-        const valid = ~~(param.valid || 20)
+        const valid = param.valid == null ? 20 : ~~param.valid
         const isPauseable = param.isPauseable === false ? false : true
 
         // 是否只找一次，无论是否找到都返回结果，默认false

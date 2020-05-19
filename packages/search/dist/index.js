@@ -115,7 +115,7 @@ function findImg(param) {
         var nextTime = param.nextTime || 0;
         var DO_IF_NOT_FOUND = param.doIfNotFound;
         var image = param.image || null;
-        var valid = ~~(param.valid || 20);
+        var valid = param.valid == null ? 20 : ~~param.valid;
         var isPauseable = param.isPauseable === false ? false : true;
         // 是否只找一次，无论是否找到都返回结果，默认false
         // 如果提供了截图cap，则只找一次
