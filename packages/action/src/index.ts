@@ -91,7 +91,7 @@ function setAction() {
     }
     clickOP = (x: number | Array<any>, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0, isPauseable = true) => {
         return source => source.pipe(
-            pauseable(isPauseable),
+            pauseable(isPauseable, false),
             map((pt) => {
                 if (x == null && getPrototype(pt) === 'Array') {
                     click(...(pt as [number, number, [number, number], number, number]))

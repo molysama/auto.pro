@@ -156,7 +156,7 @@ function findImg(param) {
         }
         var isPass = true;
         var t;
-        return rxjs.timer(0, eachTime).pipe(operators.filter(function () { return isPass; }), core.pauseable(isPauseable), operators.exhaustMap(function () {
+        return rxjs.timer(0, eachTime).pipe(operators.filter(function () { return isPass; }), core.pauseable(isPauseable, false), operators.exhaustMap(function () {
             var src = image || core.cap();
             var matches = images.matchTemplate(src, template, queryOption).matches;
             if (valid > 0) {

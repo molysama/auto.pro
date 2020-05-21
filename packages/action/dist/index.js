@@ -90,7 +90,7 @@ function setAction() {
         if (randomOffsetX === void 0) { randomOffsetX = 0; }
         if (randomOffsetY === void 0) { randomOffsetY = 0; }
         if (isPauseable === void 0) { isPauseable = true; }
-        return function (source) { return source.pipe(core.pauseable(isPauseable), operators.map(function (pt) {
+        return function (source) { return source.pipe(core.pauseable(isPauseable, false), operators.map(function (pt) {
             if (x == null && core.getPrototype(pt) === 'Array') {
                 exports.click.apply(void 0, pt);
                 return pt;

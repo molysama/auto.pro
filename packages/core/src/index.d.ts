@@ -41,9 +41,10 @@ declare function use(plugin: Plugin, option?: any): number | undefined;
 declare const pauseState$: BehaviorSubject<boolean>;
 /**
  * 操作符，使流可暂停，可设isPauseable为false来强制关闭暂停效果
- * @param isPauseable
+ * @param {boolean} isPauseable 是否强制取消暂停效果
+ * @param {boolean} wait wait为true时将阻塞并存储所有输入，为false时忽略暂停期间的输入
  */
-declare const pauseable: (isPauseable?: boolean) => (source: any) => any;
+declare const pauseable: (isPauseable?: boolean, wait?: boolean) => (source: any) => any;
 /**
  * 将程序暂停
  */

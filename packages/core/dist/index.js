@@ -83,15 +83,22 @@ function use(plugin, option) {
 var pauseState$ = new rxjs.BehaviorSubject(false);
 /**
  * 操作符，使流可暂停，可设isPauseable为false来强制关闭暂停效果
- * @param isPauseable
+ * @param {boolean} isPauseable 是否强制取消暂停效果
+ * @param {boolean} wait wait为true时将阻塞并存储所有输入，为false时忽略暂停期间的输入
  */
-var pauseable = function (isPauseable) {
+var pauseable = function (isPauseable, wait) {
     if (isPauseable === void 0) { isPauseable = true; }
+    if (wait === void 0) { wait = true; }
     return function (source) {
         if (isPauseable) {
-            return source.pipe(operators.concatMap(function (value) {
-                return pauseState$.pipe(operators.filter(function (v) { return !v; }), operators.take(1), operators.map(function () { return value; }));
-            }));
+            if (wait) {
+                return source.pipe(operators.concatMap(function (value) {
+                    return pauseState$.pipe(operators.filter(function (v) { return !v; }), operators.take(1), operators.map(function () { return value; }));
+                }));
+            }
+            else {
+                return source.pipe(operators.exhaustMap(function (value) { return pauseState$.pipe(operators.filter(function (v) { return !v; }), operators.take(1), operators.map(function () { return value; })); }));
+            }
         }
         else {
             return source;

@@ -155,7 +155,7 @@ export function findImg(param: FindImgParam): Observable<any> {
         let t: any
         return timer(0, eachTime).pipe(
             filter(() => isPass),
-            pauseable(isPauseable),
+            pauseable(isPauseable, false),
             exhaustMap(() => {
                 const src = image || cap()
                 let matches = images.matchTemplate(src, template, queryOption).matches

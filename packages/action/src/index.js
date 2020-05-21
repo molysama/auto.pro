@@ -71,7 +71,7 @@ function setAction() {
         if (randomOffsetX === void 0) { randomOffsetX = 0; }
         if (randomOffsetY === void 0) { randomOffsetY = 0; }
         if (isPauseable === void 0) { isPauseable = true; }
-        return function (source) { return source.pipe(core_1.pauseable(isPauseable), operators_1.map(function (pt) {
+        return function (source) { return source.pipe(core_1.pauseable(isPauseable, false), operators_1.map(function (pt) {
             if (x == null && core_1.getPrototype(pt) === 'Array') {
                 exports.click.apply(void 0, pt);
                 return pt;

@@ -138,7 +138,7 @@ function findImg(param) {
         }
         var isPass = true;
         var t;
-        return rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return isPass; }), core_1.pauseable(isPauseable), operators_1.exhaustMap(function () {
+        return rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return isPass; }), core_1.pauseable(isPauseable, false), operators_1.exhaustMap(function () {
             var src = image || core_1.cap();
             var matches = images.matchTemplate(src, template, queryOption).matches;
             if (valid > 0) {

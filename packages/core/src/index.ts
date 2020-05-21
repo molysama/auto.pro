@@ -1,6 +1,6 @@
 import { isFunction } from "./utils"
 import { BehaviorSubject } from "rxjs"
-import { concatMap, filter, take, map } from "rxjs/operators"
+import { concatMap, filter, take, map, exhaustMap } from "rxjs/operators"
 
 declare const requestScreenCapture: any
 declare const toast: any
@@ -94,19 +94,31 @@ const pauseState$ = new BehaviorSubject(false)
 
 /**
  * 操作符，使流可暂停，可设isPauseable为false来强制关闭暂停效果
- * @param isPauseable
+ * @param {boolean} isPauseable 是否强制取消暂停效果
+ * @param {boolean} wait wait为true时将阻塞并存储所有输入，为false时忽略暂停期间的输入
  */
-const pauseable = (isPauseable = true) => (source) => {
+const pauseable = (isPauseable = true, wait = true) => (source) => {
     if (isPauseable) {
-        return source.pipe(
-            concatMap((value) =>
-                pauseState$.pipe(
-                    filter((v) => !v),
-                    take(1),
-                    map(() => value)
+
+        if (wait) {
+            return source.pipe(
+                concatMap((value) =>
+                    pauseState$.pipe(
+                        filter((v) => !v),
+                        take(1),
+                        map(() => value)
+                    )
                 )
             )
-        )
+        } else {
+            return source.pipe(
+                exhaustMap(value => pauseState$.pipe(
+                    filter(v => !v),
+                    take(1),
+                    map(() => value)
+                ))
+            )
+        }
     } else {
         return source
     }
