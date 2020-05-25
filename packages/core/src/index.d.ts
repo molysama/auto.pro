@@ -1,4 +1,4 @@
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Observable } from 'rxjs';
 declare type PluginInstallFunction = (option?: any) => any;
 export declare type Plugin = PluginInstallFunction | {
     install: PluginInstallFunction;
@@ -54,6 +54,28 @@ declare function pause(): void;
  */
 declare function resume(): void;
 /**
+ * 可暂停的interval
+ * @param t 时间间隔
+ */
+declare function pauseableInterval(t?: number): Observable<number>;
+/**
+ * 可暂停的timer
+ * @param t 首次延迟
+ * @param each 之后的每次输出间隔
+ */
+declare function pauseableTimer(t: number, each?: number): Observable<number>;
+/**
+ * 可暂停的TimeoutWith
+ * @param t
+ * @param ob
+ */
+declare function pauseableTimeoutWith(t: number, ob: Observable<any>): (source: any) => Observable<any>;
+/**
+ * 可暂停的timeout
+ * @param t
+ */
+declare function pauseableTimeout(t: number): (source: any) => Observable<any>;
+/**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
  * @param value 要获取的宽度百分比
  * @returns 当前设备宽度 * value
@@ -74,7 +96,7 @@ export declare function getTime(): any;
  * @returns {string}
  */
 export declare function getPrototype(obj: any): string;
-export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pauseable, pauseState$ };
+export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pauseable, pauseState$, pauseableInterval, pauseableTimer, pauseableTimeout, pauseableTimeoutWith };
 /**
  *
  * @param {number | 1280} param.baseWidth 基准宽度

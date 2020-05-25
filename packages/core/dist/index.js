@@ -117,6 +117,51 @@ function pause() {
 function resume() {
     pauseState$.next(false);
 }
+var timerIntervalBase = 20;
+/**
+ * 可暂停的interval
+ * @param t 时间间隔
+ */
+function pauseableInterval(t) {
+    if (t === void 0) { t = 0; }
+    if (t === 0) {
+        return rxjs.generate(0, function (x) { return true; }, function (x) { return x + 1; });
+    }
+    return rxjs.interval(timerIntervalBase).pipe(pauseable(true, false), operators.scan(function (acc) { return acc + timerIntervalBase; }, timerIntervalBase * -1), operators.filter(function (v) { return v % t === 0; }), operators.scan(function (acc) { return acc + 1; }, -1));
+}
+/**
+ * 可暂停的timer
+ * @param t 首次延迟
+ * @param each 之后的每次输出间隔
+ */
+function pauseableTimer(t, each) {
+    return pauseableInterval(t).pipe(operators.skip(1), operators.take(1), operators.switchMap(function (v) {
+        if (each) {
+            return pauseableInterval(each);
+        }
+        else {
+            return rxjs.of(v);
+        }
+    }), operators.scan(function (acc) { return acc + 1; }, -1));
+}
+/**
+ * 可暂停的TimeoutWith
+ * @param t
+ * @param ob
+ */
+function pauseableTimeoutWith(t, ob) {
+    return function (source) {
+        var source$ = source.pipe(operators.share());
+        return rxjs.merge(source$, pauseableInterval(timerIntervalBase).pipe(operators.scan(function (acc) { return acc + timerIntervalBase; }, timerIntervalBase * -1), operators.takeUntil(source$), operators.repeat(), operators.takeUntil(source$.pipe(operators.toArray())), operators.filter(function (v) { return v >= t; }), operators.take(1), operators.switchMap(function () { return ob; })));
+    };
+}
+/**
+ * 可暂停的timeout
+ * @param t
+ */
+function pauseableTimeout(t) {
+    return pauseableTimeoutWith(t, rxjs.throwError('pauseable timeout occurred'));
+}
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
  * @param value 要获取的宽度百分比
@@ -198,5 +243,9 @@ exports.getWidth = getWidth;
 exports.pause = pause;
 exports.pauseState$ = pauseState$;
 exports.pauseable = pauseable;
+exports.pauseableInterval = pauseableInterval;
+exports.pauseableTimeout = pauseableTimeout;
+exports.pauseableTimeoutWith = pauseableTimeoutWith;
+exports.pauseableTimer = pauseableTimer;
 exports.resume = resume;
 exports.use = use;

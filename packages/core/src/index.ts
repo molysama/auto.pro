@@ -1,6 +1,7 @@
 import { isFunction } from "./utils"
-import { BehaviorSubject } from "rxjs"
-import { concatMap, filter, take, map, exhaustMap } from "rxjs/operators"
+import { concat, merge, from, BehaviorSubject, interval, timer, throwError, of, Observable, generate } from 'rxjs'
+import { toArray, switchMap, map, filter, concatMap, take, exhaustMap, skip, share, retryWhen, takeUntil, scan, takeWhile, catchError, repeat } from 'rxjs/operators'
+
 
 declare const requestScreenCapture: any
 declare const toast: any
@@ -136,6 +137,77 @@ function resume() {
     pauseState$.next(false)
 }
 
+let timerIntervalBase = 20
+
+/**
+ * 可暂停的interval
+ * @param t 时间间隔
+ */
+function pauseableInterval(t: number = 0) {
+    if (t === 0) {
+        return generate(0, x => true, x => x + 1)
+    }
+    return interval(timerIntervalBase).pipe(
+        pauseable(true, false),
+        scan(acc => acc + timerIntervalBase, timerIntervalBase * -1),
+        filter(v => v % t === 0),
+        scan(acc => acc + 1, -1)
+    )
+}
+
+/**
+ * 可暂停的timer
+ * @param t 首次延迟
+ * @param each 之后的每次输出间隔
+ */
+function pauseableTimer(t: number, each?: number) {
+    return pauseableInterval(t).pipe(
+        skip(1),
+        take(1),
+        switchMap(v => {
+            if (each) {
+                return pauseableInterval(each)
+            } else {
+                return of(v)
+            }
+        }),
+        scan(acc => acc + 1, -1)
+    )
+}
+
+/**
+ * 可暂停的TimeoutWith
+ * @param t 
+ * @param ob 
+ */
+function pauseableTimeoutWith(t: number, ob: Observable<any>) {
+    return (source) => {
+        const source$ = source.pipe(share())
+
+        return merge(
+            source$,
+            pauseableInterval(timerIntervalBase).pipe(
+                scan(acc => acc + timerIntervalBase, timerIntervalBase * -1),
+                takeUntil(source$),
+                repeat(),
+                takeUntil(source$.pipe(toArray())),
+                filter(v => v >= t),
+                take(1),
+                switchMap(() => ob)
+            )
+        )
+    }
+}
+
+/**
+ * 可暂停的timeout
+ * @param t 
+ */
+function pauseableTimeout(t: number) {
+    return pauseableTimeoutWith(t, throwError('pauseable timeout occurred'))
+}
+
+
 
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
@@ -190,7 +262,11 @@ export {
     pause,
     resume,
     pauseable,
-    pauseState$
+    pauseState$,
+    pauseableInterval,
+    pauseableTimer,
+    pauseableTimeout,
+    pauseableTimeoutWith
 }
 
 /**

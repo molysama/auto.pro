@@ -124,6 +124,55 @@ function resume() {
     pauseState$.next(false);
 }
 exports.resume = resume;
+var timerIntervalBase = 20;
+/**
+ * 可暂停的interval
+ * @param t 时间间隔
+ */
+function pauseableInterval(t) {
+    if (t === void 0) { t = 0; }
+    if (t === 0) {
+        return rxjs_1.generate(0, function (x) { return true; }, function (x) { return x + 1; });
+    }
+    return rxjs_1.interval(timerIntervalBase).pipe(pauseable(true, false), operators_1.scan(function (acc) { return acc + timerIntervalBase; }, timerIntervalBase * -1), operators_1.filter(function (v) { return v % t === 0; }), operators_1.scan(function (acc) { return acc + 1; }, -1));
+}
+exports.pauseableInterval = pauseableInterval;
+/**
+ * 可暂停的timer
+ * @param t 首次延迟
+ * @param each 之后的每次输出间隔
+ */
+function pauseableTimer(t, each) {
+    return pauseableInterval(t).pipe(operators_1.skip(1), operators_1.take(1), operators_1.switchMap(function (v) {
+        if (each) {
+            return pauseableInterval(each);
+        }
+        else {
+            return rxjs_1.of(v);
+        }
+    }), operators_1.scan(function (acc) { return acc + 1; }, -1));
+}
+exports.pauseableTimer = pauseableTimer;
+/**
+ * 可暂停的TimeoutWith
+ * @param t
+ * @param ob
+ */
+function pauseableTimeoutWith(t, ob) {
+    return function (source) {
+        var source$ = source.pipe(operators_1.share());
+        return rxjs_1.merge(source$, pauseableInterval(timerIntervalBase).pipe(operators_1.scan(function (acc) { return acc + timerIntervalBase; }, timerIntervalBase * -1), operators_1.takeUntil(source$), operators_1.repeat(), operators_1.takeUntil(source$.pipe(operators_1.toArray())), operators_1.filter(function (v) { return v >= t; }), operators_1.take(1), operators_1.switchMap(function () { return ob; })));
+    };
+}
+exports.pauseableTimeoutWith = pauseableTimeoutWith;
+/**
+ * 可暂停的timeout
+ * @param t
+ */
+function pauseableTimeout(t) {
+    return pauseableTimeoutWith(t, rxjs_1.throwError('pauseable timeout occurred'));
+}
+exports.pauseableTimeout = pauseableTimeout;
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
  * @param value 要获取的宽度百分比
