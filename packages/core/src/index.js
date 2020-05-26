@@ -184,7 +184,14 @@ function pausableTimeoutWith(t, ob) {
         }), operators_1.takeUntil(source$.pipe(operators_1.tap(function () {
             begin = Date.now();
             total = t;
-        }))), operators_1.repeat(), operators_1.takeUntil(source$.pipe(operators_1.toArray())), operators_1.switchMap(function () { return ob; }), operators_1.take(1)));
+        }))), operators_1.repeat(), operators_1.takeUntil(source$.pipe(operators_1.toArray())), operators_1.switchMap(function () { return rxjs_1.throwError(new rxjs_1.TimeoutError()); }))).pipe(operators_1.catchError(function (err) {
+            if (err instanceof rxjs_1.TimeoutError) {
+                return ob;
+            }
+            else {
+                return err;
+            }
+        }));
     };
 }
 exports.pausableTimeoutWith = pausableTimeoutWith;
@@ -193,7 +200,7 @@ exports.pausableTimeoutWith = pausableTimeoutWith;
  * @param t
  */
 function pausableTimeout(t) {
-    return pausableTimeoutWith(t, rxjs_1.throwError('pausable timeout occurred'));
+    return pausableTimeoutWith(t, rxjs_1.throwError(new rxjs_1.TimeoutError()));
 }
 exports.pausableTimeout = pausableTimeout;
 /**

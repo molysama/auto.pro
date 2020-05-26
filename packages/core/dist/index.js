@@ -175,7 +175,14 @@ function pausableTimeoutWith(t, ob) {
         }), operators.takeUntil(source$.pipe(operators.tap(function () {
             begin = Date.now();
             total = t;
-        }))), operators.repeat(), operators.takeUntil(source$.pipe(operators.toArray())), operators.switchMap(function () { return ob; }), operators.take(1)));
+        }))), operators.repeat(), operators.takeUntil(source$.pipe(operators.toArray())), operators.switchMap(function () { return rxjs.throwError(new rxjs.TimeoutError()); }))).pipe(operators.catchError(function (err) {
+            if (err instanceof rxjs.TimeoutError) {
+                return ob;
+            }
+            else {
+                return err;
+            }
+        }));
     };
 }
 /**
@@ -183,7 +190,7 @@ function pausableTimeoutWith(t, ob) {
  * @param t
  */
 function pausableTimeout(t) {
-    return pausableTimeoutWith(t, rxjs.throwError('pausable timeout occurred'));
+    return pausableTimeoutWith(t, rxjs.throwError(new rxjs.TimeoutError()));
 }
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整

@@ -1,5 +1,5 @@
 import { isFunction } from "./utils"
-import { concat, merge, from, BehaviorSubject, interval, timer, throwError, of, Observable, generate, combineLatest } from 'rxjs'
+import { concat, merge, from, BehaviorSubject, interval, timer, throwError, of, Observable, generate, combineLatest, TimeoutError } from 'rxjs'
 import { toArray, switchMap, map, filter, concatMap, take, exhaustMap, skip, share, retryWhen, takeUntil, scan, takeWhile, catchError, repeat, tap, distinctUntilChanged, delayWhen } from 'rxjs/operators'
 
 
@@ -215,9 +215,16 @@ function pausableTimeoutWith(t: number, ob: Observable<any>) {
                     ),
                     repeat(),
                     takeUntil(source$.pipe(toArray())),
-                    switchMap(() => ob),
-                    take(1)
+                    switchMap(() => throwError(new TimeoutError())),
                 )
+        ).pipe(
+            catchError(err => {
+                if (err instanceof TimeoutError) {
+                    return ob
+                } else {
+                    return err
+                }
+            })
         )
     }
 }
@@ -228,7 +235,7 @@ function pausableTimeoutWith(t: number, ob: Observable<any>) {
  * @param t 
  */
 function pausableTimeout(t: number) {
-    return pausableTimeoutWith(t, throwError('pausable timeout occurred'))
+    return pausableTimeoutWith(t, throwError(new TimeoutError()))
 }
 
 
