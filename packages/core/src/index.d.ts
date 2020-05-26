@@ -69,12 +69,12 @@ declare function pausableTimer(t: number, each?: number): Observable<unknown>;
  * @param t
  * @param ob
  */
-declare function pausableTimeoutWith(t: number, ob: Observable<any>): (source: any) => Observable<unknown>;
+declare function pausableTimeoutWith(t: number, ob: Observable<any>): (source: any) => Observable<any>;
 /**
  * 可暂停的timeout
  * @param t
  */
-declare function pausableTimeout(t: number): (source: any) => Observable<unknown>;
+declare function pausableTimeout(t: number): (source: any) => Observable<any>;
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
  * @param value 要获取的宽度百分比

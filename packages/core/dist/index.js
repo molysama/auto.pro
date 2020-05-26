@@ -175,7 +175,7 @@ function pausableTimeoutWith(t, ob) {
         }), operators.takeUntil(source$.pipe(operators.tap(function () {
             begin = Date.now();
             total = t;
-        }))), operators.repeat(), operators.takeUntil(source$.pipe(operators.toArray())), operators.switchMap(function () { return rxjs.throwError("timeout"); }), operators.take(1)));
+        }))), operators.repeat(), operators.takeUntil(source$.pipe(operators.toArray())), operators.switchMap(function () { return ob; }), operators.take(1)));
     };
 }
 /**

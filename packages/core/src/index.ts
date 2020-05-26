@@ -215,7 +215,7 @@ function pausableTimeoutWith(t: number, ob: Observable<any>) {
                     ),
                     repeat(),
                     takeUntil(source$.pipe(toArray())),
-                    switchMap(() => throwError("timeout")),
+                    switchMap(() => ob),
                     take(1)
                 )
         )
