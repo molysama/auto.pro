@@ -40,11 +40,11 @@ declare function use(plugin: Plugin, option?: any): number | undefined;
  */
 declare const pauseState$: BehaviorSubject<boolean>;
 /**
- * 操作符，使流可暂停，可设isPauseable为false来强制关闭暂停效果
- * @param {boolean} isPauseable 是否强制取消暂停效果
+ * 操作符，使流可暂停，可设ispausable为false来强制关闭暂停效果
+ * @param {boolean} isPausable 是否强制取消暂停效果
  * @param {boolean} wait wait为true时将阻塞并存储所有输入，为false时忽略暂停期间的输入
  */
-declare const pauseable: (isPauseable?: boolean, wait?: boolean) => (source: any) => any;
+declare const pausable: (isPausable?: boolean, wait?: boolean) => (source: any) => any;
 /**
  * 将程序暂停
  */
@@ -57,24 +57,24 @@ declare function resume(): void;
  * 可暂停的interval
  * @param t 时间间隔
  */
-declare function pauseableInterval(t?: number): Observable<number>;
+declare function pausableInterval(t?: number): Observable<unknown>;
 /**
  * 可暂停的timer
  * @param t 首次延迟
  * @param each 之后的每次输出间隔
  */
-declare function pauseableTimer(t: number, each?: number): Observable<number>;
+declare function pausableTimer(t: number, each?: number): Observable<unknown>;
 /**
  * 可暂停的TimeoutWith
  * @param t
  * @param ob
  */
-declare function pauseableTimeoutWith(t: number, ob: Observable<any>): (source: any) => Observable<any>;
+declare function pausableTimeoutWith(t: number, ob: Observable<any>): (source: any) => Observable<unknown>;
 /**
  * 可暂停的timeout
  * @param t
  */
-declare function pauseableTimeout(t: number): (source: any) => Observable<any>;
+declare function pausableTimeout(t: number): (source: any) => Observable<unknown>;
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
  * @param value 要获取的宽度百分比
@@ -96,7 +96,7 @@ export declare function getTime(): any;
  * @returns {string}
  */
 export declare function getPrototype(obj: any): string;
-export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pauseable, pauseState$, pauseableInterval, pauseableTimer, pauseableTimeout, pauseableTimeoutWith };
+export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
 /**
  *
  * @param {number | 1280} param.baseWidth 基准宽度

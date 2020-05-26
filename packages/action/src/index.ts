@@ -1,6 +1,6 @@
 'use strict';
 
-import { Plugin, isRoot, scale, width, height, pauseable, getPrototype } from '@auto.pro/core'
+import { Plugin, isRoot, scale, width, height, pausable, getPrototype } from '@auto.pro/core'
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
@@ -89,9 +89,9 @@ function setAction() {
     clickRes = (x: number, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0) => {
         click(x * scale, y * scale, delay, randomOffsetX, randomOffsetY)
     }
-    clickOP = (x: number | Array<any>, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0, isPauseable = true) => {
+    clickOP = (x: number | Array<any>, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0, isPausable = true) => {
         return source => source.pipe(
-            pauseable(isPauseable, false),
+            pausable(isPausable, false),
             map((pt) => {
                 if (x == null && getPrototype(pt) === 'Array') {
                     click(...(pt as [number, number, [number, number], number, number]))

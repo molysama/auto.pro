@@ -16,13 +16,13 @@ export type FindImgParam = {
     doIfNotFound?: Function
     image?: Image,
     valid?: number
-    isPauseable?: boolean
+    isPausable?: boolean
 }
 
 import { throwError, of, timer, Observable, defer } from 'rxjs'
 import { map, filter, take, tap, exhaustMap, finalize } from 'rxjs/operators'
 
-import { Plugin, cap, scale, width, height, getPrototype, pauseable } from '@auto.pro/core'
+import { Plugin, cap, scale, width, height, getPrototype, pausable } from '@auto.pro/core'
 
 const cache: Record<string, any> = {}
 
@@ -88,7 +88,7 @@ export function readImg(imgPath: Image | string, mode?: number) {
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差
- * @param {boolean} isPauseable 是否受暂停状态影响，默认为true，受影响
+ * @param {boolean} isPausable 是否受暂停状态影响，默认为true，受影响
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export function findImg(param: FindImgParam): Observable<any> {
@@ -108,7 +108,7 @@ export function findImg(param: FindImgParam): Observable<any> {
         const image = param.image || null
 
         const valid = param.valid == null ? 20 : ~~param.valid
-        const isPauseable = param.isPauseable === false ? false : true
+        const isPausable = param.isPausable === false ? false : true
 
         // 是否只找一次，无论是否找到都返回结果，默认false
         // 如果提供了截图cap，则只找一次
@@ -155,7 +155,7 @@ export function findImg(param: FindImgParam): Observable<any> {
         let t: any
         return timer(0, eachTime).pipe(
             filter(() => isPass),
-            pauseable(isPauseable, false),
+            pausable(isPausable, false),
             exhaustMap(() => {
                 const src = image || cap()
                 let matches = images.matchTemplate(src, template, queryOption).matches

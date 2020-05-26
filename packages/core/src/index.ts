@@ -1,6 +1,6 @@
 import { isFunction } from "./utils"
-import { concat, merge, from, BehaviorSubject, interval, timer, throwError, of, Observable, generate } from 'rxjs'
-import { toArray, switchMap, map, filter, concatMap, take, exhaustMap, skip, share, retryWhen, takeUntil, scan, takeWhile, catchError, repeat } from 'rxjs/operators'
+import { concat, merge, from, BehaviorSubject, interval, timer, throwError, of, Observable, generate, combineLatest } from 'rxjs'
+import { toArray, switchMap, map, filter, concatMap, take, exhaustMap, skip, share, retryWhen, takeUntil, scan, takeWhile, catchError, repeat, tap, distinctUntilChanged, delayWhen } from 'rxjs/operators'
 
 
 declare const requestScreenCapture: any
@@ -94,13 +94,12 @@ function use(plugin: Plugin, option?: any) {
 const pauseState$ = new BehaviorSubject(false)
 
 /**
- * 操作符，使流可暂停，可设isPauseable为false来强制关闭暂停效果
- * @param {boolean} isPauseable 是否强制取消暂停效果
+ * 操作符，使流可暂停，可设ispausable为false来强制关闭暂停效果
+ * @param {boolean} isPausable 是否强制取消暂停效果
  * @param {boolean} wait wait为true时将阻塞并存储所有输入，为false时忽略暂停期间的输入
  */
-const pauseable = (isPauseable = true, wait = true) => (source) => {
-    if (isPauseable) {
-
+const pausable = (isPausable = true, wait = true) => (source) => {
+    if (isPausable) {
         if (wait) {
             return source.pipe(
                 concatMap((value) =>
@@ -137,22 +136,12 @@ function resume() {
     pauseState$.next(false)
 }
 
-let timerIntervalBase = 20
-
 /**
  * 可暂停的interval
  * @param t 时间间隔
  */
-function pauseableInterval(t: number = 0) {
-    if (t === 0) {
-        return generate(0, x => true, x => x + 1)
-    }
-    return interval(timerIntervalBase).pipe(
-        pauseable(true, false),
-        scan(acc => acc + timerIntervalBase, timerIntervalBase * -1),
-        filter(v => v % t === 0),
-        scan(acc => acc + 1, -1)
-    )
+function pausableInterval(t: number = 0) {
+    return pausableTimer(0, t)
 }
 
 /**
@@ -160,51 +149,86 @@ function pauseableInterval(t: number = 0) {
  * @param t 首次延迟
  * @param each 之后的每次输出间隔
  */
-function pauseableTimer(t: number, each?: number) {
-    return pauseableInterval(t).pipe(
-        skip(1),
-        take(1),
-        switchMap(v => {
-            if (each) {
-                return pauseableInterval(each)
-            } else {
-                return of(v)
-            }
-        }),
-        scan(acc => acc + 1, -1)
+function pausableTimer(t: number, each?: number) {
+    return timer(t, each).pipe(
+        pausable(true, false)
     )
 }
+
 
 /**
  * 可暂停的TimeoutWith
  * @param t 
  * @param ob 
  */
-function pauseableTimeoutWith(t: number, ob: Observable<any>) {
+function pausableTimeoutWith(t: number, ob: Observable<any>) {
     return (source) => {
+        let begin = Date.now()
+        let total = t
         const source$ = source.pipe(share())
 
         return merge(
             source$,
-            pauseableInterval(timerIntervalBase).pipe(
-                scan(acc => acc + timerIntervalBase, timerIntervalBase * -1),
-                takeUntil(source$),
-                repeat(),
-                takeUntil(source$.pipe(toArray())),
-                filter(v => v >= t),
-                take(1),
-                switchMap(() => ob)
+            // 只允许默认和【非暂停->暂停】状态通过的流
+            pauseState$.pipe(
+                scan(
+                    ([result, prev], now) => {
+                        if (prev === undefined) {
+                            result = true
+                        } else if (prev === false && now === true) {
+                            result = true
+                        } else {
+                            result = false
+                        }
+                        return [result, now]
+                    },
+                    [true, undefined]
+                ),
+                filter((v: any) => v[0]),
+                map((v: any) => v[1]),
             )
+                .pipe(
+                    switchMap((vp) => {
+                        // 如果是暂停，则延迟时间为：剩余时间 - (当前时间 - 起始时间)
+                        if (vp) {
+                            total = total - (Date.now() - begin)
+                            return pauseState$.pipe(
+                                filter((v) => !v),
+                                concatMap(() => {
+                                    begin = Date.now()
+                                    return timer(total)
+                                })
+                            )
+                        } else {
+                            // 如果是非暂停，则延迟t毫秒，并初始化起始时间
+                            begin = Date.now()
+                            return timer(t)
+                        }
+                    }),
+                    takeUntil(
+                        source$.pipe(
+                            tap(() => {
+                                begin = Date.now()
+                                total = t
+                            })
+                        )
+                    ),
+                    repeat(),
+                    takeUntil(source$.pipe(toArray())),
+                    switchMap(() => throwError("timeout")),
+                    take(1)
+                )
         )
     }
 }
+
 
 /**
  * 可暂停的timeout
  * @param t 
  */
-function pauseableTimeout(t: number) {
-    return pauseableTimeoutWith(t, throwError('pauseable timeout occurred'))
+function pausableTimeout(t: number) {
+    return pausableTimeoutWith(t, throwError('pausable timeout occurred'))
 }
 
 
@@ -261,12 +285,12 @@ export {
 
     pause,
     resume,
-    pauseable,
+    pausable,
     pauseState$,
-    pauseableInterval,
-    pauseableTimer,
-    pauseableTimeout,
-    pauseableTimeoutWith
+    pausableInterval,
+    pausableTimer,
+    pausableTimeout,
+    pausableTimeoutWith
 }
 
 /**

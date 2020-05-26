@@ -82,15 +82,15 @@ function use(plugin, option) {
  */
 var pauseState$ = new rxjs.BehaviorSubject(false);
 /**
- * 操作符，使流可暂停，可设isPauseable为false来强制关闭暂停效果
- * @param {boolean} isPauseable 是否强制取消暂停效果
+ * 操作符，使流可暂停，可设ispausable为false来强制关闭暂停效果
+ * @param {boolean} isPausable 是否强制取消暂停效果
  * @param {boolean} wait wait为true时将阻塞并存储所有输入，为false时忽略暂停期间的输入
  */
-var pauseable = function (isPauseable, wait) {
-    if (isPauseable === void 0) { isPauseable = true; }
+var pausable = function (isPausable, wait) {
+    if (isPausable === void 0) { isPausable = true; }
     if (wait === void 0) { wait = true; }
     return function (source) {
-        if (isPauseable) {
+        if (isPausable) {
             if (wait) {
                 return source.pipe(operators.concatMap(function (value) {
                     return pauseState$.pipe(operators.filter(function (v) { return !v; }), operators.take(1), operators.map(function () { return value; }));
@@ -117,50 +117,73 @@ function pause() {
 function resume() {
     pauseState$.next(false);
 }
-var timerIntervalBase = 20;
 /**
  * 可暂停的interval
  * @param t 时间间隔
  */
-function pauseableInterval(t) {
+function pausableInterval(t) {
     if (t === void 0) { t = 0; }
-    if (t === 0) {
-        return rxjs.generate(0, function (x) { return true; }, function (x) { return x + 1; });
-    }
-    return rxjs.interval(timerIntervalBase).pipe(pauseable(true, false), operators.scan(function (acc) { return acc + timerIntervalBase; }, timerIntervalBase * -1), operators.filter(function (v) { return v % t === 0; }), operators.scan(function (acc) { return acc + 1; }, -1));
+    return pausableTimer(0, t);
 }
 /**
  * 可暂停的timer
  * @param t 首次延迟
  * @param each 之后的每次输出间隔
  */
-function pauseableTimer(t, each) {
-    return pauseableInterval(t).pipe(operators.skip(1), operators.take(1), operators.switchMap(function (v) {
-        if (each) {
-            return pauseableInterval(each);
-        }
-        else {
-            return rxjs.of(v);
-        }
-    }), operators.scan(function (acc) { return acc + 1; }, -1));
+function pausableTimer(t, each) {
+    return rxjs.timer(t, each).pipe(pausable(true, false));
 }
 /**
  * 可暂停的TimeoutWith
  * @param t
  * @param ob
  */
-function pauseableTimeoutWith(t, ob) {
+function pausableTimeoutWith(t, ob) {
     return function (source) {
+        var begin = Date.now();
+        var total = t;
         var source$ = source.pipe(operators.share());
-        return rxjs.merge(source$, pauseableInterval(timerIntervalBase).pipe(operators.scan(function (acc) { return acc + timerIntervalBase; }, timerIntervalBase * -1), operators.takeUntil(source$), operators.repeat(), operators.takeUntil(source$.pipe(operators.toArray())), operators.filter(function (v) { return v >= t; }), operators.take(1), operators.switchMap(function () { return ob; })));
+        return rxjs.merge(source$, 
+        // 只允许默认和【非暂停->暂停】状态通过的流
+        pauseState$.pipe(operators.scan(function (_a, now) {
+            var result = _a[0], prev = _a[1];
+            if (prev === undefined) {
+                result = true;
+            }
+            else if (prev === false && now === true) {
+                result = true;
+            }
+            else {
+                result = false;
+            }
+            return [result, now];
+        }, [true, undefined]), operators.filter(function (v) { return v[0]; }), operators.map(function (v) { return v[1]; }))
+            .pipe(operators.switchMap(function (vp) {
+            // 如果是暂停，则延迟时间为：剩余时间 - (当前时间 - 起始时间)
+            if (vp) {
+                total = total - (Date.now() - begin);
+                return pauseState$.pipe(operators.filter(function (v) { return !v; }), operators.concatMap(function () {
+                    begin = Date.now();
+                    return rxjs.timer(total);
+                }));
+            }
+            else {
+                // 如果是非暂停，则延迟t毫秒，并初始化起始时间
+                begin = Date.now();
+                return rxjs.timer(t);
+            }
+        }), operators.takeUntil(source$.pipe(operators.tap(function () {
+            begin = Date.now();
+            total = t;
+        }))), operators.repeat(), operators.takeUntil(source$.pipe(operators.toArray())), operators.switchMap(function () { return rxjs.throwError("timeout"); }), operators.take(1)));
     };
 }
 /**
  * 可暂停的timeout
  * @param t
  */
-function pauseableTimeout(t) {
-    return pauseableTimeoutWith(t, rxjs.throwError('pauseable timeout occurred'));
+function pausableTimeout(t) {
+    return pausableTimeoutWith(t, rxjs.throwError('pausable timeout occurred'));
 }
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
@@ -240,12 +263,12 @@ exports.getHeight = getHeight;
 exports.getPrototype = getPrototype;
 exports.getTime = getTime;
 exports.getWidth = getWidth;
+exports.pausable = pausable;
+exports.pausableInterval = pausableInterval;
+exports.pausableTimeout = pausableTimeout;
+exports.pausableTimeoutWith = pausableTimeoutWith;
+exports.pausableTimer = pausableTimer;
 exports.pause = pause;
 exports.pauseState$ = pauseState$;
-exports.pauseable = pauseable;
-exports.pauseableInterval = pauseableInterval;
-exports.pauseableTimeout = pauseableTimeout;
-exports.pauseableTimeoutWith = pauseableTimeoutWith;
-exports.pauseableTimer = pauseableTimer;
 exports.resume = resume;
 exports.use = use;

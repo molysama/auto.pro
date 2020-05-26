@@ -82,7 +82,7 @@ exports.readImg = readImg;
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差
- * @param {boolean} isPauseable 是否受暂停状态影响，默认为true，受影响
+ * @param {boolean} isPausable 是否受暂停状态影响，默认为true，受影响
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
@@ -98,7 +98,7 @@ function findImg(param) {
         var DO_IF_NOT_FOUND = param.doIfNotFound;
         var image = param.image || null;
         var valid = param.valid == null ? 20 : ~~param.valid;
-        var isPauseable = param.isPauseable === false ? false : true;
+        var isPausable = param.isPausable === false ? false : true;
         // 是否只找一次，无论是否找到都返回结果，默认false
         // 如果提供了截图cap，则只找一次
         var ONCE = image ? true : param.once;
@@ -138,7 +138,7 @@ function findImg(param) {
         }
         var isPass = true;
         var t;
-        return rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return isPass; }), core_1.pauseable(isPauseable, false), operators_1.exhaustMap(function () {
+        return rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return isPass; }), core_1.pausable(isPausable, false), operators_1.exhaustMap(function () {
             var src = image || core_1.cap();
             var matches = images.matchTemplate(src, template, queryOption).matches;
             if (valid > 0) {
