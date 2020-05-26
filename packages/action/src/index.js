@@ -59,12 +59,13 @@ function setAction() {
         else {
             press(currentX, currentY, random.apply(void 0, delay));
         }
+        return [currentX, currentY];
     };
     exports.clickRes = function (x, y, delay, randomOffsetX, randomOffsetY) {
         if (delay === void 0) { delay = [600, 800]; }
         if (randomOffsetX === void 0) { randomOffsetX = 0; }
         if (randomOffsetY === void 0) { randomOffsetY = 0; }
-        exports.click(x * core_1.scale, y * core_1.scale, delay, randomOffsetX, randomOffsetY);
+        return exports.click(x * core_1.scale, y * core_1.scale, delay, randomOffsetX, randomOffsetY);
     };
     exports.clickOP = function (x, y, delay, randomOffsetX, randomOffsetY, isPausable) {
         if (delay === void 0) { delay = [600, 800]; }

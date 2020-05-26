@@ -85,9 +85,10 @@ function setAction() {
         } else {
             press(currentX, currentY, random(...delay))
         }
+        return [currentX, currentY]
     }
     clickRes = (x: number, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0) => {
-        click(x * scale, y * scale, delay, randomOffsetX, randomOffsetY)
+        return click(x * scale, y * scale, delay, randomOffsetX, randomOffsetY)
     }
     clickOP = (x: number | Array<any>, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0, isPausable = true) => {
         return source => source.pipe(
