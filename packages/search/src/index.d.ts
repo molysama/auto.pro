@@ -20,6 +20,7 @@ export declare type FindImgParam = {
 };
 import { Observable } from 'rxjs';
 import { Plugin } from '@auto.pro/core';
+export declare function clearCache(cacheName: string): void;
 /**
  * 获取指定路径的Image对象，若已是Image则不重复获取
  * @param {string | Image} imgPath 图片路径

@@ -22,6 +22,10 @@ var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var core_1 = require("@auto.pro/core");
 var cache = {};
+function clearCache(cacheName) {
+    delete cache[cacheName];
+}
+exports.clearCache = clearCache;
 /**
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
  * @param param
