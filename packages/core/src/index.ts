@@ -140,8 +140,8 @@ function resume() {
  * 可暂停的interval
  * @param t 时间间隔
  */
-function pausableInterval(t: number = 0) {
-    return pausableTimer(0, t)
+function pausableInterval(t: number = 0, isWait = true) {
+    return pausableTimer(0, t, isWait)
 }
 
 /**
@@ -149,9 +149,9 @@ function pausableInterval(t: number = 0) {
  * @param t 首次延迟
  * @param each 之后的每次输出间隔
  */
-function pausableTimer(t: number, each?: number) {
+function pausableTimer(t: number, each?: number, isWait = true) {
     return timer(t, each).pipe(
-        pausable(true, false)
+        pausable(true, isWait)
     )
 }
 

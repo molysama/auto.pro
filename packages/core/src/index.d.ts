@@ -57,13 +57,13 @@ declare function resume(): void;
  * 可暂停的interval
  * @param t 时间间隔
  */
-declare function pausableInterval(t?: number): Observable<unknown>;
+declare function pausableInterval(t?: number, isWait?: boolean): Observable<unknown>;
 /**
  * 可暂停的timer
  * @param t 首次延迟
  * @param each 之后的每次输出间隔
  */
-declare function pausableTimer(t: number, each?: number): Observable<unknown>;
+declare function pausableTimer(t: number, each?: number, isWait?: boolean): Observable<unknown>;
 /**
  * 可暂停的TimeoutWith
  * @param t

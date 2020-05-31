@@ -128,9 +128,10 @@ exports.resume = resume;
  * 可暂停的interval
  * @param t 时间间隔
  */
-function pausableInterval(t) {
+function pausableInterval(t, isWait) {
     if (t === void 0) { t = 0; }
-    return pausableTimer(0, t);
+    if (isWait === void 0) { isWait = true; }
+    return pausableTimer(0, t, isWait);
 }
 exports.pausableInterval = pausableInterval;
 /**
@@ -138,8 +139,9 @@ exports.pausableInterval = pausableInterval;
  * @param t 首次延迟
  * @param each 之后的每次输出间隔
  */
-function pausableTimer(t, each) {
-    return rxjs_1.timer(t, each).pipe(pausable(true, false));
+function pausableTimer(t, each, isWait) {
+    if (isWait === void 0) { isWait = true; }
+    return rxjs_1.timer(t, each).pipe(pausable(true, isWait));
 }
 exports.pausableTimer = pausableTimer;
 /**
