@@ -1,0 +1,32 @@
+{
+    "name": "@auto.pro/webview",
+    "version": "8.2.5",
+    "description": "> TODO: description",
+    "author": "molysama <molysama.i@gmail.com>",
+    "homepage": "https://github.com/molysama/auto.pro#readme",
+    "license": "ISC",
+    "main": "lib/webview.js",
+    "type": "src/index.d.ts",
+    "directories": {
+        "lib": "lib",
+        "test": "__tests__"
+    },
+    "files": [
+        "lib"
+    ],
+    "publishConfig": {
+        "registry": "http://registry.npmjs.org/",
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/molysama/auto.pro.git"
+    },
+    "scripts": {
+        "test": "echo \"Error: run tests from root\" && exit 1",
+        "build": "tsc && rollup -c rollup.config.js"
+    },
+    "bugs": {
+        "url": "https://github.com/molysama/auto.pro/issues"
+    }
+}
