@@ -1,7 +1,7 @@
 {
     "name": "@auto.pro/webview",
     "version": "8.2.5",
-    "description": "> TODO: description",
+    "description": "webview plugin for auto.pro",
     "author": "molysama <molysama.i@gmail.com>",
     "homepage": "https://github.com/molysama/auto.pro#readme",
     "license": "ISC",
@@ -12,7 +12,8 @@
         "test": "__tests__"
     },
     "files": [
-        "lib"
+        "lib",
+        "src"
     ],
     "publishConfig": {
         "registry": "http://registry.npmjs.org/",
