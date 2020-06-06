@@ -1,3 +1,4 @@
+import { Plugin } from "@auto.pro/core";
 declare function runHtmlFunction(fnName: any, value: any): Promise<unknown>;
 declare function runHtmlJS(propertyName: any): Promise<unknown>;
 declare function on(eventName: string, callback: Function): void;
@@ -9,7 +10,5 @@ export declare function run(url: string): {
     runHtmlJS: typeof runHtmlJS;
     webview: any;
 };
-declare const _default: {
-    install(option?: {}): void;
-};
-export default _default;
+declare const WebViewPlugin: Plugin;
+export default WebViewPlugin;

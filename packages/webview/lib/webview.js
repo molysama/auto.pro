@@ -83,7 +83,7 @@ function run(url) {
         webview: webview
     };
 }
-var index = {
+var WebViewPlugin = {
     install: function (option) {
         importClass(android.webkit.WebView);
         importClass(android.webkit.ValueCallback);
@@ -93,5 +93,5 @@ var index = {
     }
 };
 
-exports.default = index;
+exports.default = WebViewPlugin;
 exports.run = run;

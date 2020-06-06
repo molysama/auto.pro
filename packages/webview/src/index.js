@@ -82,9 +82,8 @@ function run(url) {
     };
 }
 exports.run = run;
-exports.default = {
+var WebViewPlugin = {
     install: function (option) {
-        if (option === void 0) { option = {}; }
         importClass(android.webkit.WebView);
         importClass(android.webkit.ValueCallback);
         importClass(android.webkit.WebChromeClient);
@@ -92,3 +91,4 @@ exports.default = {
         importClass(android.webkit.WebViewClient);
     }
 };
+exports.default = WebViewPlugin;

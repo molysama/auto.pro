@@ -99,8 +99,8 @@ export function run(url: string) {
     }
 }
 
-export default {
-    install(option = {}) {
+const WebViewPlugin: Plugin = {
+    install(option: any) {
         importClass(android.webkit.WebView)
         importClass(android.webkit.ValueCallback)
         importClass(android.webkit.WebChromeClient)
@@ -108,3 +108,5 @@ export default {
         importClass(android.webkit.WebViewClient)
     }
 }
+
+export default WebViewPlugin
