@@ -57,7 +57,6 @@ function run(url) {
     set.setAllowUniversalAccessFromFileURLs(false);
     set.setSupportZoom(false);
     set.setJavaScriptEnabled(true);
-    webview.loadUrl(url);
     var webcc = new JavaAdapter(WebChromeClient, {
         onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
             var result = call(fnName, defaultValue && JSON.parse(defaultValue));
@@ -75,6 +74,7 @@ function run(url) {
         }
     });
     webview.setWebChromeClient(webcc);
+    webview.loadUrl(url);
     return {
         on: on,
         off: off,

@@ -68,7 +68,6 @@ export function run(url: string) {
     set.setAllowUniversalAccessFromFileURLs(false)
     set.setSupportZoom(false)
     set.setJavaScriptEnabled(true)
-    webview.loadUrl(url)
 
     const webcc = new JavaAdapter(WebChromeClient, {
         onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
@@ -89,6 +88,7 @@ export function run(url: string) {
     })
 
     webview.setWebChromeClient(webcc)
+    webview.loadUrl(url)
 
     return {
         on,
