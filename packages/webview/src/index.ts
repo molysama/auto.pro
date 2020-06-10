@@ -15,9 +15,9 @@ let webview
 let set
 const eventList = {}
 
-function runHtmlFunction(fnName, value) {
+function runHtmlFunction(fnName, ...value) {
     return new Promise((resolve, reject) => {
-        webview.evaluateJavascript(`javascript:${fnName}(${value})`, new JavaAdapter(ValueCallback, {
+        webview.evaluateJavascript(`javascript:${fnName}(...${JSON.stringify(value)})`, new JavaAdapter(ValueCallback, {
             onReceiveValue(result) {
                 resolve(result)
             },
