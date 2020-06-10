@@ -6,9 +6,13 @@ var log = console.log;
 var webview;
 var set;
 var eventList = {};
-function runHtmlFunction(fnName, value) {
+function runHtmlFunction(fnName) {
+    var value = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        value[_i - 1] = arguments[_i];
+    }
     return new Promise(function (resolve, reject) {
-        webview.evaluateJavascript("javascript:" + fnName + "(" + value + ")", new JavaAdapter(ValueCallback, {
+        webview.evaluateJavascript("javascript:" + fnName + "(..." + JSON.stringify(value) + ")", new JavaAdapter(ValueCallback, {
             onReceiveValue: function (result) {
                 resolve(result);
             },
