@@ -1,4 +1,5 @@
 "use strict";
+var uuidv4 = require('uuid');
 describe('webview', function () {
     test('runHtmlFunction param', function () {
         var arr = [];
@@ -12,5 +13,10 @@ describe('webview', function () {
             return arr;
         }
         expect(run(1, 2, 'ddd', [4, 5, 6])).toEqual([1, 2, 'ddd', [4, 5, 6]]);
+    });
+    test('uuid', function () {
+        var uuid = uuidv4.v4();
+        console.log('uuid', uuid);
+        expect(uuid).not.toBeUndefined();
     });
 });

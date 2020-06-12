@@ -1,21 +1,28 @@
+const uuidv4 = require('uuid')
 import { Plugin } from "@auto.pro/core"
-
-declare const android: any
-declare const ui: any
-declare const JavaAdapter: any
-declare const WebView: any
-declare const WebChromeClient: any
-declare const WebResourceResponse: any
-declare const WebViewClient: any
-declare const ValueCallback: any
+import { Subject } from "rxjs"
+import { defer } from 'rxjs'
+import { tap } from 'rxjs/operators'
+import { zip } from 'rxjs'
+import { filter } from 'rxjs/operators'
+import { take } from 'rxjs/operators'
+import { of } from 'rxjs'
+import { map } from 'rxjs/operators'
 
 const log = console.log
+let threadEvents
 
 let webview
 let set
 const eventList = {}
 
+interface EventParam {
+    uuid: string
+    params: [string, ...any[]]
+}
+
 function runHtmlFunction(fnName, ...value) {
+
     return new Promise((resolve, reject) => {
         webview.evaluateJavascript(`javascript:${fnName}(...${JSON.stringify(value)})`, new JavaAdapter(ValueCallback, {
             onReceiveValue(result) {
@@ -90,11 +97,81 @@ export function run(url: string) {
     webview.setWebChromeClient(webcc)
     webview.loadUrl(url)
 
+    const subject = new Subject()
+
+    // webview的方法必须在同一个线程内执行，因此要用线程间的事件传递
+    threadEvents = events.emitter(threads.currentThread())
+    threadEvents.on('fn', ({ uuid, params }: EventParam) => {
+        const promise = runHtmlFunction(...params)
+        subject.next({
+            uuid,
+            promise
+        })
+    })
+    threadEvents.on('js', ({ uuid, js }) => {
+        const promise = runHtmlJS(js)
+        subject.next({
+            uuid,
+            promise
+        })
+    })
     return {
         on,
         off,
-        runHtmlFunction,
-        runHtmlJS,
+        /**
+         * 执行webview中网页的函数
+         * @param fnName 要执行的方法
+         * @param value 要传递的参数
+         */
+        runHtmlFunction(fnName: string, ...value) {
+            return defer(() => {
+                const uuid = uuidv4.v4()
+                return zip(
+                    subject.pipe(
+                        filter((v: any) => v['uuid'] === uuid),
+                        map(v => v['promise']),
+                        take(1)
+                    ),
+                    of(false).pipe(
+                        tap(() => {
+                            threadEvents.emit('fn', {
+                                uuid,
+                                params: [fnName, ...value]
+                            })
+                        })
+                    )
+                ).pipe(
+                    map(v => v[0])
+                )
+            }).toPromise()
+        },
+        /**
+         * 在webview中执行一个js语句
+         * @param js 
+         */
+        runHtmlJS(js) {
+
+            return defer(() => {
+                const uuid = uuidv4.v4()
+                return zip(
+                    subject.pipe(
+                        filter((v: any) => v['uuid'] === uuid),
+                        map(v => v['promise']),
+                        take(1)
+                    ),
+                    of(false).pipe(
+                        tap(() => {
+                            threadEvents.emit('fn', {
+                                uuid,
+                                js
+                            })
+                        })
+                    )
+                ).pipe(
+                    map(v => v[0])
+                )
+            }).toPromise()
+        },
         webview
     }
 }

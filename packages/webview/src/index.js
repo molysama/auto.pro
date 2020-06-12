@@ -1,6 +1,23 @@
 "use strict";
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var uuidv4 = require('uuid');
+var rxjs_1 = require("rxjs");
+var rxjs_2 = require("rxjs");
+var operators_1 = require("rxjs/operators");
+var rxjs_3 = require("rxjs");
+var operators_2 = require("rxjs/operators");
+var operators_3 = require("rxjs/operators");
+var rxjs_4 = require("rxjs");
+var operators_4 = require("rxjs/operators");
 var log = console.log;
+var threadEvents;
 var webview;
 var set;
 var eventList = {};
@@ -77,11 +94,63 @@ function run(url) {
     });
     webview.setWebChromeClient(webcc);
     webview.loadUrl(url);
+    var subject = new rxjs_1.Subject();
+    // webview的方法必须在同一个线程内执行，因此要用线程间的事件传递
+    threadEvents = events.emitter(threads.currentThread());
+    threadEvents.on('fn', function (_a) {
+        var uuid = _a.uuid, params = _a.params;
+        var promise = runHtmlFunction.apply(void 0, params);
+        subject.next({
+            uuid: uuid,
+            promise: promise
+        });
+    });
+    threadEvents.on('js', function (_a) {
+        var uuid = _a.uuid, js = _a.js;
+        var promise = runHtmlJS(js);
+        subject.next({
+            uuid: uuid,
+            promise: promise
+        });
+    });
     return {
         on: on,
         off: off,
-        runHtmlFunction: runHtmlFunction,
-        runHtmlJS: runHtmlJS,
+        /**
+         * 执行webview中网页的函数
+         * @param fnName 要执行的方法
+         * @param value 要传递的参数
+         */
+        runHtmlFunction: function (fnName) {
+            var value = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                value[_i - 1] = arguments[_i];
+            }
+            return rxjs_2.defer(function () {
+                var uuid = uuidv4.v4();
+                return rxjs_3.zip(subject.pipe(operators_2.filter(function (v) { return v['uuid'] === uuid; }), operators_4.map(function (v) { return v['promise']; }), operators_3.take(1)), rxjs_4.of(false).pipe(operators_1.tap(function () {
+                    threadEvents.emit('fn', {
+                        uuid: uuid,
+                        params: __spreadArrays([fnName], value)
+                    });
+                }))).pipe(operators_4.map(function (v) { return v[0]; }));
+            }).toPromise();
+        },
+        /**
+         * 在webview中执行一个js语句
+         * @param js
+         */
+        runHtmlJS: function (js) {
+            return rxjs_2.defer(function () {
+                var uuid = uuidv4.v4();
+                return rxjs_3.zip(subject.pipe(operators_2.filter(function (v) { return v['uuid'] === uuid; }), operators_4.map(function (v) { return v['promise']; }), operators_3.take(1)), rxjs_4.of(false).pipe(operators_1.tap(function () {
+                    threadEvents.emit('fn', {
+                        uuid: uuid,
+                        js: js
+                    });
+                }))).pipe(operators_4.map(function (v) { return v[0]; }));
+            }).toPromise();
+        },
         webview: webview
     };
 }
