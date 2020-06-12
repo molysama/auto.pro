@@ -1,4 +1,4 @@
-import uuidjs from 'uuidjs'
+import uuidjs from 'uuid-js'
 import { Plugin } from "@auto.pro/core"
 import { Subject } from "rxjs"
 import { defer } from 'rxjs'
@@ -125,7 +125,7 @@ export function run(url: string) {
          */
         runHtmlFunction(fnName: string, ...value) {
             return defer(() => {
-                const uuid = uuidjs.generate()
+                const uuid = uuidjs.create(4).toString()
                 return zip(
                     subject.pipe(
                         filter((v: any) => v['uuid'] === uuid),
@@ -152,7 +152,7 @@ export function run(url: string) {
         runHtmlJS(js) {
 
             return defer(() => {
-                const uuid = uuidjs.generate()
+                const uuid = uuidjs.create(4).toString()
                 return zip(
                     subject.pipe(
                         filter((v: any) => v['uuid'] === uuid),

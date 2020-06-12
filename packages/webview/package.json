@@ -32,6 +32,6 @@
     },
     "dependencies": {
         "rxjs": "^6.5.5",
-        "uuidjs": "^4.2.5"
+        "uuid-js": "^0.7.5"
     }
 }

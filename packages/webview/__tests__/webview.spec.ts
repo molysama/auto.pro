@@ -1,4 +1,4 @@
-import uuidjs from 'uuidjs'
+import uuidjs from 'uuid-js'
 
 describe('webview', () => {
 
@@ -15,7 +15,7 @@ describe('webview', () => {
     })
 
     test('uuid', () => {
-        const uuid = uuidjs.generate()
+        const uuid = uuidjs.create(4).toString()
         console.log('uuid', uuid)
         expect(uuid).not.toBeUndefined()
     })

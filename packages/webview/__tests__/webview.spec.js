@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var uuidjs_1 = __importDefault(require("uuidjs"));
+var uuid_js_1 = __importDefault(require("uuid-js"));
 describe('webview', function () {
     test('runHtmlFunction param', function () {
         var arr = [];
@@ -19,7 +19,7 @@ describe('webview', function () {
         expect(run(1, 2, 'ddd', [4, 5, 6])).toEqual([1, 2, 'ddd', [4, 5, 6]]);
     });
     test('uuid', function () {
-        var uuid = uuidjs_1.default.generate();
+        var uuid = uuid_js_1.default.create(4).toString();
         console.log('uuid', uuid);
         expect(uuid).not.toBeUndefined();
     });

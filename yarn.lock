@@ -9238,15 +9238,15 @@ util.promisify@^1.0.0:
     define-properties "^1.1.2"
     object.getownpropertydescriptors "^2.0.3"
 
+uuid-js@^0.7.5:
+  version "0.7.5"
+  resolved "https://registry.yarnpkg.com/uuid-js/-/uuid-js-0.7.5.tgz#6c886d02a53d2d40dcf25d91a170b4a7b25b94d0"
+  integrity sha1-bIhtAqU9LUDc8l2RoXC0p7JblNA=
+
 uuid@^3.0.1, uuid@^3.3.2:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.3.tgz#4568f0216e78760ee1dbf3a4d2cf53e224112866"
   integrity sha512-pW0No1RGHgzlpHJO1nsVrHKpOEIxkGg1xB+v0ZmdNH5OAeAwzAVrCnI2/6Mtx+Uys6iaylxa+D3g4j63IKKjSQ==
-
-uuidjs@^4.2.5:
-  version "4.2.5"
-  resolved "https://registry.yarnpkg.com/uuidjs/-/uuidjs-4.2.5.tgz#a80439ece05dfe6ed875a5d62de0820046055713"
-  integrity sha512-0utbJ3L/C/AUv8cRAfFnUC7XhvRvaQaGNPbrroBeXF26BWfYT6aD8/n5UQ4ic3bpkJfVd2W15yQS+YCwvQxtXA==
 
 validate-npm-package-license@^3.0.1, validate-npm-package-license@^3.0.3:
   version "3.0.4"

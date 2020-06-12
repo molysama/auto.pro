@@ -4,7 +4,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var uuidjs = _interopDefault(require('uuidjs'));
+var uuidjs = _interopDefault(require('uuid-js'));
 var rxjs = require('rxjs');
 var operators = require('rxjs/operators');
 
@@ -142,7 +142,7 @@ function run(url) {
                 value[_i - 1] = arguments[_i];
             }
             return rxjs.defer(function () {
-                var uuid = uuidjs.generate();
+                var uuid = uuidjs.create(4).toString();
                 return rxjs.zip(subject.pipe(operators.filter(function (v) { return v['uuid'] === uuid; }), operators.map(function (v) { return v['promise']; }), operators.take(1)), rxjs.of(false).pipe(operators.tap(function () {
                     threadEvents.emit('fn', {
                         uuid: uuid,
@@ -157,7 +157,7 @@ function run(url) {
          */
         runHtmlJS: function (js) {
             return rxjs.defer(function () {
-                var uuid = uuidjs.generate();
+                var uuid = uuidjs.create(4).toString();
                 return rxjs.zip(subject.pipe(operators.filter(function (v) { return v['uuid'] === uuid; }), operators.map(function (v) { return v['promise']; }), operators.take(1)), rxjs.of(false).pipe(operators.tap(function () {
                     threadEvents.emit('fn', {
                         uuid: uuid,
