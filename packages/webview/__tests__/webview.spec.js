@@ -1,5 +1,9 @@
 "use strict";
-var uuidv4 = require('uuid');
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var uuidjs_1 = __importDefault(require("uuidjs"));
 describe('webview', function () {
     test('runHtmlFunction param', function () {
         var arr = [];
@@ -15,7 +19,7 @@ describe('webview', function () {
         expect(run(1, 2, 'ddd', [4, 5, 6])).toEqual([1, 2, 'ddd', [4, 5, 6]]);
     });
     test('uuid', function () {
-        var uuid = uuidv4.v4();
+        var uuid = uuidjs_1.default.generate();
         console.log('uuid', uuid);
         expect(uuid).not.toBeUndefined();
     });

@@ -1,4 +1,4 @@
-const uuidv4 = require('uuid')
+import uuidjs from 'uuidjs'
 
 describe('webview', () => {
 
@@ -15,7 +15,7 @@ describe('webview', () => {
     })
 
     test('uuid', () => {
-        const uuid = uuidv4.v4()
+        const uuid = uuidjs.generate()
         console.log('uuid', uuid)
         expect(uuid).not.toBeUndefined()
     })
