@@ -159,7 +159,7 @@ function run(url) {
             return rxjs.defer(function () {
                 var uuid = uuidjs.create(4).toString();
                 return rxjs.zip(subject.pipe(operators.filter(function (v) { return v['uuid'] === uuid; }), operators.map(function (v) { return v['promise']; }), operators.take(1)), rxjs.of(false).pipe(operators.tap(function () {
-                    threadEvents.emit('fn', {
+                    threadEvents.emit('js', {
                         uuid: uuid,
                         js: js
                     });

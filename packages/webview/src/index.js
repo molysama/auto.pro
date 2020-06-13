@@ -147,7 +147,7 @@ function run(url) {
             return rxjs_2.defer(function () {
                 var uuid = uuid_js_1.default.create(4).toString();
                 return rxjs_3.zip(subject.pipe(operators_2.filter(function (v) { return v['uuid'] === uuid; }), operators_4.map(function (v) { return v['promise']; }), operators_3.take(1)), rxjs_4.of(false).pipe(operators_1.tap(function () {
-                    threadEvents.emit('fn', {
+                    threadEvents.emit('js', {
                         uuid: uuid,
                         js: js
                     });

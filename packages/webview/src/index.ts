@@ -161,7 +161,7 @@ export function run(url: string) {
                     ),
                     of(false).pipe(
                         tap(() => {
-                            threadEvents.emit('fn', {
+                            threadEvents.emit('js', {
                                 uuid,
                                 js
                             })
