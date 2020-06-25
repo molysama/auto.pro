@@ -86,8 +86,9 @@ exports.readImg = readImg;
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
- * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差，默认为20
+ * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差，默认为30
  * @param {boolean} isPausable 是否受暂停状态影响，默认为true，受影响
+ * @param {boolean} isLog 是否打印匹配信息
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 function findImg(param) {
@@ -102,7 +103,7 @@ function findImg(param) {
         var nextTime = param.nextTime || 0;
         var DO_IF_NOT_FOUND = param.doIfNotFound;
         var image = param.image || null;
-        var valid = param.valid == null ? 20 : ~~param.valid;
+        var valid = param.valid == null ? 30 : ~~param.valid;
         var isPausable = param.isPausable === false ? false : true;
         // 是否只找一次，无论是否找到都返回结果，默认false
         // 如果提供了截图cap，则只找一次
@@ -141,6 +142,7 @@ function findImg(param) {
             }
             queryOption.region = region_1;
         }
+        var isLog = param.isLog;
         var when = param.when || (function () { return true; });
         var isPass = true;
         var t;
@@ -148,10 +150,16 @@ function findImg(param) {
             var src = image || core_1.cap();
             var matches = images.matchTemplate(src, template, queryOption).matches;
             if (valid > 0) {
+                if (isLog) {
+                    console.log(path, 'before valid', matches);
+                }
                 matches = matches.filter(function (match) {
                     // return images.detectsColor(src, images.pixel(template, 0, 0), match.point.x, match.point.y, valid)
                     return images.findColorInRegion(src, images.pixel(template, 0, 0), match.point.x, match.point.y, 10, 10, valid);
                 });
+                if (isLog) {
+                    console.log(path, 'after valid', matches);
+                }
             }
             if (matches.length == 0 && DO_IF_NOT_FOUND) {
                 DO_IF_NOT_FOUND();

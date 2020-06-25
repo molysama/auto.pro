@@ -18,6 +18,7 @@ export type FindImgParam = {
     image?: Image,
     valid?: number
     isPausable?: boolean
+    isLog?: boolean
 }
 
 import { throwError, of, timer, Observable, defer } from 'rxjs'
@@ -93,8 +94,9 @@ export function readImg(imgPath: Image | string, mode?: number) {
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
- * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差，默认为20
+ * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差，默认为30
  * @param {boolean} isPausable 是否受暂停状态影响，默认为true，受影响
+ * @param {boolean} isLog 是否打印匹配信息
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export function findImg(param: FindImgParam): Observable<any> {
@@ -113,7 +115,7 @@ export function findImg(param: FindImgParam): Observable<any> {
         const DO_IF_NOT_FOUND = param.doIfNotFound
         const image = param.image || null
 
-        const valid = param.valid == null ? 20 : ~~param.valid
+        const valid = param.valid == null ? 30 : ~~param.valid
         const isPausable = param.isPausable === false ? false : true
 
         // 是否只找一次，无论是否找到都返回结果，默认false
@@ -157,6 +159,7 @@ export function findImg(param: FindImgParam): Observable<any> {
             queryOption.region = region
         }
 
+        let isLog = param.isLog
         let when = param.when || (() => true)
         let isPass = true
         let t: any
@@ -167,10 +170,16 @@ export function findImg(param: FindImgParam): Observable<any> {
                 const src = image || cap()
                 let matches = images.matchTemplate(src, template, queryOption).matches
                 if (valid > 0) {
+                    if (isLog) {
+                        console.log(path, 'before valid', matches)
+                    }
                     matches = matches.filter(match => {
                         // return images.detectsColor(src, images.pixel(template, 0, 0), match.point.x, match.point.y, valid)
                         return images.findColorInRegion(src, images.pixel(template, 0, 0), match.point.x, match.point.y, 10, 10, valid)
                     })
+                    if (isLog) {
+                        console.log(path, 'after valid', matches)
+                    }
                 }
                 if (matches.length == 0 && DO_IF_NOT_FOUND) {
                     DO_IF_NOT_FOUND()
