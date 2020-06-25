@@ -1,5 +1,6 @@
 export declare type FindImgParam = {
     path: string;
+    when?: Function;
     option?: {
         region?: Array<number>;
         threshold?: number;
@@ -31,6 +32,7 @@ export declare function readImg(imgPath: Image | string, mode?: number): any;
 /**
  * 找图函数，此函数为异步函数！
  * @param {string} path 待查图片路径
+ * @param {Function} when 传递一个函数作为filter，仅当函数返回值为真时进行找图
  * @param {object} option 查询参数
  * @param {number} index 取范围内的第几个结果，值从1开始。默认为1，设置为null、fale时返回所有结果
  * @param {object} useCache 缓存配置
@@ -40,7 +42,7 @@ export declare function readImg(imgPath: Image | string, mode?: number): any;
  * @param {number} take 期望匹配到几次结果，默认为1
  * @param {function} doIfNotFound 本次未匹配到图片时将执行的函数
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
- * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差
+ * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差，默认为20
  * @param {boolean} isPausable 是否受暂停状态影响，默认为true，受影响
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
