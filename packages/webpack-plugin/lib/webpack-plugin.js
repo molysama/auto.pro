@@ -10,7 +10,6 @@ var AutoProWebpackPlugin = /** @class */ (function () {
         var ui = this.option.ui || [];
         var encode = this.option.encode;
         compiler.hooks.emit.tap('AutoProWebpackPlugin', function (compilation) {
-            console.log('plugin assets', compilation.getAssets());
             var _loop_1 = function (filename) {
                 var sourceFileName = filename.split('.')[0];
                 var source = compilation.assets[filename].source();

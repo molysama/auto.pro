@@ -32,7 +32,6 @@ class AutoProWebpackPlugin {
 
         compiler.hooks.emit.tap('AutoProWebpackPlugin', function (compilation) {
 
-            console.log('plugin assets', compilation.getAssets())
             for (let filename in compilation.assets) {
                 let sourceFileName = filename.split('.')[0]
                 let source = compilation.assets[filename].source()
