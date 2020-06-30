@@ -41,7 +41,9 @@ export class AutoProWebpackPlugin {
 
                 if (encode) {
                     try {
-                        result = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(source), encode.key, {
+                        result = CryptoJS.AES.encrypt(
+                            CryptoJS.enc.Utf8.parse(source),
+                            CryptoJS.enc.Utf8.parse(encode.key), {
                             mode: CryptoJS.mode.ECB,
                             padding: CryptoJS.pad.Pkcs7,
                         }).toString()
