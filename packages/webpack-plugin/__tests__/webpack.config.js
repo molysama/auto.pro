@@ -17,6 +17,6 @@ module.exports = {
             // encode: {
             //     key: 'Secret Passphrase'
             // }
-        })
+        }),
     ]
 }

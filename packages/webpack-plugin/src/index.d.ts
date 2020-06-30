@@ -1,13 +1,11 @@
-interface Option {
+export interface Option {
     ui?: string[];
     encode?: {
         key: string;
         type: 'pck7' | 'pck5';
     };
 }
-declare const CryptoJS: any;
-declare const fs: any;
-declare class AutoProWebpackPlugin {
+export declare class AutoProWebpackPlugin {
     option: Option;
     constructor(option: {
         ui?: string[];

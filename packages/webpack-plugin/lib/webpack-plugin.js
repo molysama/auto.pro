@@ -1,7 +1,8 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 var CryptoJS = require("crypto-js");
-var fs = require("fs");
 var AutoProWebpackPlugin = /** @class */ (function () {
     function AutoProWebpackPlugin(option) {
         this.option = option;
@@ -48,3 +49,5 @@ var AutoProWebpackPlugin = /** @class */ (function () {
     return AutoProWebpackPlugin;
 }());
 module.exports = AutoProWebpackPlugin;
+
+exports.AutoProWebpackPlugin = AutoProWebpackPlugin;

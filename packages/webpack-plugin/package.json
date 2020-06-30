@@ -30,7 +30,7 @@
         "url": "git+https://github.com/molysama/auto.pro.git"
     },
     "scripts": {
-        "test": "npx webpack --config __tests__/webpack.config.js",
+        "test": "webpack --config __tests__/webpack.config.js",
         "build": "tsc && rollup -c rollup.config.js"
     },
     "bugs": {

@@ -1,6 +1,6 @@
 'use strict';
 
-interface Option {
+export interface Option {
     ui?: string[]
     encode?: {
         key: string
@@ -9,9 +9,8 @@ interface Option {
 }
 
 const CryptoJS = require("crypto-js")
-const fs = require("fs")
 
-class AutoProWebpackPlugin {
+export class AutoProWebpackPlugin {
 
     option: Option
 
