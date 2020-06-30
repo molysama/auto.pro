@@ -15,12 +15,12 @@ var AutoProWebpackPlugin = /** @class */ (function () {
                 var result = '';
                 // 如果ui数组里包含有该文件名，则为其头部添加"ui";
                 if (ui.includes(sourceFileName)) {
-                    result += '"ui";';
+                    result = '"ui";';
                 }
                 result += source;
                 if (encode) {
                     try {
-                        result += CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(source), CryptoJS.enc.Utf8.parse(encode.key), {
+                        result = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(result), CryptoJS.enc.Utf8.parse(encode.key), {
                             mode: CryptoJS.mode.ECB,
                             padding: CryptoJS.pad.Pkcs7,
                         }).toString();
