@@ -20,9 +20,9 @@ var AutoProWebpackPlugin = /** @class */ (function () {
                 result += source;
                 if (encode) {
                     try {
-                        result = CryptoJS.AES.encrypt(source, encode.key, {
+                        result = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(source), CryptoJS.enc.Utf8.parse(encode.key), {
                             mode: CryptoJS.mode.ECB,
-                            padding: encode.type === 'pck5' ? CryptoJS.pad.Pkcs5 : CryptoJS.pad.Pkcs7,
+                            padding: CryptoJS.pad.Pkcs7,
                         }).toString();
                     }
                     catch (error) {

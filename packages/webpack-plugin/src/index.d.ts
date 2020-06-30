@@ -2,7 +2,6 @@ export interface Option {
     ui?: string[];
     encode?: {
         key: string;
-        type: 'pck7' | 'pck5';
     };
 }
 export declare class AutoProWebpackPlugin {
@@ -11,7 +10,6 @@ export declare class AutoProWebpackPlugin {
         ui?: string[];
         encode?: {
             key: string;
-            type: 'pck7' | 'pck5';
         };
     });
     apply(compiler: any): void;

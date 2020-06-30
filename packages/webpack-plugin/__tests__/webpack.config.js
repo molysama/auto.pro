@@ -14,9 +14,9 @@ module.exports = {
     plugins: [
         new AutoProWebpackPlugin({
             ui: ['second'],
-            // encode: {
-            //     key: 'Secret Passphrase'
-            // }
+            encode: {
+                key: 'SecretPassphrase'
+            }
         }),
     ]
 }
