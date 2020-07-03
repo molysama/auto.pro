@@ -182,7 +182,7 @@ function pausableTimeoutWith(t, ob) {
                 return ob;
             }
             else {
-                return err;
+                return rxjs.throwError(err);
             }
         }));
     };

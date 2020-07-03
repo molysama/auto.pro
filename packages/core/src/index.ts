@@ -222,7 +222,7 @@ function pausableTimeoutWith(t: number, ob: Observable<any>) {
                 if (err instanceof TimeoutError) {
                     return ob
                 } else {
-                    return err
+                    return throwError(err)
                 }
             })
         )
