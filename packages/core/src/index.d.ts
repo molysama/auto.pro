@@ -36,6 +36,8 @@ declare function cap(path?: string): Image;
  */
 declare function use(plugin: Plugin, option?: any): number | undefined;
 /**
+ *
+ *
  * 程序是否处于暂停状态
  */
 declare const pauseState$: BehaviorSubject<boolean>;
@@ -109,4 +111,5 @@ export default function (param?: {
     baseHeight?: number;
     needCap?: boolean;
     needService?: boolean;
+    needFloaty?: boolean;
 }): void;

@@ -80,7 +80,11 @@ function use(plugin, option) {
     return plugins.push(plugin);
 }
 exports.use = use;
+//################################################################################
+//                                   暂停功能
 /**
+ *
+ *
  * 程序是否处于暂停状态
  */
 var pauseState$ = new rxjs_1.BehaviorSubject(false);
@@ -205,6 +209,8 @@ function pausableTimeout(t) {
     return pausableTimeoutWith(t, rxjs_1.throwError(new rxjs_1.TimeoutError()));
 }
 exports.pausableTimeout = pausableTimeout;
+//                                 暂停功能结束
+//#############################################################################
 /**
  * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
  * @param value 要获取的宽度百分比
@@ -278,6 +284,26 @@ function default_1(param) {
                 action: "android.settings.ACCESSIBILITY_SETTINGS"
             });
         }
+        if (param.needFloaty && !checkFloatyPermission()) {
+            requestFloatyPermission();
+        }
     });
 }
 exports.default = default_1;
+function checkFloatyPermission() {
+    importClass(android.provider.Settings);
+    if (!Settings.canDrawOverlays(context.getApplicationContext())) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+function requestFloatyPermission() {
+    app.startActivity({
+        action: Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+        data: "package:" + currentPackage()
+    });
+}
+//                                 悬浮窗权限结束
+//##################################################################################

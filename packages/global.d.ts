@@ -1,5 +1,7 @@
 interface Image { }
 
+declare const context: any
+declare const runtime: any
 declare const android: any
 declare const ui: any
 declare const JavaAdapter: any

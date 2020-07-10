@@ -88,7 +88,11 @@ function use(plugin: Plugin, option?: any) {
     return plugins.push(plugin)
 }
 
+//################################################################################
+//                                   暂停功能
 /**
+ * 
+ *
  * 程序是否处于暂停状态
  */
 const pauseState$ = new BehaviorSubject(false)
@@ -237,7 +241,8 @@ function pausableTimeoutWith(t: number, ob: Observable<any>) {
 function pausableTimeout(t: number) {
     return pausableTimeoutWith(t, throwError(new TimeoutError()))
 }
-
+//                                 暂停功能结束
+//#############################################################################
 
 
 /**
@@ -312,6 +317,7 @@ export default function (param: {
     baseHeight?: number
     needCap?: boolean
     needService?: boolean
+    needFloaty?: boolean
 } = {}) {
     needCap = param.needCap === true ? true : false
     needService = param.needService === true ? true : false
@@ -343,6 +349,32 @@ export default function (param: {
                 action: "android.settings.ACCESSIBILITY_SETTINGS"
             });
         }
+
+        if (param.needFloaty && !checkFloatyPermission()) {
+            requestFloatyPermission()
+        }
     })
 
 }
+
+//#################################################################################
+//                                   悬浮窗权限
+
+declare const Settings: any
+declare const currentPackage: Function
+function checkFloatyPermission() {
+    importClass(android.provider.Settings);
+    if (!Settings.canDrawOverlays(context.getApplicationContext())) {
+        return false
+    } else {
+        return true
+    }
+}
+function requestFloatyPermission() {
+    app.startActivity({
+        action: Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+        data: "package:" + currentPackage()
+    })
+}
+//                                 悬浮窗权限结束
+//##################################################################################
