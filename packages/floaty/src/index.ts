@@ -85,7 +85,7 @@ export function createFloaty({
         map(v => Boolean(v)),
         shareReplay(1)
     )
-    isFloatyOpen$.subscribe(console.log)
+    isFloatyOpen$.subscribe()
 
     function toggleFloaty() {
         toggleFloaty$.next(true)
@@ -93,7 +93,6 @@ export function createFloaty({
 
     function animation() {
         return new Promise((resolve, reject) => {
-            console.log('animation')
 
             const logo = FLOATY['logo']
             const firstElement = items.length > 0 && FLOATY[items[0].id]
@@ -115,7 +114,6 @@ export function createFloaty({
 
                 const offsetX = Math.floor(r * Math.cos(Math.PI * α / 180)) * direction
                 const offsetY = Math.floor(r * Math.sin(Math.PI * α / 180)) * -1
-                console.log(offsetX, offsetY, direction, FLOATY.getX(), logo.getX())
 
                 // 偏移的x = cos α * r, y = -1 * sin α * r
                 if (isOpen) {
@@ -148,7 +146,6 @@ export function createFloaty({
             set.start()
             set.addListener(new JavaAdapter(Animator.AnimatorListener, {
                 onAnimationEnd() {
-                    console.log('animation end')
                     if (!isOpen) {
                         logo.attr('alpha', 0.4)
                     }
@@ -163,9 +160,7 @@ export function createFloaty({
         filter(e => e.getAction() === e.ACTION_DOWN)
     )
     const move$ = logoTouch$.pipe(
-        withLatestFrom(isFloatyOpen$),
-        filter(([e, isOpen]) => !isOpen && e.getAction() === e.ACTION_MOVE),
-        map(([e, isOpen]) => e)
+        filter(e => e.getAction() === e.ACTION_MOVE),
     )
     const up$ = logoTouch$.pipe(
         filter(e => e.getAction() === e.ACTION_UP)
@@ -177,7 +172,6 @@ export function createFloaty({
             up$.pipe(
                 takeUntil(move$),
                 tap(() => {
-                    console.log('click')
                     toggleFloaty()
                 })
             ),
@@ -207,6 +201,7 @@ export function createFloaty({
 
     items.forEach(item => {
         FLOATY[item.id].on('click', () => {
+            toggleFloaty()
             item.callback()
         })
     })

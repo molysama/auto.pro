@@ -52,13 +52,12 @@ function createFloaty(_a) {
     var isFloatyOpen$ = toggleFloaty$.asObservable().pipe(operators_1.exhaustMap(function () {
         return rxjs_1.from(animation());
     }), operators_1.startWith(false), operators_1.map(function (v) { return Boolean(v); }), operators_1.shareReplay(1));
-    isFloatyOpen$.subscribe(console.log);
+    isFloatyOpen$.subscribe();
     function toggleFloaty() {
         toggleFloaty$.next(true);
     }
     function animation() {
         return new Promise(function (resolve, reject) {
-            console.log('animation');
             var logo = FLOATY['logo'];
             var firstElement = items.length > 0 && FLOATY[items[0].id];
             if (!firstElement) {
@@ -74,7 +73,6 @@ function createFloaty(_a) {
                 var element = FLOATY[item.id];
                 var offsetX = Math.floor(r * Math.cos(Math.PI * α / 180)) * direction;
                 var offsetY = Math.floor(r * Math.sin(Math.PI * α / 180)) * -1;
-                console.log(offsetX, offsetY, direction, FLOATY.getX(), logo.getX());
                 // 偏移的x = cos α * r, y = -1 * sin α * r
                 if (isOpen) {
                     animationItems.push(ObjectAnimator.ofFloat(element, "translationX", 0, offsetX), ObjectAnimator.ofFloat(element, "translationY", 0, offsetY), ObjectAnimator.ofFloat(element, "scaleX", 0, 1), ObjectAnimator.ofFloat(element, "scaleY", 0, 1), ObjectAnimator.ofFloat(element, "alpha", 0, 1));
@@ -94,7 +92,6 @@ function createFloaty(_a) {
             set.start();
             set.addListener(new JavaAdapter(Animator.AnimatorListener, {
                 onAnimationEnd: function () {
-                    console.log('animation end');
                     if (!isOpen) {
                         logo.attr('alpha', 0.4);
                     }
@@ -105,18 +102,11 @@ function createFloaty(_a) {
     }
     var logoTouch$ = new rxjs_1.Subject();
     var down$ = logoTouch$.pipe(operators_1.filter(function (e) { return e.getAction() === e.ACTION_DOWN; }));
-    var move$ = logoTouch$.pipe(operators_1.withLatestFrom(isFloatyOpen$), operators_1.filter(function (_a) {
-        var e = _a[0], isOpen = _a[1];
-        return !isOpen && e.getAction() === e.ACTION_MOVE;
-    }), operators_1.map(function (_a) {
-        var e = _a[0], isOpen = _a[1];
-        return e;
-    }));
+    var move$ = logoTouch$.pipe(operators_1.filter(function (e) { return e.getAction() === e.ACTION_MOVE; }));
     var up$ = logoTouch$.pipe(operators_1.filter(function (e) { return e.getAction() === e.ACTION_UP; }));
     down$.pipe(operators_1.map(function (e) { return ({ fx: FLOATY.getX(), fy: FLOATY.getY(), dx: e.getRawX(), dy: e.getRawY() }); }), operators_1.switchMap(function (_a) {
         var fx = _a.fx, fy = _a.fy, dx = _a.dx, dy = _a.dy;
         return rxjs_1.merge(up$.pipe(operators_1.takeUntil(move$), operators_1.tap(function () {
-            console.log('click');
             toggleFloaty();
         })), move$.pipe(operators_1.tap(function (e_move) {
             FLOATY.setPosition(fx + e_move.getRawX() - dx, fy + e_move.getRawY() - dy);
@@ -132,6 +122,7 @@ function createFloaty(_a) {
     }, 10000);
     items.forEach(function (item) {
         FLOATY[item.id].on('click', function () {
+            toggleFloaty();
             item.callback();
         });
     });
