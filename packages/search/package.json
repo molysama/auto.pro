@@ -1,40 +1,40 @@
 {
-  "name": "@auto.pro/search",
-  "version": "8.5.1",
-  "publishConfig": {
-    "access": "public"
-  },
-  "description": "auto.pro module for search image and color",
-  "author": "molysama <molysama.i@gmail.com>",
-  "homepage": "https://github.com/molysama/auto.pro#readme",
-  "license": "ISC",
-  "main": "dist/index.js",
-  "types": "src/index.d.ts",
-  "directories": {
-    "lib": "lib",
-    "test": "__tests__"
-  },
-  "files": [
-    "lib",
-    "dist",
-    "src"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/molysama/auto.pro.git"
-  },
-  "scripts": {
-    "build": "tsc && rollup -c rollup.config.js"
-  },
-  "bugs": {
-    "url": "https://github.com/molysama/auto.pro/issues"
-  },
-  "gitHead": "9911016873152d8fbd930899e3b575d559be9e43",
-  "dependencies": {
-    "rxjs": "^6.5.3"
-  },
-  "devDependencies": {
-    "@babel/preset-env": "^7.6.3",
-    "rollup-plugin-babel": "^4.3.3"
-  }
+    "name": "@auto.pro/search",
+    "version": "8.5.1",
+    "publishConfig": {
+        "access": "public"
+    },
+    "description": "auto.pro module for search image and color",
+    "author": "molysama <molysama.i@gmail.com>",
+    "homepage": "https://github.com/molysama/auto.pro#readme",
+    "license": "ISC",
+    "main": "lib/search.js",
+    "types": "src/index.d.ts",
+    "directories": {
+        "lib": "lib",
+        "src": "src",
+        "test": "__tests__"
+    },
+    "files": [
+        "lib",
+        "src"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/molysama/auto.pro.git"
+    },
+    "scripts": {
+        "build": "tsc && rollup -c rollup.config.js"
+    },
+    "bugs": {
+        "url": "https://github.com/molysama/auto.pro/issues"
+    },
+    "gitHead": "9911016873152d8fbd930899e3b575d559be9e43",
+    "dependencies": {
+        "rxjs": "^6.5.3"
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.6.3",
+        "rollup-plugin-babel": "^4.3.3"
+    }
 }

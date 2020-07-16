@@ -5,7 +5,7 @@ import babel from 'rollup-plugin-babel'
 export default {
     input: 'src/index.ts',
     output: {
-        file: 'dist/floaty.js',
+        file: 'lib/floaty.js',
         format: 'cjs'
     },
     plugins: [

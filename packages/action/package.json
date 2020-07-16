@@ -1,35 +1,35 @@
 {
-  "name": "@auto.pro/action",
-  "version": "8.5.1",
-  "description": "module for control app",
-  "author": "molysama <molysama.i@gmail.com>",
-  "publishConfig": {
-    "access": "public"
-  },
-  "homepage": "https://github.com/molysama/auto.pro#readme",
-  "license": "ISC",
-  "main": "dist/index.js",
-  "types": "src/index.d.ts",
-  "directories": {
-    "test": "__tests__"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/molysama/auto.pro.git"
-  },
-  "scripts": {
-    "build": "tsc && rollup -c rollup.config.js"
-  },
-  "bugs": {
-    "url": "https://github.com/molysama/auto.pro/issues"
-  },
-  "gitHead": "9911016873152d8fbd930899e3b575d559be9e43",
-  "dependencies": {
-    "bezier-js": "^2.4.4",
-    "rxjs": "^6.5.5"
-  },
-  "devDependencies": {
-    "@babel/preset-env": "^7.6.3",
-    "rollup-plugin-babel": "^4.3.3"
-  }
+    "name": "@auto.pro/action",
+    "version": "8.5.1",
+    "description": "module for control app",
+    "author": "molysama <molysama.i@gmail.com>",
+    "publishConfig": {
+        "access": "public"
+    },
+    "homepage": "https://github.com/molysama/auto.pro#readme",
+    "license": "ISC",
+    "main": "lib/action.js",
+    "types": "src/index.d.ts",
+    "directories": {
+        "test": "__tests__"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/molysama/auto.pro.git"
+    },
+    "scripts": {
+        "build": "tsc && rollup -c rollup.config.js"
+    },
+    "bugs": {
+        "url": "https://github.com/molysama/auto.pro/issues"
+    },
+    "gitHead": "9911016873152d8fbd930899e3b575d559be9e43",
+    "dependencies": {
+        "bezier-js": "^2.4.4",
+        "rxjs": "^6.5.5"
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.6.3",
+        "rollup-plugin-babel": "^4.3.3"
+    }
 }
