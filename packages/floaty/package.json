@@ -1,0 +1,39 @@
+{
+    "name": "@auto.pro/floaty",
+    "version": "8.8.0",
+    "description": "> TODO: description",
+    "keywords": [
+        "auto.pro",
+        "@auto.pro",
+        "molysama"
+    ],
+    "author": "molysama <molysama.i@gmail.com>",
+    "homepage": "https://github.com/molysama/auto.pro#readme",
+    "license": "ISC",
+    "main": "lib/floaty.js",
+    "types": "src/index.d.ts",
+    "directories": {
+        "lib": "lib",
+        "src": "src",
+        "test": "__tests__"
+    },
+    "files": [
+        "lib",
+        "src"
+    ],
+    "publishConfig": {
+        "registry": "http://registry.npmjs.org/",
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/molysama/auto.pro.git"
+    },
+    "scripts": {
+        "test": "echo \"Error: run tests from root\" && exit 1",
+        "build": "tsc && rollup -c rollup.config.js"
+    },
+    "bugs": {
+        "url": "https://github.com/molysama/auto.pro/issues"
+    }
+}

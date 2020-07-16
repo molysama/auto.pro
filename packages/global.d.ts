@@ -1,6 +1,11 @@
 interface Image { }
 
+declare const Animator: any
+declare const AnimatorSet: any
+declare const ObjectAnimator: any
 declare const context: any
+declare const java: any
+declare const floaty: any
 declare const runtime: any
 declare const android: any
 declare const ui: any
