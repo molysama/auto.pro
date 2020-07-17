@@ -48,8 +48,8 @@ function createFloaty(_a) {
         },
     ] : _g;
     var FLOATY = floaty.rawWindow("\n        <frame w=\"" + 2 * radius + "\" h=\"" + 2 * radius + "\">\n            " + items.map(function (item) {
-        return "\n                <frame id=\"" + item.id + "\" w=\"44\" h=\"44\" alpha=\"0\" layout_gravity=\"center\">\n                    <img w=\"44\" h=\"44\" src=\"" + item.color + "\" circle=\"true\" />\n                    <img w=\"28\" h=\"28\" src=\"@drawable/" + item.icon + "\" tint=\"#ffffff\" gravity=\"center\" layout_gravity=\"center\" />\n                    <img id=\"id_0_click\" w=\"*\" h=\"*\" src=\"#ffffff\" circle=\"true\" alpha=\"0\" />\n                </frame>\n                    ";
-    }).join('') + "\n            <frame id=\"logo\" w=\"44\" h=\"44\" alpha=\"0.4\" layout_gravity=\"center\">\n                <img w=\"44\" h=\"44\" src=\"#ffffff\" circle=\"true\" alpha=\"0.8\" />\n                <img id=\"img_logo\" w=\"32\" h=\"32\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n                <img id=\"logo_click\" w=\"*\" h=\"*\" src=\"#ffffff\" alpha=\"0\" />\n            </frame>\n        </frame>\n    ");
+        return "\n                <frame id=\"" + item.id + "\" w=\"44\" h=\"44\" alpha=\"0\" layout_gravity=\"center\">\n                    <img w=\"44\" h=\"44\" src=\"" + item.color + "\" circle=\"true\" />\n                    <img w=\"28\" h=\"28\" src=\"@drawable/" + item.icon + "\" tint=\"#ffffff\" gravity=\"center\" layout_gravity=\"center\" />\n                </frame>\n                    ";
+    }).join('') + "\n            <frame id=\"logo\" w=\"44\" h=\"44\" alpha=\"0.4\" layout_gravity=\"center\">\n                <img w=\"44\" h=\"44\" src=\"#ffffff\" circle=\"true\" alpha=\"0.8\" />\n                <img id=\"img_logo\" w=\"32\" h=\"32\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n            </frame>\n        </frame>\n    ");
     FLOATY.setPosition(-1 * radius + 20, core.height / 2);
     var toggleFloaty$ = new rxjs.Subject();
     var isFloatyOpen$ = toggleFloaty$.asObservable().pipe(operators.exhaustMap(function () {
@@ -62,7 +62,7 @@ function createFloaty(_a) {
     function animation() {
         return new Promise(function (resolve, reject) {
             var logo = FLOATY['logo'];
-            var firstElement = items.length > 0 && FLOATY[items[0].id];
+            var firstElement = items && items.length > 0 && FLOATY[items[0].id];
             if (!firstElement) {
                 return resolve(true);
             }
@@ -114,7 +114,13 @@ function createFloaty(_a) {
         })), move$.pipe(operators.tap(function (e_move) {
             FLOATY.setPosition(fx + e_move.getRawX() - dx, fy + e_move.getRawY() - dy);
         }), operators.takeUntil(up$)), up$.pipe(operators.skipUntil(move$), operators.tap(function () {
-            FLOATY.setPosition(FLOATY.getX() <= device.width / 2 - radius ? -1 * radius + 20 : device.width - radius - 20, FLOATY.getY());
+            // 在边界时吸附边界
+            if (FLOATY.getX() < 50) {
+                FLOATY.setPosition(-1 * radius + 20, FLOATY.getY());
+            }
+            else if (FLOATY.getX() > device.width - 50) {
+                FLOATY.setPosition(device.width - radius - 20, FLOATY.getY());
+            }
         })));
     })).subscribe();
     FLOATY.logo.setOnTouchListener(function (v, e) {
