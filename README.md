@@ -10,6 +10,7 @@
 | @auto.pro/search  | ![](https://img.shields.io/npm/v/@auto.pro/search.svg)  | 图色插件，封装了分辨率适配、循环找图、缓存及其他增强型函数      |
 | @auto.pro/stream  | ![](https://img.shields.io/npm/v/@auto.pro/stream.svg)  | 流程插件，提供了 RxJS 拓展操作符，便于检验和重做失效操作        |
 | @auto.pro/webview | ![](https://img.shields.io/npm/v/@auto.pro/webview.svg) | 网页插件，可使用 html 作为 UI 界面，有便捷的双向通信功能        |
+| @auto.pro/floaty  | ![](https://img.shields.io/npm/v/@auto.pro/floaty.svg)  | 悬浮窗插件，快速创建悬浮窗，能拖动和切换，支持多个自定义按钮     |
 
 # 文档
 [wiki](https://github.com/molysama/auto.pro/wiki)
