@@ -12,6 +12,8 @@ var operators = require('rxjs/operators');
  * @param {number} duration 悬浮窗开关的过渡时间
  * @param {number} radius 子菜单距离logo的长度（包含子菜单的直径），默认120
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
+ * @param {number} initX 初始X坐标，默认为-2
+ * @param {number} initY 初始Y坐标，默认为高度的一半
  * @param {{id: string, color: string, icon: string, callback: Function}[]} items 子菜单数组
  */
 function createFloaty(_a) {
@@ -46,16 +48,23 @@ function createFloaty(_a) {
             icon: 'ic_settings_black_48dp',
             callback: function () { }
         },
-    ] : _g;
+    ] : _g, _h = _b.initX, initX = _h === void 0 ? -2 : _h, _j = _b.initY, initY = _j === void 0 ? core.height / 2 : _j;
     var FLOATY = floaty.rawWindow("\n        <frame w=\"" + 2 * radius + "\" h=\"" + 2 * radius + "\">\n            " + items.map(function (item) {
         return "\n                <frame id=\"" + item.id + "\" w=\"44\" h=\"44\" alpha=\"0\" layout_gravity=\"center\">\n                    <img w=\"44\" h=\"44\" src=\"" + item.color + "\" circle=\"true\" />\n                    <img w=\"28\" h=\"28\" src=\"@drawable/" + item.icon + "\" tint=\"#ffffff\" gravity=\"center\" layout_gravity=\"center\" />\n                </frame>\n                    ";
-    }).join('') + "\n            <frame id=\"logo\" w=\"44\" h=\"44\" alpha=\"0.4\" layout_gravity=\"center\">\n                <img w=\"44\" h=\"44\" src=\"#ffffff\" circle=\"true\" alpha=\"0.8\" />\n                <img id=\"img_logo\" w=\"32\" h=\"32\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n            </frame>\n        </frame>\n    ");
-    FLOATY.setPosition(-1 * radius + 20, core.height / 2);
+    }).join('') + "\n            <frame id=\"logo\" w=\"44\" h=\"44\" alpha=\"0.4\" layout_gravity=\"center\">\n                <img id=\"img_logo\" w=\"*\" h=\"*\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n            </frame>\n        </frame>\n    ");
+    // 创建一个替身，让子菜单在关闭时不接受点击事件
+    var STAND = floaty.rawWindow("\n        <frame id=\"btn\" w=\"44\" h=\"44\" alpha=\"0\">\n            <img id=\"stand_logo\" w=\"*\" h=\"*\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n        </frame>\n    ");
+    // 两个悬浮窗的偏移量，在计算位置时 FLOATY的坐标 = STAND的坐标 - 偏移量
+    var FLOATY_STAND_OFFSET_X = FLOATY.logo.getX();
+    var FLOATY_STAND_OFFSET_Y = FLOATY.logo.getY();
+    FLOATY.setTouchable(false);
+    FLOATY.setPosition(initX - FLOATY_STAND_OFFSET_X, initY - FLOATY_STAND_OFFSET_Y);
+    STAND.setPosition(initX, initY);
     var toggleFloaty$ = new rxjs.Subject();
     var isFloatyOpen$ = toggleFloaty$.asObservable().pipe(operators.exhaustMap(function () {
         return rxjs.from(animation());
     }), operators.startWith(false), operators.map(function (v) { return Boolean(v); }), operators.shareReplay(1));
-    isFloatyOpen$.subscribe();
+    isFloatyOpen$.subscribe(function (isOpen) { return FLOATY.setTouchable(isOpen); });
     function toggleFloaty() {
         toggleFloaty$.next(true);
     }
@@ -105,34 +114,46 @@ function createFloaty(_a) {
     }
     var logoTouch$ = new rxjs.Subject();
     var down$ = logoTouch$.pipe(operators.filter(function (e) { return e.getAction() === e.ACTION_DOWN; }));
-    var move$ = logoTouch$.pipe(operators.filter(function (e) { return e.getAction() === e.ACTION_MOVE; }));
+    // 悬浮窗仅当关闭时可以移动
+    var move$ = logoTouch$.pipe(operators.withLatestFrom(isFloatyOpen$), operators.filter(function (_a) {
+        var e = _a[0], isOpen = _a[1];
+        return !isOpen && e.getAction() === e.ACTION_MOVE;
+    }), operators.map(function (_a) {
+        var e = _a[0], isOpen = _a[1];
+        return e;
+    }));
     var up$ = logoTouch$.pipe(operators.filter(function (e) { return e.getAction() === e.ACTION_UP; }));
-    down$.pipe(operators.map(function (e) { return ({ fx: FLOATY.getX(), fy: FLOATY.getY(), dx: e.getRawX(), dy: e.getRawY() }); }), operators.switchMap(function (_a) {
-        var fx = _a.fx, fy = _a.fy, dx = _a.dx, dy = _a.dy;
+    down$.pipe(operators.map(function (e) { return ({ dx: e.getRawX(), dy: e.getRawY(), sx: STAND.getX(), sy: STAND.getY() }); }), operators.switchMap(function (_a) {
+        var dx = _a.dx, dy = _a.dy, sx = _a.sx, sy = _a.sy;
         return rxjs.merge(up$.pipe(operators.takeUntil(move$), operators.tap(function () {
             toggleFloaty();
         })), move$.pipe(operators.tap(function (e_move) {
-            FLOATY.setPosition(fx + e_move.getRawX() - dx, fy + e_move.getRawY() - dy);
-        }), operators.takeUntil(up$)), up$.pipe(operators.skipUntil(move$), operators.tap(function () {
-            // 在边界时吸附边界
-            if (FLOATY.getX() < 50) {
-                FLOATY.setPosition(-1 * radius + 20, FLOATY.getY());
+            var rawX = e_move.getRawX() - dx;
+            var rawY = e_move.getRawY() - dy;
+            STAND.setPosition(sx + rawX, sy + rawY);
+            FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y);
+        }), operators.takeUntil(up$)), up$.pipe(operators.skipUntil(move$), operators.tap(function (e_up) {
+            var upX = e_up.getRawX();
+            var nowY = STAND.getY();
+            if (upX < 100) {
+                STAND.setPosition(-2, nowY);
+                FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y);
             }
-            else if (FLOATY.getX() > device.width - 50) {
-                FLOATY.setPosition(device.width - radius - 20, FLOATY.getY());
+            else if (upX > core.width - 100) {
+                STAND.setPosition(core.width - 42, nowY);
+                FLOATY.setPosition(core.width - FLOATY_STAND_OFFSET_X - 42, nowY - FLOATY_STAND_OFFSET_Y);
             }
         })));
     })).subscribe();
-    FLOATY.logo.setOnTouchListener(function (v, e) {
+    STAND.btn.setOnTouchListener(function (v, e) {
         logoTouch$.next(e);
         return true;
     });
-    var t = setInterval(function () {
-    }, 10000);
+    var t = setInterval(function () { }, 10000);
     items.forEach(function (item) {
         FLOATY[item.id].on('click', function () {
             toggleFloaty();
-            item.callback();
+            item.callback && item.callback();
         });
     });
     return {
@@ -140,6 +161,7 @@ function createFloaty(_a) {
         isOpen$: isFloatyOpen$,
         close: function () {
             FLOATY.close();
+            STAND.close();
             clearInterval(t);
         }
     };

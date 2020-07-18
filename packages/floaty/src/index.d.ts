@@ -7,9 +7,11 @@ declare const icons: readonly ["ic_3d_rotation_black_48dp", "ic_accessibility_bl
  * @param {number} duration 悬浮窗开关的过渡时间
  * @param {number} radius 子菜单距离logo的长度（包含子菜单的直径），默认120
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
+ * @param {number} initX 初始X坐标，默认为-2
+ * @param {number} initY 初始Y坐标，默认为高度的一半
  * @param {{id: string, color: string, icon: string, callback: Function}[]} items 子菜单数组
  */
-export declare function createFloaty({ logo, duration, radius, angle, items }?: {
+export declare function createFloaty({ logo, duration, radius, angle, items, initX, initY }?: {
     logo?: string;
     duration?: number;
     radius?: number;
@@ -20,6 +22,8 @@ export declare function createFloaty({ logo, duration, radius, angle, items }?: 
         color: string;
         callback: Function;
     }[];
+    initX?: number;
+    initY?: number;
 }): {
     FLOATY: any;
     isOpen$: Observable<boolean>;
