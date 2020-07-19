@@ -15,7 +15,7 @@ var operators = require('rxjs/operators');
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
  * @param {number} initX 初始X坐标，默认为-2
  * @param {number} initY 初始Y坐标，默认为高度的一半
- * @param {{id: string, color: string, icon: string, callback: Function}[]} items 子菜单数组
+ * @param {{id: string, color: string, icon: string, activeIcon: string, callback: Function}[]} items 子菜单数组
  */
 function createFloaty(_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.logo, logo = _c === void 0 ? 'https://pro.autojs.org/images/logo.png' : _c, _d = _b.logoSize, logoSize = _d === void 0 ? 44 : _d, _e = _b.duration, duration = _e === void 0 ? 200 : _e, _f = _b.radius, radius = _f === void 0 ? 120 : _f, _g = _b.angle, angle = _g === void 0 ? 120 : _g, _h = _b.items, items = _h === void 0 ? [
@@ -49,11 +49,11 @@ function createFloaty(_a) {
             icon: 'ic_settings_black_48dp',
             callback: function () { }
         },
-    ] : _h, _j = _b.initX, initX = _j === void 0 ? -2 : _j, _k = _b.initY, initY = _k === void 0 ? core.height / 2 : _k;
+    ] : _h, _j = _b.initX, initX = _j === void 0 ? -2 : _j, _k = _b.initY, initY = _k === void 0 ? core.getHeightPixels() / 2 : _k;
     var size = Math.floor(logoSize);
     var ICON_SIZE = Math.floor(32 / 44 * size);
     var FLOATY = floaty.rawWindow("\n        <frame w=\"" + 2 * radius + "\" h=\"" + 2 * radius + "\">\n            " + items.map(function (item) {
-        return "\n                <frame id=\"" + item.id + "\" w=\"" + size + "\" h=\"" + size + "\" alpha=\"0\" layout_gravity=\"center\">\n                    <img w=\"" + size + "\" h=\"" + size + "\" src=\"" + item.color + "\" circle=\"true\" />\n                    <img w=\"" + ICON_SIZE + "\" h=\"" + ICON_SIZE + "\" src=\"@drawable/" + item.icon + "\" tint=\"#ffffff\" gravity=\"center\" layout_gravity=\"center\" />\n                </frame>\n                    ";
+        return "\n                <frame id=\"" + item.id + "\" w=\"" + size + "\" h=\"" + size + "\" alpha=\"0\" layout_gravity=\"center\">\n                    <img w=\"" + size + "\" h=\"" + size + "\" id=\"" + item.id + "_color\" src=\"" + (core.getPrototype(item.color) === 'String' ? item.color : item.color && item.color && item.color.length > 0 && item.color[0]) + "\" circle=\"true\" />\n                    <img w=\"" + ICON_SIZE + "\" h=\"" + ICON_SIZE + "\" id=\"" + item.id + "_icon\" src=\"@drawable/" + (core.getPrototype(item.icon) === 'String' ? item.icon : item.icon && item.icon.length > 0 && item.icon[0]) + "\" tint=\"" + (item.tint || '#ffffff') + "\" gravity=\"center\" layout_gravity=\"center\" />\n                </frame>\n                    ";
     }).join('') + "\n            <frame id=\"logo\" w=\"" + size + "\" h=\"" + size + "\" alpha=\"0.4\" layout_gravity=\"center\">\n                <img id=\"img_logo\" w=\"*\" h=\"*\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n            </frame>\n        </frame>\n    ");
     // 创建一个替身，让子菜单在关闭时不接受点击事件
     var STAND = floaty.rawWindow("\n        <frame id=\"btn\" w=\"" + size + "\" h=\"" + size + "\" alpha=\"0\">\n            <img id=\"stand_logo\" w=\"*\" h=\"*\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n        </frame>\n    ");
@@ -81,11 +81,11 @@ function createFloaty(_a) {
                 return resolve(true);
             }
             var isOpen = firstElement.getX() === logo.getX();
-            var direction = FLOATY.getX() < core.width / 2 ? 1 : -1;
+            var direction = STAND.getX() < core.getWidthPixels() / 2 ? 1 : -1;
             var base = Math.floor(angle / (items.length - 1));
             var r = radius - Math.floor(size / 2 + 2);
             var animationItems = [];
-            var α = 180 - angle;
+            var α = angle / 2;
             items.forEach(function (item) {
                 var element = FLOATY[item.id];
                 var offsetX = Math.floor(r * Math.cos(Math.PI * α / 180)) * direction;
@@ -145,14 +145,15 @@ function createFloaty(_a) {
         up$.pipe(operators.skipUntil(move$), operators.tap(function (e_up) {
             var upX = e_up.getRawX();
             var nowY = STAND.getY();
+            var widthPixels = core.getWidthPixels();
             // 吸附左右边界
             if (upX < 100) {
                 STAND.setPosition(-2, nowY);
                 FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y);
             }
-            else if (upX > core.width - 100) {
-                STAND.setPosition(core.width - size + 2, nowY);
-                FLOATY.setPosition(core.width - FLOATY_STAND_OFFSET_X - size + 2, nowY - FLOATY_STAND_OFFSET_Y);
+            else if (upX > widthPixels - 100) {
+                STAND.setPosition(widthPixels - size + 2, nowY);
+                FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - size + 2, nowY - FLOATY_STAND_OFFSET_Y);
             }
         })));
     })).subscribe();
@@ -162,9 +163,20 @@ function createFloaty(_a) {
     });
     var t = setInterval(function () { }, 10000);
     items.forEach(function (item) {
+        var index = 0;
+        var iconLength = core.getPrototype(item.icon) === 'Array' && item.icon.length || 0;
+        var colorLength = core.getPrototype(item.color) === 'Array' && item.color.length || 0;
         FLOATY[item.id].on('click', function () {
             toggleFloaty();
-            item.callback && item.callback();
+            item.callback && item.callback(index);
+            // 如果item.icon是数组的话，切换item的按钮图标
+            if (iconLength > 1) {
+                index = (index + 1) % iconLength;
+                FLOATY[item.id + '_icon'].setSource("@drawable/" + item.icon[index]);
+                if (iconLength === colorLength) {
+                    FLOATY[item.id + '_color'].setSource(item.color[index]);
+                }
+            }
         });
     });
     return {

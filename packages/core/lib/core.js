@@ -6,6 +6,33 @@ var rxjs = require('rxjs');
 var operators = require('rxjs/operators');
 
 var isFunction = function (val) { return typeof val === 'function'; };
+/**
+ * 判断当前是否为横屏
+ */
+var isScreenLandscape = function () {
+    var dm = context.getResources().getDisplayMetrics();
+    var wm = context.getSystemService(context.WINDOW_SERVICE);
+    wm.getDefaultDisplay().getRealMetrics(dm);
+    return dm.widthPixels > dm.heightPixels;
+};
+/**
+ * 返回屏幕水平像素
+ */
+var getWidthPixels = function () {
+    var dm = context.getResources().getDisplayMetrics();
+    var wm = context.getSystemService(context.WINDOW_SERVICE);
+    wm.getDefaultDisplay().getRealMetrics(dm);
+    return dm.widthPixels;
+};
+/**
+ * 返回屏幕纵向像素
+ */
+var getHeightPixels = function () {
+    var dm = context.getResources().getDisplayMetrics();
+    var wm = context.getSystemService(context.WINDOW_SERVICE);
+    wm.getDefaultDisplay().getRealMetrics(dm);
+    return dm.heightPixels;
+};
 
 /**
  * 设备是否Root
@@ -28,11 +55,11 @@ var baseWidth = 1280;
  */
 var baseHeight = 720;
 /**
- * 当前设备宽度
+ * 当前设备宽度，为最长的那条边
  */
 
 /**
- * 当前设备高度
+ * 当前设备高度，为最短的那条边
  */
 
 /**
@@ -40,7 +67,7 @@ var baseHeight = 720;
  */
 
 /**
- * 当前设备的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
+ * 脚本需求的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
  */
 
 /**
@@ -299,9 +326,13 @@ function requestFloatyPermission() {
 exports.cap = cap;
 exports.default = index;
 exports.getHeight = getHeight;
+exports.getHeightPixels = getHeightPixels;
 exports.getPrototype = getPrototype;
 exports.getTime = getTime;
 exports.getWidth = getWidth;
+exports.getWidthPixels = getWidthPixels;
+exports.isFunction = isFunction;
+exports.isScreenLandscape = isScreenLandscape;
 exports.pausable = pausable;
 exports.pausableInterval = pausableInterval;
 exports.pausableTimeout = pausableTimeout;

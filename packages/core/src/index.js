@@ -25,12 +25,12 @@ var baseWidth = 1280;
  */
 var baseHeight = 720;
 /**
- * 当前设备宽度
+ * 当前设备宽度，为最长的那条边
  */
 var width;
 exports.width = width;
 /**
- * 当前设备高度
+ * 当前设备高度，为最短的那条边
  */
 var height;
 exports.height = height;
@@ -40,7 +40,7 @@ exports.height = height;
 var scale;
 exports.scale = scale;
 /**
- * 当前设备的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
+ * 脚本需求的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
  */
 var screenType;
 exports.screenType = screenType;
@@ -235,6 +235,11 @@ function getTime() {
     return android.os.SystemClock.uptimeMillis();
 }
 exports.getTime = getTime;
+var utils_2 = require("./utils");
+exports.isScreenLandscape = utils_2.isScreenLandscape;
+exports.isFunction = utils_2.isFunction;
+exports.getWidthPixels = utils_2.getWidthPixels;
+exports.getHeightPixels = utils_2.getHeightPixels;
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'

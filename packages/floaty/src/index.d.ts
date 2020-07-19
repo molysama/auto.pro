@@ -10,18 +10,19 @@ declare const icons: readonly ["ic_3d_rotation_black_48dp", "ic_accessibility_bl
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
  * @param {number} initX 初始X坐标，默认为-2
  * @param {number} initY 初始Y坐标，默认为高度的一半
- * @param {{id: string, color: string, icon: string, callback: Function}[]} items 子菜单数组
+ * @param {{id: string, color: string, icon: string, activeIcon: string, callback: Function}[]} items 子菜单数组
  */
 export declare function createFloaty({ logo, logoSize, duration, radius, angle, items, initX, initY }?: {
-    logo?: string;
+    logo?: string | string[];
     logoSize?: number;
     duration?: number;
     radius?: number;
     angle?: number;
     items?: {
         id: string;
-        icon: typeof icons[number];
-        color: string;
+        icon: typeof icons[number] | (typeof icons[number])[];
+        color: string | string[];
+        tint?: string;
         callback: Function;
     }[];
     initX?: number;

@@ -38,11 +38,11 @@ let baseWidth = 1280
  */
 let baseHeight = 720
 /**
- * 当前设备宽度
+ * 当前设备宽度，为最长的那条边
  */
 let width: number
 /**
- * 当前设备高度
+ * 当前设备高度，为最短的那条边
  */
 let height: number
 /**
@@ -51,7 +51,7 @@ let height: number
 let scale: number
 
 /**
- * 当前设备的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
+ * 脚本需求的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
  */
 let screenType: ('w' | 'h')
 
@@ -266,6 +266,7 @@ declare const android
 export function getTime() {
     return android.os.SystemClock.uptimeMillis()
 }
+export { isScreenLandscape, isFunction, getWidthPixels, getHeightPixels } from './utils'
 
 /**
  * 获取对象的原型

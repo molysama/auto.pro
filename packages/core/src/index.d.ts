@@ -8,11 +8,11 @@ export declare type Plugin = PluginInstallFunction | {
  */
 declare let isRoot: boolean;
 /**
- * 当前设备宽度
+ * 当前设备宽度，为最长的那条边
  */
 declare let width: number;
 /**
- * 当前设备高度
+ * 当前设备高度，为最短的那条边
  */
 declare let height: number;
 /**
@@ -20,7 +20,7 @@ declare let height: number;
  */
 declare let scale: number;
 /**
- * 当前设备的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
+ * 脚本需求的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
  */
 declare let screenType: ('w' | 'h');
 /**
@@ -90,6 +90,7 @@ declare function getWidth(value?: number): number;
  */
 declare function getHeight(value?: number): number;
 export declare function getTime(): any;
+export { isScreenLandscape, isFunction, getWidthPixels, getHeightPixels } from './utils';
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'

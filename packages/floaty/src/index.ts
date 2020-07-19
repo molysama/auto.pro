@@ -1,4 +1,4 @@
-import { height, Plugin, width } from "@auto.pro/core";
+import { getHeightPixels, getPrototype, getWidthPixels, Plugin } from "@auto.pro/core";
 import { from, merge, Observable, Subject } from 'rxjs';
 import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 
@@ -17,7 +17,7 @@ const icons = [
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
  * @param {number} initX 初始X坐标，默认为-2
  * @param {number} initY 初始Y坐标，默认为高度的一半
- * @param {{id: string, color: string, icon: string, callback: Function}[]} items 子菜单数组
+ * @param {{id: string, color: string, icon: string, activeIcon: string, callback: Function}[]} items 子菜单数组
  */
 export function createFloaty({
     logo = 'https://pro.autojs.org/images/logo.png',
@@ -58,17 +58,18 @@ export function createFloaty({
         },
     ],
     initX = -2,
-    initY = height / 2
+    initY = getHeightPixels() / 2
 }: {
-    logo?: string
+    logo?: string | string[]
     logoSize?: number
     duration?: number
     radius?: number
     angle?: number
     items?: {
         id: string
-        icon: typeof icons[number]
-        color: string
+        icon: typeof icons[number] | (typeof icons[number])[]
+        color: string | string[]
+        tint?: string
         callback: Function
     }[],
     initX?: number
@@ -88,8 +89,8 @@ export function createFloaty({
         items.map(item => {
             return `
                 <frame id="${item.id}" w="${size}" h="${size}" alpha="0" layout_gravity="center">
-                    <img w="${size}" h="${size}" src="${item.color}" circle="true" />
-                    <img w="${ICON_SIZE}" h="${ICON_SIZE}" src="@drawable/${item.icon}" tint="#ffffff" gravity="center" layout_gravity="center" />
+                    <img w="${size}" h="${size}" id="${item.id}_color" src="${getPrototype(item.color) === 'String' ? item.color : item.color && item.color && item.color.length > 0 && item.color[0]}" circle="true" />
+                    <img w="${ICON_SIZE}" h="${ICON_SIZE}" id="${item.id}_icon" src="@drawable/${getPrototype(item.icon) === 'String' ? item.icon : item.icon && item.icon.length > 0 && item.icon[0]}" tint="${item.tint || '#ffffff'}" gravity="center" layout_gravity="center" />
                 </frame>
                     `
         }).join('')
@@ -143,12 +144,12 @@ export function createFloaty({
             }
 
             const isOpen = firstElement.getX() === logo.getX()
-            const direction = FLOATY.getX() < width / 2 ? 1 : -1
+            const direction = STAND.getX() < getWidthPixels() / 2 ? 1 : -1
 
             const base = Math.floor(angle / (items.length - 1))
             const r = radius - Math.floor(size / 2 + 2)
             const animationItems: any[] = []
-            let α = 180 - angle
+            let α = angle / 2
             items.forEach(item => {
                 const element = FLOATY[item.id]
 
@@ -235,14 +236,15 @@ export function createFloaty({
                 tap((e_up) => {
                     const upX = e_up.getRawX()
                     const nowY = STAND.getY()
+                    const widthPixels = getWidthPixels()
 
                     // 吸附左右边界
                     if (upX < 100) {
                         STAND.setPosition(-2, nowY)
                         FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y)
-                    } else if (upX > width - 100) {
-                        STAND.setPosition(width - size + 2, nowY)
-                        FLOATY.setPosition(width - FLOATY_STAND_OFFSET_X - size + 2, nowY - FLOATY_STAND_OFFSET_Y)
+                    } else if (upX > widthPixels - 100) {
+                        STAND.setPosition(widthPixels - size + 2, nowY)
+                        FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - size + 2, nowY - FLOATY_STAND_OFFSET_Y)
                     }
                 })
             )
@@ -254,12 +256,23 @@ export function createFloaty({
         return true
     })
 
-    const t = setInterval(() => { }, 10000);
+    const t = setInterval(() => { }, 10000)
 
     items.forEach(item => {
+        let index = 0
+        const iconLength = getPrototype(item.icon) === 'Array' && item.icon.length || 0
+        const colorLength = getPrototype(item.color) === 'Array' && item.color.length || 0
         FLOATY[item.id].on('click', () => {
             toggleFloaty()
-            item.callback && item.callback()
+            item.callback && item.callback(index)
+            // 如果item.icon是数组的话，切换item的按钮图标
+            if (iconLength > 1) {
+                index = (index + 1) % iconLength
+                FLOATY[item.id + '_icon'].setSource(`@drawable/${item.icon[index]}`)
+                if (iconLength === colorLength) {
+                    FLOATY[item.id + '_color'].setSource(item.color[index])
+                }
+            }
         })
     })
 
