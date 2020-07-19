@@ -11,7 +11,7 @@ const icons = [
 /**
  * 创建一个悬浮窗
  * @param {string} logo logo图片地址
- * @param {number} size 按钮尺寸
+ * @param {number} logoSize 按钮尺寸
  * @param {number} duration 悬浮窗开关的过渡时间
  * @param {number} radius 子菜单距离logo的长度（包含子菜单的直径），默认120
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
@@ -116,6 +116,7 @@ export function createFloaty({
     FLOATY.setPosition(initX - FLOATY_STAND_OFFSET_X, initY - FLOATY_STAND_OFFSET_Y)
     STAND.setPosition(initX, initY)
 
+    // 悬浮窗的开关状态及动画
     const toggleFloaty$ = new Subject<boolean>()
     const isFloatyOpen$: Observable<boolean> = toggleFloaty$.asObservable().pipe(
         exhaustMap(() => {
@@ -194,6 +195,7 @@ export function createFloaty({
         })
     }
 
+    // 派发触摸事件
     const logoTouch$ = new Subject<any>()
     const down$ = logoTouch$.pipe(
         filter(e => e.getAction() === e.ACTION_DOWN)
@@ -211,6 +213,7 @@ export function createFloaty({
     down$.pipe(
         map(e => ({ dx: e.getRawX(), dy: e.getRawY(), sx: STAND.getX(), sy: STAND.getY() })),
         switchMap(({ dx, dy, sx, sy }) => merge(
+            // 按下后无移动，则弹起时视为点击
             up$.pipe(
                 takeUntil(move$),
                 tap(() => {
@@ -226,11 +229,14 @@ export function createFloaty({
                 }),
                 takeUntil(up$),
             ),
+            // 按下后有移动，则弹起时视为移动结束
             up$.pipe(
                 skipUntil(move$),
                 tap((e_up) => {
                     const upX = e_up.getRawX()
                     const nowY = STAND.getY()
+
+                    // 吸附左右边界
                     if (upX < 100) {
                         STAND.setPosition(-2, nowY)
                         FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y)

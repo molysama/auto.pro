@@ -9,7 +9,7 @@ var operators = require('rxjs/operators');
 /**
  * 创建一个悬浮窗
  * @param {string} logo logo图片地址
- * @param {number} size 按钮尺寸
+ * @param {number} logoSize 按钮尺寸
  * @param {number} duration 悬浮窗开关的过渡时间
  * @param {number} radius 子菜单距离logo的长度（包含子菜单的直径），默认120
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
@@ -64,6 +64,7 @@ function createFloaty(_a) {
     FLOATY.setTouchable(false);
     FLOATY.setPosition(initX - FLOATY_STAND_OFFSET_X, initY - FLOATY_STAND_OFFSET_Y);
     STAND.setPosition(initX, initY);
+    // 悬浮窗的开关状态及动画
     var toggleFloaty$ = new rxjs.Subject();
     var isFloatyOpen$ = toggleFloaty$.asObservable().pipe(operators.exhaustMap(function () {
         return rxjs.from(animation());
@@ -116,6 +117,7 @@ function createFloaty(_a) {
             }));
         });
     }
+    // 派发触摸事件
     var logoTouch$ = new rxjs.Subject();
     var down$ = logoTouch$.pipe(operators.filter(function (e) { return e.getAction() === e.ACTION_DOWN; }));
     // 悬浮窗仅当关闭时可以移动
@@ -129,16 +131,21 @@ function createFloaty(_a) {
     var up$ = logoTouch$.pipe(operators.filter(function (e) { return e.getAction() === e.ACTION_UP; }));
     down$.pipe(operators.map(function (e) { return ({ dx: e.getRawX(), dy: e.getRawY(), sx: STAND.getX(), sy: STAND.getY() }); }), operators.switchMap(function (_a) {
         var dx = _a.dx, dy = _a.dy, sx = _a.sx, sy = _a.sy;
-        return rxjs.merge(up$.pipe(operators.takeUntil(move$), operators.tap(function () {
+        return rxjs.merge(
+        // 按下后无移动，则弹起时视为点击
+        up$.pipe(operators.takeUntil(move$), operators.tap(function () {
             toggleFloaty();
         })), move$.pipe(operators.tap(function (e_move) {
             var rawX = e_move.getRawX() - dx;
             var rawY = e_move.getRawY() - dy;
             STAND.setPosition(sx + rawX, sy + rawY);
             FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y);
-        }), operators.takeUntil(up$)), up$.pipe(operators.skipUntil(move$), operators.tap(function (e_up) {
+        }), operators.takeUntil(up$)), 
+        // 按下后有移动，则弹起时视为移动结束
+        up$.pipe(operators.skipUntil(move$), operators.tap(function (e_up) {
             var upX = e_up.getRawX();
             var nowY = STAND.getY();
+            // 吸附左右边界
             if (upX < 100) {
                 STAND.setPosition(-2, nowY);
                 FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y);
