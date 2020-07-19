@@ -11,6 +11,7 @@ const icons = [
 /**
  * 创建一个悬浮窗
  * @param {string} logo logo图片地址
+ * @param {number} size 按钮尺寸
  * @param {number} duration 悬浮窗开关的过渡时间
  * @param {number} radius 子菜单距离logo的长度（包含子菜单的直径），默认120
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
@@ -20,6 +21,7 @@ const icons = [
  */
 export function createFloaty({
     logo = 'https://pro.autojs.org/images/logo.png',
+    logoSize = 44,
     duration = 200,
     radius = 120,
     angle = 120,
@@ -59,6 +61,7 @@ export function createFloaty({
     initY = height / 2
 }: {
     logo?: string
+    logoSize?: number
     duration?: number
     radius?: number
     angle?: number
@@ -76,19 +79,22 @@ export function createFloaty({
     close: Function
 } {
 
+    const size = Math.floor(logoSize)
+    const ICON_SIZE = Math.floor(32 / 44 * size)
+
     const FLOATY = floaty.rawWindow(`
         <frame w="${2 * radius}" h="${2 * radius}">
             ${
         items.map(item => {
             return `
-                <frame id="${item.id}" w="44" h="44" alpha="0" layout_gravity="center">
-                    <img w="44" h="44" src="${item.color}" circle="true" />
-                    <img w="28" h="28" src="@drawable/${item.icon}" tint="#ffffff" gravity="center" layout_gravity="center" />
+                <frame id="${item.id}" w="${size}" h="${size}" alpha="0" layout_gravity="center">
+                    <img w="${size}" h="${size}" src="${item.color}" circle="true" />
+                    <img w="${ICON_SIZE}" h="${ICON_SIZE}" src="@drawable/${item.icon}" tint="#ffffff" gravity="center" layout_gravity="center" />
                 </frame>
                     `
         }).join('')
         }
-            <frame id="logo" w="44" h="44" alpha="0.4" layout_gravity="center">
+            <frame id="logo" w="${size}" h="${size}" alpha="0.4" layout_gravity="center">
                 <img id="img_logo" w="*" h="*" src="${logo}" gravity="center" layout_gravity="center" />
             </frame>
         </frame>
@@ -96,7 +102,7 @@ export function createFloaty({
 
     // 创建一个替身，让子菜单在关闭时不接受点击事件
     const STAND = floaty.rawWindow(`
-        <frame id="btn" w="44" h="44" alpha="0">
+        <frame id="btn" w="${size}" h="${size}" alpha="0">
             <img id="stand_logo" w="*" h="*" src="${logo}" gravity="center" layout_gravity="center" />
         </frame>
     `)
@@ -105,6 +111,7 @@ export function createFloaty({
     const FLOATY_STAND_OFFSET_X = FLOATY.logo.getX()
     const FLOATY_STAND_OFFSET_Y = FLOATY.logo.getY()
 
+    // 设置悬浮窗的初始位置
     FLOATY.setTouchable(false)
     FLOATY.setPosition(initX - FLOATY_STAND_OFFSET_X, initY - FLOATY_STAND_OFFSET_Y)
     STAND.setPosition(initX, initY)
@@ -138,10 +145,9 @@ export function createFloaty({
             const direction = FLOATY.getX() < width / 2 ? 1 : -1
 
             const base = Math.floor(angle / (items.length - 1))
-            let α = 180 - angle
-            const r = radius - 24
-
+            const r = radius - Math.floor(size / 2 + 2)
             const animationItems: any[] = []
+            let α = 180 - angle
             items.forEach(item => {
                 const element = FLOATY[item.id]
 
@@ -172,7 +178,7 @@ export function createFloaty({
             set.playTogether(...animationItems)
             set.setDuration(duration)
 
-            // logo变亮的按钮在前
+            // logo变亮的按钮效果在前
             if (isOpen) {
                 logo.attr('alpha', 1)
             }
@@ -229,8 +235,8 @@ export function createFloaty({
                         STAND.setPosition(-2, nowY)
                         FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y)
                     } else if (upX > width - 100) {
-                        STAND.setPosition(width - 42, nowY)
-                        FLOATY.setPosition(width - FLOATY_STAND_OFFSET_X - 42, nowY - FLOATY_STAND_OFFSET_Y)
+                        STAND.setPosition(width - size + 2, nowY)
+                        FLOATY.setPosition(width - FLOATY_STAND_OFFSET_X - size + 2, nowY - FLOATY_STAND_OFFSET_Y)
                     }
                 })
             )

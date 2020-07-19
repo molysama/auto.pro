@@ -4,6 +4,7 @@ declare const icons: readonly ["ic_3d_rotation_black_48dp", "ic_accessibility_bl
 /**
  * 创建一个悬浮窗
  * @param {string} logo logo图片地址
+ * @param {number} size 按钮尺寸
  * @param {number} duration 悬浮窗开关的过渡时间
  * @param {number} radius 子菜单距离logo的长度（包含子菜单的直径），默认120
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
@@ -11,8 +12,9 @@ declare const icons: readonly ["ic_3d_rotation_black_48dp", "ic_accessibility_bl
  * @param {number} initY 初始Y坐标，默认为高度的一半
  * @param {{id: string, color: string, icon: string, callback: Function}[]} items 子菜单数组
  */
-export declare function createFloaty({ logo, duration, radius, angle, items, initX, initY }?: {
+export declare function createFloaty({ logo, logoSize, duration, radius, angle, items, initX, initY }?: {
     logo?: string;
+    logoSize?: number;
     duration?: number;
     radius?: number;
     angle?: number;
