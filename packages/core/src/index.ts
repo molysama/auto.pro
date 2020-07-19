@@ -360,8 +360,12 @@ export default function (param: {
 //#################################################################################
 //                                   悬浮窗权限
 
+importClass(android.provider.Settings);
+importClass(android.net.Uri);
+//请求悬浮窗权限
+
 declare const Settings: any
-declare const currentPackage: Function
+declare const Uri
 function checkFloatyPermission() {
     importClass(android.provider.Settings);
     if (!Settings.canDrawOverlays(context.getApplicationContext())) {
@@ -373,8 +377,10 @@ function checkFloatyPermission() {
 function requestFloatyPermission() {
     app.startActivity({
         action: Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-        data: "package:" + currentPackage()
+        data: Uri.parse("package:" + context.getPackageName())
     })
 }
+
+
 //                                 悬浮窗权限结束
 //##################################################################################
