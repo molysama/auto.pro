@@ -60,16 +60,40 @@ export function createFloaty({
     initX = -2,
     initY = getHeightPixels() / 2
 }: {
+    /**
+     * logo地址
+     */
     logo?: string | string[]
+    /**
+     * logo尺寸，默认44
+     */
     logoSize?: number
+    /**
+     * 动画过渡总时间，默认200(ms)
+     */
     duration?: number
+    /**
+     * 子菜单离logo的距离，算上了子菜单本身的长度
+     */
     radius?: number
+    /**
+     * 子菜单形成的角度，默认120(度)
+     */
     angle?: number
+    /**
+     * 子菜单列表
+     * 
+     * id不能重复  
+     * icon: 安卓系统内置图标，可为字符串或字符串数组，当为数组时每次点击都会切换到下个图标，callback的state也会切换  
+     * color: 十六机制颜色，如'#ffffff'，可为字符串或字符串数组，仅当数组长度与icon长度相同时会进行切换  
+     * callback: function (state) {} 点击后的回调函数，state对应当前icon的索引，当icon为字符串时始终为0  
+     */
     items?: {
         id: string
         icon: typeof icons[number] | (typeof icons[number])[]
         color: string | string[]
         tint?: string
+        toggleOnClick?: boolean
         callback: Function
     }[],
     initX?: number
@@ -82,6 +106,9 @@ export function createFloaty({
 
     const size = Math.floor(logoSize)
     const ICON_SIZE = Math.floor(32 / 44 * size)
+
+    // size实际像素
+    const SIZE_PIXELS = Math.floor(size * context.getResources().getDisplayMetrics().density)
 
     const FLOATY = floaty.rawWindow(`
         <frame w="${2 * radius}" h="${2 * radius}">
@@ -124,7 +151,6 @@ export function createFloaty({
             return from(animation())
         }),
         startWith(false),
-        map(v => Boolean(v)),
         shareReplay(1)
     )
     isFloatyOpen$.subscribe(isOpen => FLOATY.setTouchable(isOpen))
@@ -134,7 +160,7 @@ export function createFloaty({
     }
 
     function animation() {
-        return new Promise((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
 
             const logo = FLOATY['logo']
             const firstElement = items && items.length > 0 && FLOATY[items[0].id]
@@ -147,7 +173,7 @@ export function createFloaty({
             const direction = STAND.getX() < getWidthPixels() / 2 ? 1 : -1
 
             const base = Math.floor(angle / (items.length - 1))
-            const r = radius - Math.floor(size / 2 + 2)
+            const r = radius - Math.floor(SIZE_PIXELS / 2 + 2)
             const animationItems: any[] = []
             let α = angle / 2
             items.forEach(item => {
@@ -243,8 +269,8 @@ export function createFloaty({
                         STAND.setPosition(-2, nowY)
                         FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y)
                     } else if (upX > widthPixels - 100) {
-                        STAND.setPosition(widthPixels - size + 2, nowY)
-                        FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - size + 2, nowY - FLOATY_STAND_OFFSET_Y)
+                        STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowY)
+                        FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowY - FLOATY_STAND_OFFSET_Y)
                     }
                 })
             )
@@ -263,7 +289,9 @@ export function createFloaty({
         const iconLength = getPrototype(item.icon) === 'Array' && item.icon.length || 0
         const colorLength = getPrototype(item.color) === 'Array' && item.color.length || 0
         FLOATY[item.id].on('click', () => {
-            toggleFloaty()
+            if (item.toggleOnClick !== false) {
+                toggleFloaty()
+            }
             item.callback && item.callback(index)
             // 如果item.icon是数组的话，切换item的按钮图标
             if (iconLength > 1) {

@@ -13,16 +13,40 @@ declare const icons: readonly ["ic_3d_rotation_black_48dp", "ic_accessibility_bl
  * @param {{id: string, color: string, icon: string, activeIcon: string, callback: Function}[]} items 子菜单数组
  */
 export declare function createFloaty({ logo, logoSize, duration, radius, angle, items, initX, initY }?: {
+    /**
+     * logo地址
+     */
     logo?: string | string[];
+    /**
+     * logo尺寸，默认44
+     */
     logoSize?: number;
+    /**
+     * 动画过渡总时间，默认200(ms)
+     */
     duration?: number;
+    /**
+     * 子菜单离logo的距离，算上了子菜单本身的长度
+     */
     radius?: number;
+    /**
+     * 子菜单形成的角度，默认120(度)
+     */
     angle?: number;
+    /**
+     * 子菜单列表
+     *
+     * id不能重复
+     * icon: 安卓系统内置图标，可为字符串或字符串数组，当为数组时每次点击都会切换到下个图标，callback的state也会切换
+     * color: 十六机制颜色，如'#ffffff'，可为字符串或字符串数组，仅当数组长度与icon长度相同时会进行切换
+     * callback: function (state) {} 点击后的回调函数，state对应当前icon的索引，当icon为字符串时始终为0
+     */
     items?: {
         id: string;
         icon: typeof icons[number] | (typeof icons[number])[];
         color: string | string[];
         tint?: string;
+        toggleOnClick?: boolean;
         callback: Function;
     }[];
     initX?: number;

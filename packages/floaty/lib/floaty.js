@@ -52,6 +52,8 @@ function createFloaty(_a) {
     ] : _h, _j = _b.initX, initX = _j === void 0 ? -2 : _j, _k = _b.initY, initY = _k === void 0 ? core.getHeightPixels() / 2 : _k;
     var size = Math.floor(logoSize);
     var ICON_SIZE = Math.floor(32 / 44 * size);
+    // size实际像素
+    var SIZE_PIXELS = Math.floor(size * context.getResources().getDisplayMetrics().density);
     var FLOATY = floaty.rawWindow("\n        <frame w=\"" + 2 * radius + "\" h=\"" + 2 * radius + "\">\n            " + items.map(function (item) {
         return "\n                <frame id=\"" + item.id + "\" w=\"" + size + "\" h=\"" + size + "\" alpha=\"0\" layout_gravity=\"center\">\n                    <img w=\"" + size + "\" h=\"" + size + "\" id=\"" + item.id + "_color\" src=\"" + (core.getPrototype(item.color) === 'String' ? item.color : item.color && item.color && item.color.length > 0 && item.color[0]) + "\" circle=\"true\" />\n                    <img w=\"" + ICON_SIZE + "\" h=\"" + ICON_SIZE + "\" id=\"" + item.id + "_icon\" src=\"@drawable/" + (core.getPrototype(item.icon) === 'String' ? item.icon : item.icon && item.icon.length > 0 && item.icon[0]) + "\" tint=\"" + (item.tint || '#ffffff') + "\" gravity=\"center\" layout_gravity=\"center\" />\n                </frame>\n                    ";
     }).join('') + "\n            <frame id=\"logo\" w=\"" + size + "\" h=\"" + size + "\" alpha=\"0.4\" layout_gravity=\"center\">\n                <img id=\"img_logo\" w=\"*\" h=\"*\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n            </frame>\n        </frame>\n    ");
@@ -68,7 +70,7 @@ function createFloaty(_a) {
     var toggleFloaty$ = new rxjs.Subject();
     var isFloatyOpen$ = toggleFloaty$.asObservable().pipe(operators.exhaustMap(function () {
         return rxjs.from(animation());
-    }), operators.startWith(false), operators.map(function (v) { return Boolean(v); }), operators.shareReplay(1));
+    }), operators.startWith(false), operators.shareReplay(1));
     isFloatyOpen$.subscribe(function (isOpen) { return FLOATY.setTouchable(isOpen); });
     function toggleFloaty() {
         toggleFloaty$.next(true);
@@ -83,7 +85,7 @@ function createFloaty(_a) {
             var isOpen = firstElement.getX() === logo.getX();
             var direction = STAND.getX() < core.getWidthPixels() / 2 ? 1 : -1;
             var base = Math.floor(angle / (items.length - 1));
-            var r = radius - Math.floor(size / 2 + 2);
+            var r = radius - Math.floor(SIZE_PIXELS / 2 + 2);
             var animationItems = [];
             var α = angle / 2;
             items.forEach(function (item) {
@@ -152,8 +154,8 @@ function createFloaty(_a) {
                 FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y);
             }
             else if (upX > widthPixels - 100) {
-                STAND.setPosition(widthPixels - size + 2, nowY);
-                FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - size + 2, nowY - FLOATY_STAND_OFFSET_Y);
+                STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowY);
+                FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowY - FLOATY_STAND_OFFSET_Y);
             }
         })));
     })).subscribe();
@@ -167,7 +169,9 @@ function createFloaty(_a) {
         var iconLength = core.getPrototype(item.icon) === 'Array' && item.icon.length || 0;
         var colorLength = core.getPrototype(item.color) === 'Array' && item.color.length || 0;
         FLOATY[item.id].on('click', function () {
-            toggleFloaty();
+            if (item.toggleOnClick !== false) {
+                toggleFloaty();
+            }
             item.callback && item.callback(index);
             // 如果item.icon是数组的话，切换item的按钮图标
             if (iconLength > 1) {
