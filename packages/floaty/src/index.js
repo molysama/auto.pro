@@ -17,7 +17,7 @@ var icons = [
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
  * @param {number} initX 初始X坐标，默认为-2
  * @param {number} initY 初始Y坐标，默认为高度的一半
- * @param {{id: string, color: string, icon: string, activeIcon: string, callback: Function}[]} items 子菜单数组
+ * @param {Object[]} items 子菜单数组
  */
 function createFloaty(_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.logo, logo = _c === void 0 ? 'https://pro.autojs.org/images/logo.png' : _c, _d = _b.logoSize, logoSize = _d === void 0 ? 44 : _d, _e = _b.duration, duration = _e === void 0 ? 200 : _e, _f = _b.radius, radius = _f === void 0 ? 120 : _f, _g = _b.angle, angle = _g === void 0 ? 120 : _g, _h = _b.items, items = _h === void 0 ? [

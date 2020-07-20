@@ -10,7 +10,7 @@ declare const icons: readonly ["ic_3d_rotation_black_48dp", "ic_accessibility_bl
  * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
  * @param {number} initX 初始X坐标，默认为-2
  * @param {number} initY 初始Y坐标，默认为高度的一半
- * @param {{id: string, color: string, icon: string, activeIcon: string, callback: Function}[]} items 子菜单数组
+ * @param {Object[]} items 子菜单数组
  */
 export declare function createFloaty({ logo, logoSize, duration, radius, angle, items, initX, initY }?: {
     /**
@@ -35,11 +35,11 @@ export declare function createFloaty({ logo, logoSize, duration, radius, angle, 
     angle?: number;
     /**
      * 子菜单列表
-     *
-     * id不能重复
-     * icon: 安卓系统内置图标，可为字符串或字符串数组，当为数组时每次点击都会切换到下个图标，callback的state也会切换
-     * color: 十六机制颜色，如'#ffffff'，可为字符串或字符串数组，仅当数组长度与icon长度相同时会进行切换
-     * callback: function (state) {} 点击后的回调函数，state对应当前icon的索引，当icon为字符串时始终为0
+     * @param {string} id id不能重复
+     * @param {string|string[]} icon 安卓系统内置图标，可为字符串或字符串数组，当为数组时每次点击都会切换到下个图标，callback的state也会切换
+     * @param {string|string[]} color 十六机制颜色，如'#ffffff'，可为字符串或字符串数组，仅当数组长度与icon长度相同时会进行切换
+     * @param {(state) => any} callback 点击后的回调函数，state对应当前icon的索引，当icon为字符串时始终为0
+     * @param {boolean} toggleOnClick 点击时是否自动关闭悬浮窗，默认为true
      */
     items?: {
         id: string;
