@@ -10,14 +10,15 @@ var icons = [
 ];
 /**
  * 创建一个悬浮窗
- * @param {string} logo logo图片地址
- * @param {number} logoSize 按钮尺寸
- * @param {number} duration 悬浮窗开关的过渡时间
- * @param {number} radius 子菜单距离logo的长度（包含子菜单的直径），默认120
- * @param {number} angle 子菜单形成的最大角度，默认120，建议大于90小于180
- * @param {number} initX 初始X坐标，默认为-2
- * @param {number} initY 初始Y坐标，默认为高度的一半
- * @param {Object[]} items 子菜单数组
+ * @param {Object} option
+ * @param {string} option.logo - logo图片地址
+ * @param {number} option.logoSize 按钮尺寸
+ * @param {number} option.duration 悬浮窗开关的过渡时间
+ * @param {number} option.radius 子菜单距离logo的长度（包含子菜单的直径），默认120
+ * @param {number} option.angle 子菜单形成的最大角度，默认120，建议大于90小于180
+ * @param {number} option.initX 初始X坐标，默认为-2
+ * @param {number} option.initY 初始Y坐标，默认为高度的一半
+ * @param {Object[]} option.items 子菜单数组
  */
 function createFloaty(_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.logo, logo = _c === void 0 ? 'https://pro.autojs.org/images/logo.png' : _c, _d = _b.logoSize, logoSize = _d === void 0 ? 44 : _d, _e = _b.duration, duration = _e === void 0 ? 200 : _e, _f = _b.radius, radius = _f === void 0 ? 120 : _f, _g = _b.angle, angle = _g === void 0 ? 120 : _g, _h = _b.items, items = _h === void 0 ? [
@@ -30,25 +31,15 @@ function createFloaty(_a) {
         {
             id: 'id_1',
             color: '#08BC92',
-            icon: 'ic_pause_circle_outline_black_48dp',
-            callback: function () { }
+            icon: ['ic_pause_circle_outline_black_48dp', 'ic_play_circle_outline_black_48dp'],
+            callback: function (state) {
+                toastLog(state);
+            }
         },
         {
             id: 'id_2',
-            color: '#08BC92',
-            icon: 'ic_play_circle_outline_black_48dp',
-            callback: function () { }
-        },
-        {
-            id: 'id_3',
             color: '#DC1C2C',
             icon: 'ic_clear_black_48dp',
-            callback: function () { }
-        },
-        {
-            id: 'id_4',
-            color: '#bfc1c0',
-            icon: 'ic_settings_black_48dp',
             callback: function () { }
         },
     ] : _h, _j = _b.initX, initX = _j === void 0 ? -2 : _j, _k = _b.initY, initY = _k === void 0 ? core_1.getHeightPixels() / 2 : _k;

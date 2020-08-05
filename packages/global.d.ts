@@ -1,5 +1,6 @@
 interface Image { }
 
+declare const toastLog: any
 declare const Animator: any
 declare const AnimatorSet: any
 declare const ObjectAnimator: any
