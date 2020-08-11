@@ -68,8 +68,9 @@
         }
     },
     "include": [
-        "packages/global.d.ts",
+        "packages/types/lib/global.d.ts",
         "packages/*/src",
         "packages/*/__tests__"
     ]
+    // "preserveSymlinks": true
 }

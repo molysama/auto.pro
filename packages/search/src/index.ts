@@ -2,7 +2,7 @@ export type FindImgParam = {
     path: string
     when?: Function
     option?: {
-        region?: Array<number>
+        region?: RegionType
         threshold?: number
     }
     index?: number
@@ -70,7 +70,7 @@ export function readImg(imgPath: Image | string, mode?: number) {
     if (getPrototype(imgPath) != 'String') {
         result = imgPath
     } else {
-        result = images.read(imgPath)
+        result = images.read(imgPath as string)
     }
 
     if (mode === 0) {
@@ -189,6 +189,7 @@ export function findImg(param: FindImgParam): Observable<any> {
             take(ONCE ? 1 : 99999999),
             filter(v => ONCE ? true : v.length > 0),
             take(TAKE_NUM),
+            // TODO 使用MatchingResult自带的排序
             map(res => {
                 let result = res.map(p => {
                     return [
@@ -199,12 +200,12 @@ export function findImg(param: FindImgParam): Observable<any> {
                     let absY = Math.abs(a[1] - b[1])
                     let absX = Math.abs(a[0] - b[0])
                     if (absY > 4 && a[1] > b[1]) {
-                        return true
+                        return -1
                     }
                     else if (absY < 4) {
-                        return absX > 4 && a[0] > b[0]
+                        return (absX > 4 && a[0] > b[0]) ? -1 : 1
                     } else {
-                        return false
+                        return 1
                     }
                 })
 
@@ -281,7 +282,7 @@ export function findImg(param: FindImgParam): Observable<any> {
  * @param {Array} region    查找范围
  * @param {Array<Color>} colors    待查颜色数组 
  */
-export function noAnyColors(image: Image, region: [] = [], colors: [] = []) {
+export function noAnyColors(image: Image, region: RegionType = [0, 0], colors: [] = []) {
     let src = readImg(image)
     let result = !colors.some(c => {
         if (images.findColorEquals(src, c, ...region)) {
@@ -304,7 +305,7 @@ export function noAnyColors(image: Image, region: [] = [], colors: [] = []) {
  * @param {Array} region 范围
  * @param {Array<Color>} colors 待查颜色数组
  */
-export function hasMulColors(image: Image | string, region: [] = [], colors: [] = []) {
+export function hasMulColors(image: Image | string, region: RegionType = [0, 0], colors: [] = []) {
     let src = readImg(image)
     let result = colors.every(c => {
         if (images.findColorEquals(src, c, ...region)) {
