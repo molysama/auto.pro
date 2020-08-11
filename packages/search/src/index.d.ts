@@ -2,7 +2,7 @@ export declare type FindImgParam = {
     path: string;
     when?: Function;
     option?: {
-        region?: Array<number>;
+        region?: RegionType;
         threshold?: number;
     };
     index?: number;
@@ -57,7 +57,7 @@ export declare function findImg(param: FindImgParam): Observable<any>;
  * @param {Array} region    查找范围
  * @param {Array<Color>} colors    待查颜色数组
  */
-export declare function noAnyColors(image: Image, region?: [], colors?: []): boolean;
+export declare function noAnyColors(image: Image, region?: RegionType, colors?: []): boolean;
 /**
  * (精确查找)
  * 区域内含有colors中的全部颜色时，返回true，否则返回false
@@ -66,7 +66,7 @@ export declare function noAnyColors(image: Image, region?: [], colors?: []): boo
  * @param {Array} region 范围
  * @param {Array<Color>} colors 待查颜色数组
  */
-export declare function hasMulColors(image: Image | string, region?: [], colors?: []): boolean;
+export declare function hasMulColors(image: Image | string, region?: RegionType, colors?: []): boolean;
 /**
  * 存在任意颜色，则返回颜色坐标，否则返回false
  *

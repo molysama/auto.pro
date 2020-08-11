@@ -7,9 +7,20 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.swipe = exports.clickOP = exports.clickRes = exports.click = void 0;
 var core_1 = require("@auto.pro/core");
 var operators_1 = require("rxjs/operators");
 var Bezier = require('bezier-js');
+exports.clickOP = function (randomOffsetX, randomOffsetY, isPausable) {
+    if (randomOffsetX === void 0) { randomOffsetX = 0; }
+    if (randomOffsetY === void 0) { randomOffsetY = 0; }
+    if (isPausable === void 0) { isPausable = true; }
+    return function (source) { return source.pipe(core_1.pausable(isPausable, false), operators_1.tap(function (pt) {
+        var _a;
+        var x = (_a = pt || [], _a[0]), y = _a[1];
+        exports.click(x, y, [600, 800], randomOffsetX, randomOffsetY);
+    })); };
+};
 function setAction() {
     exports.swipe = function (startPoint, endPoint, duration) {
         var x1 = startPoint[0];
@@ -66,29 +77,6 @@ function setAction() {
         if (randomOffsetX === void 0) { randomOffsetX = 0; }
         if (randomOffsetY === void 0) { randomOffsetY = 0; }
         return exports.click(x * core_1.scale, y * core_1.scale, delay, randomOffsetX, randomOffsetY);
-    };
-    exports.clickOP = function (x, y, delay, randomOffsetX, randomOffsetY, isPausable) {
-        if (delay === void 0) { delay = [600, 800]; }
-        if (randomOffsetX === void 0) { randomOffsetX = 0; }
-        if (randomOffsetY === void 0) { randomOffsetY = 0; }
-        if (isPausable === void 0) { isPausable = true; }
-        return function (source) { return source.pipe(core_1.pausable(isPausable, false), operators_1.map(function (pt) {
-            if (x == null && core_1.getPrototype(pt) === 'Array') {
-                exports.click.apply(void 0, pt);
-                return pt;
-            }
-            else if (core_1.getPrototype(x) === 'Array') {
-                exports.click.apply(void 0, x);
-                return [x, y, delay, randomOffsetX, randomOffsetY];
-            }
-            else if (x != null) {
-                exports.click(x, y, delay, randomOffsetX, randomOffsetY);
-                return [x, y, delay, randomOffsetX, randomOffsetY];
-            }
-            else {
-                return null;
-            }
-        })); };
     };
 }
 var Action = {

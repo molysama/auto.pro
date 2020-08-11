@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createFloaty = void 0;
 var core_1 = require("@auto.pro/core");
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
@@ -131,10 +132,11 @@ function createFloaty(_a) {
         up$.pipe(operators_1.takeUntil(move$), operators_1.tap(function () {
             toggleFloaty();
         })), move$.pipe(operators_1.tap(function (e_move) {
-            var rawX = e_move.getRawX() - dx;
-            var rawY = e_move.getRawY() - dy;
-            STAND.setPosition(sx + rawX, sy + rawY);
-            FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y);
+            // const rawX = e_move.getRawX() - dx
+            // const rawY = e_move.getRawY() - dy
+            STAND.setPosition(sx + e_move.getRawX() - dx, sy + e_move.getRawY() - dy);
+            // 悬浮窗只在关闭时可以移动，因此不需要实时移动
+            // FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y)
         }), operators_1.takeUntil(up$)), 
         // 按下后有移动，则弹起时视为移动结束
         up$.pipe(operators_1.skipUntil(move$), operators_1.tap(function (e_up) {

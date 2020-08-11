@@ -26,9 +26,8 @@ declare let screenType: ('w' | 'h');
 /**
  * 截图，仅当needCap设为true时可用
  * @param path 要保存的图片路径
- * @returns {Image} 返回得到的截图
  */
-declare function cap(path?: string): Image;
+declare function cap(path?: string): void | Image;
 /**
  * 加载插件
  * @param plugin 要加载的插件
@@ -90,7 +89,8 @@ declare function getWidth(value?: number): number;
  */
 declare function getHeight(value?: number): number;
 export declare function getTime(): any;
-export { isScreenLandscape, isFunction, getWidthPixels, getHeightPixels } from './utils';
+export { getHeightPixels, getWidthPixels, isFunction, isScreenLandscape } from './utils';
+export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
@@ -99,7 +99,6 @@ export { isScreenLandscape, isFunction, getWidthPixels, getHeightPixels } from '
  * @returns {string}
  */
 export declare function getPrototype(obj: any): string;
-export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
 /**
  *
  * @param {number | 1280} param.baseWidth 基准宽度

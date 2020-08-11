@@ -10,15 +10,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var uuid_js_1 = __importDefault(require("uuid-js"));
+exports.run = void 0;
 var rxjs_1 = require("rxjs");
-var rxjs_2 = require("rxjs");
 var operators_1 = require("rxjs/operators");
-var rxjs_3 = require("rxjs");
-var operators_2 = require("rxjs/operators");
-var operators_3 = require("rxjs/operators");
-var rxjs_4 = require("rxjs");
-var operators_4 = require("rxjs/operators");
+var uuid_js_1 = __importDefault(require("uuid-js"));
 var log = console.log;
 var threadEvents;
 var webview;
@@ -129,14 +124,14 @@ function run(url) {
             for (var _i = 1; _i < arguments.length; _i++) {
                 value[_i - 1] = arguments[_i];
             }
-            return rxjs_2.defer(function () {
+            return rxjs_1.defer(function () {
                 var uuid = uuid_js_1.default.create(4).toString();
-                return rxjs_3.zip(subject.pipe(operators_2.filter(function (v) { return v['uuid'] === uuid; }), operators_4.map(function (v) { return v['promise']; }), operators_3.take(1)), rxjs_4.of(false).pipe(operators_1.tap(function () {
+                return rxjs_1.zip(subject.pipe(operators_1.filter(function (v) { return v['uuid'] === uuid; }), operators_1.map(function (v) { return v['promise']; }), operators_1.take(1)), rxjs_1.of(false).pipe(operators_1.tap(function () {
                     threadEvents.emit('fn', {
                         uuid: uuid,
                         params: __spreadArrays([fnName], value)
                     });
-                }))).pipe(operators_4.map(function (v) { return v[0]; }));
+                }))).pipe(operators_1.map(function (v) { return v[0]; }));
             }).toPromise();
         },
         /**
@@ -144,14 +139,14 @@ function run(url) {
          * @param js
          */
         runHtmlJS: function (js) {
-            return rxjs_2.defer(function () {
+            return rxjs_1.defer(function () {
                 var uuid = uuid_js_1.default.create(4).toString();
-                return rxjs_3.zip(subject.pipe(operators_2.filter(function (v) { return v['uuid'] === uuid; }), operators_4.map(function (v) { return v['promise']; }), operators_3.take(1)), rxjs_4.of(false).pipe(operators_1.tap(function () {
+                return rxjs_1.zip(subject.pipe(operators_1.filter(function (v) { return v['uuid'] === uuid; }), operators_1.map(function (v) { return v['promise']; }), operators_1.take(1)), rxjs_1.of(false).pipe(operators_1.tap(function () {
                     threadEvents.emit('js', {
                         uuid: uuid,
                         js: js
                     });
-                }))).pipe(operators_4.map(function (v) { return v[0]; }));
+                }))).pipe(operators_1.map(function (v) { return v[0]; }));
             }).toPromise();
         },
         webview: webview

@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("./utils");
+exports.getPrototype = exports.pausableTimeoutWith = exports.pausableTimeout = exports.pausableTimer = exports.pausableInterval = exports.pauseState$ = exports.pausable = exports.resume = exports.pause = exports.screenType = exports.getHeight = exports.getWidth = exports.scale = exports.height = exports.width = exports.use = exports.cap = exports.isRoot = exports.getTime = void 0;
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
+var utils_1 = require("./utils");
 /**
  * 设备是否Root
  */
@@ -47,17 +48,16 @@ exports.screenType = screenType;
 /**
  * 截图，仅当needCap设为true时可用
  * @param path 要保存的图片路径
- * @returns {Image} 返回得到的截图
  */
 function cap(path) {
     if (!needCap) {
         throw 'cap仅当needCap为真值时可用';
     }
     if (path) {
-        return captureScreen(path);
+        return images.captureScreen(path);
     }
     else {
-        return captureScreen();
+        return images.captureScreen();
     }
 }
 exports.cap = cap;
@@ -236,10 +236,10 @@ function getTime() {
 }
 exports.getTime = getTime;
 var utils_2 = require("./utils");
-exports.isScreenLandscape = utils_2.isScreenLandscape;
-exports.isFunction = utils_2.isFunction;
-exports.getWidthPixels = utils_2.getWidthPixels;
-exports.getHeightPixels = utils_2.getHeightPixels;
+Object.defineProperty(exports, "getHeightPixels", { enumerable: true, get: function () { return utils_2.getHeightPixels; } });
+Object.defineProperty(exports, "getWidthPixels", { enumerable: true, get: function () { return utils_2.getWidthPixels; } });
+Object.defineProperty(exports, "isFunction", { enumerable: true, get: function () { return utils_2.isFunction; } });
+Object.defineProperty(exports, "isScreenLandscape", { enumerable: true, get: function () { return utils_2.isScreenLandscape; } });
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
@@ -279,7 +279,7 @@ function default_1(param) {
     exports.scale = scale = Math.min(width / baseWidth, height / baseHeight);
     threads && threads.start && threads.start(function () {
         if (needCap) {
-            if (!requestScreenCapture(width, height)) {
+            if (!images.requestScreenCapture(width, height)) {
                 toast("请求截图失败");
                 exit();
             }

@@ -1,13 +1,7 @@
-import uuidjs from 'uuid-js'
 import { Plugin } from "@auto.pro/core"
-import { Subject } from "rxjs"
-import { defer } from 'rxjs'
-import { tap } from 'rxjs/operators'
-import { zip } from 'rxjs'
-import { filter } from 'rxjs/operators'
-import { take } from 'rxjs/operators'
-import { of } from 'rxjs'
-import { map } from 'rxjs/operators'
+import { defer, of, Subject, zip } from "rxjs"
+import { filter, map, take, tap } from 'rxjs/operators'
+import uuidjs from 'uuid-js'
 
 const log = console.log
 let threadEvents

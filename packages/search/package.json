@@ -7,16 +7,14 @@
     "description": "auto.pro module for search image and color",
     "author": "molysama <molysama.i@gmail.com>",
     "homepage": "https://github.com/molysama/auto.pro#readme",
-    "license": "ISC",
-    "main": "lib/search.js",
+    "license": "MIT",
+    "main": "src/index.js",
     "types": "src/index.d.ts",
     "directories": {
-        "lib": "lib",
         "src": "src",
         "test": "__tests__"
     },
     "files": [
-        "lib",
         "src"
     ],
     "repository": {
@@ -24,7 +22,7 @@
         "url": "git+https://github.com/molysama/auto.pro.git"
     },
     "scripts": {
-        "build": "tsc && rollup -c rollup.config.js"
+        "build": "tsc"
     },
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"
@@ -32,9 +30,5 @@
     "gitHead": "9911016873152d8fbd930899e3b575d559be9e43",
     "dependencies": {
         "rxjs": "^6.5.3"
-    },
-    "devDependencies": {
-        "@babel/preset-env": "^7.6.3",
-        "rollup-plugin-babel": "^4.3.3"
     }
 }

@@ -235,10 +235,11 @@ export function createFloaty({
             ),
             move$.pipe(
                 tap(e_move => {
-                    const rawX = e_move.getRawX() - dx
-                    const rawY = e_move.getRawY() - dy
-                    STAND.setPosition(sx + rawX, sy + rawY)
-                    FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y)
+                    // const rawX = e_move.getRawX() - dx
+                    // const rawY = e_move.getRawY() - dy
+                    STAND.setPosition(sx + e_move.getRawX() - dx, sy + e_move.getRawY() - dy)
+                    // 悬浮窗只在关闭时可以移动，因此不需要实时移动
+                    // FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y)
                 }),
                 takeUntil(up$),
             ),

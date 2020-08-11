@@ -202,6 +202,8 @@ declare const device: any
 declare const auto: any
 declare const app: any
 
+declare function toast(str: string): void
+declare function exit(num?: number): void
 declare function sleep(low: number, up?: number): void
 declare function Tap(x: number, y: number): void
 declare function press(x: number, y: number, delay: number): void

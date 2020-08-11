@@ -6,6 +6,7 @@ import { filter } from 'rxjs/operators';
 import { tap } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { MonoTypeOperatorFunction } from 'rxjs';
 const Bezier = require('bezier-js')
 
 /**
@@ -23,7 +24,15 @@ export let click: (x: number, y: number, delay?: [number, number] | [600, 800], 
  */
 export let clickRes: (x: number, y: number, delay?: [number, number] | [600, 800], randomOffsetX?: number, randomOffsetY?: number) => any
 
-export let clickOP: (x: number, y: number, delay?: [number, number] | [600, 800], randomOffsetX?: number, randomOffsetY?: number) => (source) => Observable<[number, number]>
+export let clickOP = (randomOffsetX: number = 0, randomOffsetY: number = 0, isPausable: boolean = true) => {
+    return source => source.pipe(
+        pausable(isPausable, false),
+        tap(pt => {
+            const [x, y] = pt as [number, number] || []
+            click(x, y, [600, 800], randomOffsetX, randomOffsetY)
+        })
+    )
+}
 
 /**
  * 根据给定的两个点进行滑动，root模式直接使用两点滑动，无障碍模式下使用贝塞尔曲线
@@ -89,25 +98,6 @@ function setAction() {
     }
     clickRes = (x: number, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0) => {
         return click(x * scale, y * scale, delay, randomOffsetX, randomOffsetY)
-    }
-    clickOP = (x: number | Array<any>, y: number, delay: [number, number] = [600, 800], randomOffsetX: number = 0, randomOffsetY: number = 0, isPausable = true) => {
-        return source => source.pipe(
-            pausable(isPausable, false),
-            map((pt) => {
-                if (x == null && getPrototype(pt) === 'Array') {
-                    click(...(pt as [number, number, [number, number], number, number]))
-                    return pt
-                } else if (getPrototype(x) === 'Array') {
-                    click(...(x as [number, number, [number, number], number, number]))
-                    return [x, y, delay, randomOffsetX, randomOffsetY]
-                } else if (x != null) {
-                    click(x as number, y, delay, randomOffsetX, randomOffsetY)
-                    return [x, y, delay, randomOffsetX, randomOffsetY]
-                } else {
-                    return null
-                }
-            })
-        )
     }
 }
 

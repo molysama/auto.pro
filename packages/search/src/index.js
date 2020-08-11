@@ -18,6 +18,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.hasAnyColors = exports.hasMulColors = exports.noAnyColors = exports.findImg = exports.readImg = exports.clearCache = void 0;
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var core_1 = require("@auto.pro/core");
@@ -165,7 +166,9 @@ function findImg(param) {
                 DO_IF_NOT_FOUND();
             }
             return rxjs_1.of(matches);
-        }), operators_1.take(ONCE ? 1 : 99999999), operators_1.filter(function (v) { return ONCE ? true : v.length > 0; }), operators_1.take(TAKE_NUM), operators_1.map(function (res) {
+        }), operators_1.take(ONCE ? 1 : 99999999), operators_1.filter(function (v) { return ONCE ? true : v.length > 0; }), operators_1.take(TAKE_NUM), 
+        // TODO 使用MatchingResult自带的排序
+        operators_1.map(function (res) {
             var result = res.map(function (p) {
                 return [
                     Math.floor(p.point['x']),
@@ -175,13 +178,13 @@ function findImg(param) {
                 var absY = Math.abs(a[1] - b[1]);
                 var absX = Math.abs(a[0] - b[0]);
                 if (absY > 4 && a[1] > b[1]) {
-                    return true;
+                    return -1;
                 }
                 else if (absY < 4) {
-                    return absX > 4 && a[0] > b[0];
+                    return (absX > 4 && a[0] > b[0]) ? -1 : 1;
                 }
                 else {
-                    return false;
+                    return 1;
                 }
             });
             // 如果设置了取第几个
@@ -253,7 +256,7 @@ exports.findImg = findImg;
  * @param {Array<Color>} colors    待查颜色数组
  */
 function noAnyColors(image, region, colors) {
-    if (region === void 0) { region = []; }
+    if (region === void 0) { region = [0, 0]; }
     if (colors === void 0) { colors = []; }
     var src = readImg(image);
     var result = !colors.some(function (c) {
@@ -279,7 +282,7 @@ exports.noAnyColors = noAnyColors;
  * @param {Array<Color>} colors 待查颜色数组
  */
 function hasMulColors(image, region, colors) {
-    if (region === void 0) { region = []; }
+    if (region === void 0) { region = [0, 0]; }
     if (colors === void 0) { colors = []; }
     var src = readImg(image);
     var result = colors.every(function (c) {

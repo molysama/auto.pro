@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.tag = void 0;
 var core_1 = require("@auto.pro/core");
-var search_1 = require("@auto.pro/search");
-var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
-var rxjs_2 = require("rxjs");
-exports.concat = rxjs_2.concat;
+var rxjs_1 = require("rxjs");
+Object.defineProperty(exports, "concat", { enumerable: true, get: function () { return rxjs_1.concat; } });
 function isFindImgParam(param) {
     return core_1.getPrototype(param) === 'Object' && param.path !== undefined;
 }
@@ -15,90 +14,80 @@ function isFunction(param) {
 function isString(param) {
     return core_1.getPrototype(param) === 'String';
 }
-/**
- * 添加事件流
- * @param param 要做的事
- * @param target 完成标志
- * @param {boolean} passValue 过滤器的值，默认为true
- * @param {number} maxRetryTimes 最大重试次数
- */
-exports.add = function (param, target, passValue, maxRetryTimes) {
-    if (passValue === void 0) { passValue = true; }
-    if (maxRetryTimes === void 0) { maxRetryTimes = 1; }
-    return function (source) {
-        return source.pipe(operators_1.mergeMap(function (v) { return rxjs_1.defer(function () {
-            if (rxjs_1.isObservable(param)) {
-                return param;
-            }
-            else if (isFunction(param)) {
-                var paramResult = param(v);
-                if (rxjs_1.isObservable(paramResult)) {
-                    return paramResult;
-                }
-                else {
-                    return rxjs_1.of(paramResult);
-                }
-            }
-            else if (isFindImgParam(param)) {
-                return search_1.findImg(param);
-            }
-            else if (isString(param)) {
-                return search_1.findImg({
-                    path: v,
-                    useCache: {
-                        key: '__CACHE__'
-                    },
-                    index: 1
-                });
-            }
-            else {
-                return rxjs_1.of(param);
-            }
-        }).pipe(operators_1.mergeMap(function (paramValue) {
-            var targetType = core_1.getPrototype(target);
-            var filterValue = function () { return operators_1.map(function (v) {
-                if (Boolean(v) === Boolean(passValue)) {
-                    return [paramValue, v];
-                }
-                else {
-                    throw "invalid target result: " + v + " is not " + passValue;
-                }
-            }); };
-            if (rxjs_1.isObservable(target)) {
-                return target.pipe(filterValue());
-            }
-            else if (targetType === 'Function') {
-                var targetResult = target(paramValue);
-                if (rxjs_1.isObservable(targetResult)) {
-                    return targetResult.pipe(operators_1.filter(function (v) { return Boolean(v) === Boolean(passValue); }), operators_1.last(), operators_1.map(function (v) { return [paramValue, v]; }), operators_1.catchError(function (v) {
-                        return rxjs_1.throwError("invalid target result: " + v);
-                    }));
-                }
-                else {
-                    return rxjs_1.of(targetResult).pipe(filterValue());
-                }
-            }
-            else if (targetType === 'Object') {
-                return search_1.findImg(target).pipe(filterValue());
-            }
-            else if (targetType === 'String') {
-                return search_1.findImg({
-                    path: target,
-                    useCache: {
-                        key: '__CACHE__'
-                    },
-                    index: 1
-                }).pipe(filterValue());
-            }
-            else if (targetType === 'Undefined') {
-                return rxjs_1.of(paramValue);
-            }
-            else {
-                return rxjs_1.of(target).pipe(filterValue());
-            }
-        }), operators_1.retry(maxRetryTimes)); }));
-    };
+exports.tag = function (text, showValue, fn) {
+    if (showValue === void 0) { showValue = false; }
+    operators_1.tap(function (v) {
+        if (showValue) {
+            console.log('tag', text, v);
+        }
+        else {
+            console.log('tag', text);
+        }
+        if (fn) {
+            fn(v);
+        }
+    });
 };
+// export const clickImg = (path: string, region: RegionType = [0, 0], threshold = 0.9) => {
+//     return findImg({
+//         path,
+//         option: {
+//             region,
+//             threshold,
+//         },
+//     }).pipe(
+//         tap((pt) => {
+//             // click(x, y, [600, 800], 5, 5)
+//         }),
+//         delay(1000)
+//     )
+// }
+// export const clickImgWithCheck = (
+//     path,
+//     region: RegionType = [0, 0],
+//     threshold = 0.9,
+//     checkDelay = 1000,
+//     useCache = true
+// ) => {
+//     // 点击和确认都使用同一个找图参数
+//     const param: FindImgParam = {
+//         path,
+//         option: {
+//             region,
+//             threshold,
+//         },
+//         useCache: useCache ? {
+//             // 使用一个时间戳来进行区域缓存，执行完毕后销毁该缓存
+//             key: path + Date.now(),
+//         } : undefined,
+//     }
+//     return findImg(param).pipe(
+//         tap(([x, y]) => {
+//             click(x, y)
+//         }),
+//         switchMap((pt) =>
+//             pausableTimer(checkDelay).pipe(
+//                 switchMap(() => findImg({ ...param, once: true })),
+//                 switchMap((v) => {
+//                     // 如果点击后能再次找到该图，则再次点击并抛出错误，随后retry会重试确认
+//                     if (v) {
+//                         click(v[0], v[1])
+//                         return throwError("check unpass")
+//                     } else {
+//                         return of(pt)
+//                     }
+//                 }),
+//                 retry()
+//             )
+//         ),
+//         catchError((err) => {
+//             console.log(`clickImgWithCheck ${param.path} err`, err)
+//             return throwError(err)
+//         }),
+//         // 由于是按时间戳生成的唯一缓存，结束后清掉
+//         finalize(() => param.useCache?.key && clearCache(param.useCache.key))
+//     )
+// }
 exports.default = {
     install: function () {
     }

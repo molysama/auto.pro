@@ -8,14 +8,13 @@
     "author": "molysama <molysama.i@gmail.com>",
     "homepage": "https://github.com/molysama/auto.pro#readme",
     "license": "MIT",
-    "main": "lib/stream.js",
+    "main": "src/index.js",
     "types": "src/index.d.ts",
     "directories": {
-        "lib": "lib",
+        "src": "src",
         "test": "__tests__"
     },
     "files": [
-        "lib",
         "src"
     ],
     "publishConfig": {
@@ -27,10 +26,12 @@
         "url": "git+https://github.com/molysama/auto.pro.git"
     },
     "scripts": {
-        "build": "tsc && rollup -c rollup.config.js",
-        "test": "echo \"Error: run tests from root\" && exit 1"
+        "build": "tsc"
     },
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"
+    },
+    "dependencies": {
+        "rxjs": "^6.6.2"
     }
 }

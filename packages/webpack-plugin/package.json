@@ -10,15 +10,13 @@
     "author": "molysama <molysama.i@gmail.com>",
     "homepage": "https://github.com/molysama/auto.pro#readme",
     "license": "MIT",
-    "main": "lib/webpack-plugin.js",
+    "main": "src/index.js",
     "types": "src/index.d.ts",
     "directories": {
-        "lib": "lib",
         "src": "src",
         "test": "__tests__"
     },
     "files": [
-        "lib",
         "src"
     ],
     "publishConfig": {
@@ -31,7 +29,7 @@
     },
     "scripts": {
         "test": "node __tests__/index.js",
-        "build": "tsc && rollup -c rollup.config.js"
+        "build": "tsc"
     },
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"

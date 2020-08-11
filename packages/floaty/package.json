@@ -9,16 +9,14 @@
     ],
     "author": "molysama <molysama.i@gmail.com>",
     "homepage": "https://github.com/molysama/auto.pro#readme",
-    "license": "ISC",
-    "main": "lib/floaty.js",
+    "license": "MIT",
+    "main": "src/index.js",
     "types": "src/index.d.ts",
     "directories": {
-        "lib": "lib",
         "src": "src",
         "test": "__tests__"
     },
     "files": [
-        "lib",
         "src"
     ],
     "publishConfig": {
@@ -30,8 +28,7 @@
         "url": "git+https://github.com/molysama/auto.pro.git"
     },
     "scripts": {
-        "test": "echo \"Error: run tests from root\" && exit 1",
-        "build": "tsc && rollup -c rollup.config.js"
+        "build": "tsc"
     },
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"

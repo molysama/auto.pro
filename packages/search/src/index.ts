@@ -167,7 +167,7 @@ export function findImg(param: FindImgParam): Observable<any> {
             filter(() => isPass && when()),
             pausable(isPausable, false),
             exhaustMap(() => {
-                const src = image || cap()
+                const src = image || cap() as Image
                 let matches = images.matchTemplate(src, template, queryOption).matches
                 if (valid > 0) {
                     if (isLog) {

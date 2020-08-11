@@ -1,11 +1,6 @@
+import { BehaviorSubject, merge, Observable, throwError, TimeoutError, timer } from 'rxjs'
+import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators'
 import { isFunction } from "./utils"
-import { concat, merge, from, BehaviorSubject, interval, timer, throwError, of, Observable, generate, combineLatest, TimeoutError } from 'rxjs'
-import { toArray, switchMap, map, filter, concatMap, take, exhaustMap, skip, share, retryWhen, takeUntil, scan, takeWhile, catchError, repeat, tap, distinctUntilChanged, delayWhen } from 'rxjs/operators'
-
-
-declare const requestScreenCapture: any
-declare const toast: any
-declare const exit: any
 
 type PluginInstallFunction = (option?: any) => any
 
@@ -58,16 +53,15 @@ let screenType: ('w' | 'h')
 /**
  * 截图，仅当needCap设为true时可用
  * @param path 要保存的图片路径
- * @returns {Image} 返回得到的截图
  */
 function cap(path?: string) {
     if (!needCap) {
         throw 'cap仅当needCap为真值时可用'
     }
     if (path) {
-        return captureScreen(path)
+        return images.captureScreen(path)
     } else {
-        return captureScreen()
+        return images.captureScreen()
     }
 }
 const plugins: Plugin[] = []
@@ -266,24 +260,7 @@ declare const android
 export function getTime() {
     return android.os.SystemClock.uptimeMillis()
 }
-export { isScreenLandscape, isFunction, getWidthPixels, getHeightPixels } from './utils'
-
-/**
- * 获取对象的原型
- * Java对象直接返回Java类名，如'Image'、'Point'
- * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean' 'Array'
- * @param obj 要获取原型的对象
- * @returns {string}
- */
-export function getPrototype(obj: any): string {
-    const prototype = Object.prototype.toString.call(obj)
-    if (prototype == '[object JavaObject]') {
-        return obj.getClass().getSimpleName()
-    } else {
-        return prototype.substring(prototype.indexOf(' ') + 1, prototype.indexOf(']'))
-    }
-}
-
+export { getHeightPixels, getWidthPixels, isFunction, isScreenLandscape } from './utils'
 export {
     isRoot,
     cap,
@@ -305,6 +282,23 @@ export {
     pausableTimeout,
     pausableTimeoutWith
 }
+
+/**
+ * 获取对象的原型
+ * Java对象直接返回Java类名，如'Image'、'Point'
+ * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean' 'Array'
+ * @param obj 要获取原型的对象
+ * @returns {string}
+ */
+export function getPrototype(obj: any): string {
+    const prototype = Object.prototype.toString.call(obj)
+    if (prototype == '[object JavaObject]') {
+        return obj.getClass().getSimpleName()
+    } else {
+        return prototype.substring(prototype.indexOf(' ') + 1, prototype.indexOf(']'))
+    }
+}
+
 
 /**
  * 
@@ -339,7 +333,7 @@ export default function (param: {
     threads && threads.start && threads.start(function () {
 
         if (needCap) {
-            if (!requestScreenCapture(width, height)) {
+            if (!images.requestScreenCapture(width, height)) {
                 toast("请求截图失败");
                 exit();
             }

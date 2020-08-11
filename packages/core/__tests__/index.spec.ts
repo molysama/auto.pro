@@ -10,4 +10,5 @@ describe('Core', () => {
     test('isRoot exist', () => {
         expect(isRoot).not.toBeUndefined()
     })
+
 })

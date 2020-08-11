@@ -1,5 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AutoProWebpackPlugin = void 0;
 var CryptoJS = require("crypto-js");
 var AutoProWebpackPlugin = /** @class */ (function () {
     function AutoProWebpackPlugin(option) {
