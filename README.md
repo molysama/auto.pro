@@ -4,7 +4,7 @@
 
 | 包名              | 版本                                                    | 描述                                                            |
 | ----------------- | ------------------------------------------------------- | ---------------------------------------------------------------|
-| @auto.pro/cli     | ![](https://img.shields.io/npm/v/@auto.pro/cli.svg)     | cli工具，仅用于创建项目模板 |
+| @auto.pro/cli     | ![](https://img.shields.io/npm/v/@auto.pro/cli.svg)     | cli工具，可用于下载模板，以及将js转换为dex |
 | @auto.pro/core    | ![](https://img.shields.io/npm/v/@auto.pro/core.svg)    | 框架核心，提供应用和其他插件所需的各种属性、服务、权限              |
 | @auto.pro/action  | ![](https://img.shields.io/npm/v/@auto.pro/action.svg)  | 动作插件，兼容高低安卓版本的点击、滑动等功能，配有贝塞尔函数等  |
 | @auto.pro/search  | ![](https://img.shields.io/npm/v/@auto.pro/search.svg)  | 图色插件，封装了分辨率适配、循环找图、缓存及其他增强型函数      |
