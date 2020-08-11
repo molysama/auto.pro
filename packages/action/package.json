@@ -26,7 +26,7 @@
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"
     },
-    "gitHead": "9911016873152d8fbd930899e3b575d559be9e43",
+    "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136",
     "dependencies": {
         "bezier-js": "^2.4.4",
         "rxjs": "^6.5.5"

@@ -15,7 +15,7 @@
         "lib"
     ],
     "publishConfig": {
-        "registry": "https://registry.npm.taobao.org/",
+        "registry": "http://registry.npmjs.org",
         "access": "public"
     },
     "repository": {
@@ -27,5 +27,6 @@
     },
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"
-    }
+    },
+    "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136"
 }
