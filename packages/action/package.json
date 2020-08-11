@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/action",
-    "version": "8.9.1",
+    "version": "8.10.2-alpha.0",
     "description": "module for control app",
     "author": "molysama <molysama.i@gmail.com>",
     "publishConfig": {
