@@ -1,7 +1,7 @@
 import { BehaviorSubject, merge, Observable, throwError, TimeoutError, timer } from 'rxjs'
 import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators'
 import { isFunction } from "./utils"
-import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode } from './utils/settings'
+import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode, closeForeground } from './utils/settings'
 export * from './utils/index'
 export * from './utils/settings'
 export {
@@ -350,8 +350,13 @@ export default function ({
             requestFloatyPermission()
         }
 
-        if (needForeground && !isOpenForeground()) {
-            openForeground()
+        if (needForeground) {
+            if (!isOpenForeground()) {
+                openForeground()
+            }
+            events.on('exit', function () {
+                closeForeground()
+            })
         }
 
         if (needStableMode && !isOpenStableMode()) {
