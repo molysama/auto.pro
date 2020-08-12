@@ -1,9 +1,22 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPrototype = exports.pausableTimeoutWith = exports.pausableTimeout = exports.pausableTimer = exports.pausableInterval = exports.pauseState$ = exports.pausable = exports.resume = exports.pause = exports.screenType = exports.getHeight = exports.getWidth = exports.scale = exports.height = exports.width = exports.use = exports.cap = exports.isRoot = exports.getTime = void 0;
+exports.getPrototype = exports.getTime = exports.pausableTimeoutWith = exports.pausableTimeout = exports.pausableTimer = exports.pausableInterval = exports.pauseState$ = exports.pausable = exports.resume = exports.pause = exports.screenType = exports.getHeight = exports.getWidth = exports.scale = exports.height = exports.width = exports.use = exports.cap = exports.isRoot = void 0;
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var utils_1 = require("./utils");
+var settings_1 = require("./utils/settings");
+__exportStar(require("./utils/index"), exports);
+__exportStar(require("./utils/settings"), exports);
 /**
  * 设备是否Root
  */
@@ -235,11 +248,6 @@ function getTime() {
     return android.os.SystemClock.uptimeMillis();
 }
 exports.getTime = getTime;
-var utils_2 = require("./utils");
-Object.defineProperty(exports, "getHeightPixels", { enumerable: true, get: function () { return utils_2.getHeightPixels; } });
-Object.defineProperty(exports, "getWidthPixels", { enumerable: true, get: function () { return utils_2.getWidthPixels; } });
-Object.defineProperty(exports, "isFunction", { enumerable: true, get: function () { return utils_2.isFunction; } });
-Object.defineProperty(exports, "isScreenLandscape", { enumerable: true, get: function () { return utils_2.isScreenLandscape; } });
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
@@ -263,13 +271,11 @@ exports.getPrototype = getPrototype;
  * @param {number | 720} param.baseHeight 基准高度
  * @param {boolean | false} param.needCap 是否需要截图功能
  * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
+ * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
+ * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
  */
-function default_1(param) {
-    if (param === void 0) { param = {}; }
-    needCap = param.needCap === true ? true : false;
-    needService = param.needService === true ? true : false;
-    baseWidth = param.baseWidth || baseWidth;
-    baseHeight = param.baseHeight || baseHeight;
+function default_1(_a) {
+    var _b = _a === void 0 ? {} : _a, _c = _b.baseWidth, baseWidth = _c === void 0 ? 1280 : _c, _d = _b.baseHeight, baseHeight = _d === void 0 ? 720 : _d, _e = _b.needCap, needCap = _e === void 0 ? false : _e, _f = _b.needService, needService = _f === void 0 ? false : _f, _g = _b.needFloaty, needFloaty = _g === void 0 ? false : _g, _h = _b.needForeground, needForeground = _h === void 0 ? false : _h, _j = _b.needStableMode, needStableMode = _j === void 0 ? true : _j;
     exports.screenType = screenType = baseWidth >= baseHeight ? 'w' : 'h';
     exports.isRoot = isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false;
     var max = typeof device != 'undefined' ? Math.max(device.width, device.height) : 0;
@@ -284,35 +290,25 @@ function default_1(param) {
                 exit();
             }
         }
-        if (needService && auto.service == null) {
-            app.startActivity({
-                action: "android.settings.ACCESSIBILITY_SETTINGS"
-            });
+        if (needService) {
+            if (isRoot && !settings_1.isOpenAccessibilityByRoot()) {
+                settings_1.openAccessibilityByRoot();
+            }
+            else if (!isRoot && auto.service == null) {
+                app.startActivity({
+                    action: "android.settings.ACCESSIBILITY_SETTINGS"
+                });
+            }
         }
-        if (param.needFloaty && !checkFloatyPermission()) {
-            requestFloatyPermission();
+        if (needFloaty && !settings_1.checkFloatyPermission()) {
+            settings_1.requestFloatyPermission();
+        }
+        if (needForeground && !settings_1.isOpenForeground()) {
+            settings_1.openForeground();
+        }
+        if (needStableMode && !settings_1.isOpenStableMode()) {
+            settings_1.openStableMode();
         }
     });
 }
 exports.default = default_1;
-//#################################################################################
-//                                   悬浮窗权限
-importClass(android.provider.Settings);
-importClass(android.net.Uri);
-function checkFloatyPermission() {
-    importClass(android.provider.Settings);
-    if (!Settings.canDrawOverlays(context.getApplicationContext())) {
-        return false;
-    }
-    else {
-        return true;
-    }
-}
-function requestFloatyPermission() {
-    app.startActivity({
-        action: Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-        data: Uri.parse("package:" + context.getPackageName())
-    });
-}
-//                                 悬浮窗权限结束
-//##################################################################################

@@ -20,7 +20,7 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "rxjs": "^6.5.3"
+        "rxjs": "^6.5.5"
     },
     "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136"
 }

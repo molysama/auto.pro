@@ -176,6 +176,11 @@ declare const images: {
     }): MatchingResult
 }
 
+declare const $settings: {
+    isEnabled(str: string): boolean
+    setEnabled(str, state: boolean): void
+}
+
 declare function toastLog(string): void
 declare const Animator: any
 declare const AnimatorSet: any

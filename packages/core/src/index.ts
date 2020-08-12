@@ -1,6 +1,30 @@
 import { BehaviorSubject, merge, Observable, throwError, TimeoutError, timer } from 'rxjs'
 import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators'
 import { isFunction } from "./utils"
+import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode } from './utils/settings'
+export * from './utils/index'
+export * from './utils/settings'
+export {
+    isRoot,
+    cap,
+    use,
+
+    width,
+    height,
+    scale,
+    getWidth,
+    getHeight,
+    screenType,
+
+    pause,
+    resume,
+    pausable,
+    pauseState$,
+    pausableInterval,
+    pausableTimer,
+    pausableTimeout,
+    pausableTimeoutWith
+}
 
 type PluginInstallFunction = (option?: any) => any
 
@@ -260,28 +284,6 @@ declare const android
 export function getTime() {
     return android.os.SystemClock.uptimeMillis()
 }
-export { getHeightPixels, getWidthPixels, isFunction, isScreenLandscape } from './utils'
-export {
-    isRoot,
-    cap,
-    use,
-
-    width,
-    height,
-    scale,
-    getWidth,
-    getHeight,
-    screenType,
-
-    pause,
-    resume,
-    pausable,
-    pauseState$,
-    pausableInterval,
-    pausableTimer,
-    pausableTimeout,
-    pausableTimeoutWith
-}
 
 /**
  * 获取对象的原型
@@ -306,20 +308,19 @@ export function getPrototype(obj: any): string {
  * @param {number | 720} param.baseHeight 基准高度
  * @param {boolean | false} param.needCap 是否需要截图功能
  * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
+ * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
+ * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
  */
-export default function (param: {
-    baseWidth?: number
-    baseHeight?: number
-    needCap?: boolean
-    needService?: boolean
-    needFloaty?: boolean
+export default function ({
+    baseWidth = 1280,
+    baseHeight = 720,
+    needCap = false,
+    needService = false,
+    needFloaty = false,
+    needForeground = false,
+    needStableMode = true
 } = {
     }) {
-    needCap = param.needCap === true ? true : false
-    needService = param.needService === true ? true : false
-
-    baseWidth = param.baseWidth || baseWidth
-    baseHeight = param.baseHeight || baseHeight
 
     screenType = baseWidth >= baseHeight ? 'w' : 'h'
     isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false
@@ -340,43 +341,27 @@ export default function (param: {
             }
         }
 
-        if (needService && auto.service == null) {
-            app.startActivity({
-                action: "android.settings.ACCESSIBILITY_SETTINGS"
-            });
+        if (needService) {
+            if (isRoot && !isOpenAccessibilityByRoot()) {
+                openAccessibilityByRoot()
+            } else if (!isRoot && auto.service == null) {
+                app.startActivity({
+                    action: "android.settings.ACCESSIBILITY_SETTINGS"
+                })
+            }
         }
 
-        if (param.needFloaty && !checkFloatyPermission()) {
+        if (needFloaty && !checkFloatyPermission()) {
             requestFloatyPermission()
         }
+
+        if (needForeground && !isOpenForeground()) {
+            openForeground()
+        }
+
+        if (needStableMode && !isOpenStableMode()) {
+            openStableMode()
+        }
     })
 
 }
-
-//#################################################################################
-//                                   悬浮窗权限
-
-importClass(android.provider.Settings);
-importClass(android.net.Uri);
-//请求悬浮窗权限
-
-declare const Settings: any
-declare const Uri
-function checkFloatyPermission() {
-    importClass(android.provider.Settings);
-    if (!Settings.canDrawOverlays(context.getApplicationContext())) {
-        return false
-    } else {
-        return true
-    }
-}
-function requestFloatyPermission() {
-    app.startActivity({
-        action: Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-        data: Uri.parse("package:" + context.getPackageName())
-    })
-}
-
-
-//                                 悬浮窗权限结束
-//##################################################################################

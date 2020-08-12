@@ -1,4 +1,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
+export * from './utils/index';
+export * from './utils/settings';
+export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
 declare type PluginInstallFunction = (option?: any) => any;
 export declare type Plugin = PluginInstallFunction | {
     install: PluginInstallFunction;
@@ -89,8 +92,6 @@ declare function getWidth(value?: number): number;
  */
 declare function getHeight(value?: number): number;
 export declare function getTime(): any;
-export { getHeightPixels, getWidthPixels, isFunction, isScreenLandscape } from './utils';
-export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
@@ -105,11 +106,15 @@ export declare function getPrototype(obj: any): string;
  * @param {number | 720} param.baseHeight 基准高度
  * @param {boolean | false} param.needCap 是否需要截图功能
  * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
+ * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
+ * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
  */
-export default function (param?: {
-    baseWidth?: number;
-    baseHeight?: number;
-    needCap?: boolean;
-    needService?: boolean;
-    needFloaty?: boolean;
+export default function ({ baseWidth, baseHeight, needCap, needService, needFloaty, needForeground, needStableMode }?: {
+    baseWidth?: number | undefined;
+    baseHeight?: number | undefined;
+    needCap?: boolean | undefined;
+    needService?: boolean | undefined;
+    needFloaty?: boolean | undefined;
+    needForeground?: boolean | undefined;
+    needStableMode?: boolean | undefined;
 }): void;
