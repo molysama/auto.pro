@@ -55,15 +55,22 @@ function call(eventName, ...params) {
     }
 }
 
-export function run(url: string, xmlString?: string) {
-    xmlString = xmlString || `
-        <linear w="*" h="*">
-            <webview id="webview" h="*" w="*" />
-        </linear>
-    `
+/**
+ * 
+ * @param {string} url html路径
+ * @param {object} option 自定义选项
+ * @param {string} option.xmlString 自定义界面
+ * @param {string} option.webviewId 自定义界面的webviewId，使用自定义时必填，且要与字符串内的webview的id一致
+ */
+export function run(url: string, { xmlString = `
+    <linear w="*" h="*">
+        <webview id="webview" h="*" w="*" />
+    </linear>
+`, webviewId = 'webview' } = {}) {
+
     ui.layout(xmlString)
 
-    webview = ui.webview
+    webview = ui[webviewId]
     set = webview.getSettings()
 
     set.setAllowFileAccessFromFileURLs(false)
