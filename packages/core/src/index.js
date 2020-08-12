@@ -299,13 +299,8 @@ function default_1(_a) {
         if (needFloaty && !settings_1.checkFloatyPermission()) {
             settings_1.requestFloatyPermission();
         }
-        if (needForeground) {
-            if (!settings_1.isOpenForeground()) {
-                settings_1.openForeground();
-            }
-            events.on('exit', function () {
-                settings_1.closeForeground();
-            });
+        if (needForeground && !settings_1.isOpenForeground()) {
+            settings_1.openForeground();
         }
         if (needStableMode && !settings_1.isOpenStableMode()) {
             settings_1.openStableMode();

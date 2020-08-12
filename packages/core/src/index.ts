@@ -350,13 +350,8 @@ export default function ({
             requestFloatyPermission()
         }
 
-        if (needForeground) {
-            if (!isOpenForeground()) {
-                openForeground()
-            }
-            events.on('exit', function () {
-                closeForeground()
-            })
+        if (needForeground && !isOpenForeground()) {
+            openForeground()
         }
 
         if (needStableMode && !isOpenStableMode()) {
