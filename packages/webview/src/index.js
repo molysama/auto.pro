@@ -66,8 +66,9 @@ function call(eventName) {
         return null;
     }
 }
-function run(url) {
-    ui.layout("\n        <linear w=\"*\" h=\"*\">\n            <webview id=\"webview\" h=\"*\" w=\"*\" />\n        </linear>\n    ");
+function run(url, xmlString) {
+    xmlString = xmlString || "\n        <linear w=\"*\" h=\"*\">\n            <webview id=\"webview\" h=\"*\" w=\"*\" />\n        </linear>\n    ";
+    ui.layout(xmlString);
     webview = ui.webview;
     set = webview.getSettings();
     set.setAllowFileAccessFromFileURLs(false);

@@ -1,7 +1,7 @@
 import { Plugin } from "@auto.pro/core";
 declare function on(eventName: string, callback: Function): void;
 declare function off(eventName: string): void;
-export declare function run(url: string): {
+export declare function run(url: string, xmlString?: string): {
     on: typeof on;
     off: typeof off;
     /**

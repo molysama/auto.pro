@@ -55,12 +55,13 @@ function call(eventName, ...params) {
     }
 }
 
-export function run(url: string) {
-    ui.layout(`
+export function run(url: string, xmlString?: string) {
+    xmlString = xmlString || `
         <linear w="*" h="*">
             <webview id="webview" h="*" w="*" />
         </linear>
-    `)
+    `
+    ui.layout(xmlString)
 
     webview = ui.webview
     set = webview.getSettings()
