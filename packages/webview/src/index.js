@@ -66,10 +66,17 @@ function call(eventName) {
         return null;
     }
 }
-function run(url, xmlString) {
-    xmlString = xmlString || "\n        <linear w=\"*\" h=\"*\">\n            <webview id=\"webview\" h=\"*\" w=\"*\" />\n        </linear>\n    ";
+/**
+ *
+ * @param {string} url html路径
+ * @param {object} option 自定义选项
+ * @param {string} option.xmlString 自定义界面
+ * @param {string} option.webviewId 自定义界面的webviewId，使用自定义时必填，且要与字符串内的webview的id一致
+ */
+function run(url, _a) {
+    var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d;
     ui.layout(xmlString);
-    webview = ui.webview;
+    webview = ui[webviewId];
     set = webview.getSettings();
     set.setAllowFileAccessFromFileURLs(false);
     set.setAllowUniversalAccessFromFileURLs(false);

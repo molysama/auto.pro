@@ -1,7 +1,17 @@
 import { Plugin } from "@auto.pro/core";
 declare function on(eventName: string, callback: Function): void;
 declare function off(eventName: string): void;
-export declare function run(url: string, xmlString?: string): {
+/**
+ *
+ * @param {string} url html路径
+ * @param {object} option 自定义选项
+ * @param {string} option.xmlString 自定义界面
+ * @param {string} option.webviewId 自定义界面的webviewId，使用自定义时必填，且要与字符串内的webview的id一致
+ */
+export declare function run(url: string, { xmlString, webviewId }?: {
+    xmlString?: string | undefined;
+    webviewId?: string | undefined;
+}): {
     on: typeof on;
     off: typeof off;
     /**
