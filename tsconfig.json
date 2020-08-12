@@ -64,13 +64,12 @@
             "@auto.pro/core": ["packages/core/src"],
             "@auto.pro/action": ["packages/action/src"],
             "@auto.pro/search": ["packages/search/src"],
-            "@auto.pro/stream": ["packages/stream/src"]
+            "@auto.pro/stream": ["packages/stream/src"],
+            "@auto.pro/webview": ["packages/webview/src"],
+            "@auto.pro/floaty": ["packages/floaty/src"],
+            "@auto.pro/webpack-plugin": ["packages/webpack-plugin/src"]
         }
     },
-    "include": [
-        "packages/types/lib/global.d.ts",
-        "packages/*/src",
-        "packages/*/__tests__"
-    ]
-    // "preserveSymlinks": true
+    "include": ["packages/core/src/global.d.ts", "packages/*/src"],
+    "exclude": ["packages/*/__test__"]
 }

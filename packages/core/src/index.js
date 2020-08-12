@@ -258,11 +258,11 @@ function getPrototype(obj) {
 }
 exports.getPrototype = getPrototype;
 /**
- *
+ * @param {object} param
  * @param {number | 1280} param.baseWidth 基准宽度
  * @param {number | 720} param.baseHeight 基准高度
  * @param {boolean | false} param.needCap 是否需要截图功能
- * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false，但在非root环境下将强制开启
+ * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
  */
 function default_1(param) {
     if (param === void 0) { param = {}; }
@@ -284,7 +284,7 @@ function default_1(param) {
                 exit();
             }
         }
-        if ((needService || !isRoot) && auto.service == null) {
+        if (needService && auto.service == null) {
             app.startActivity({
                 action: "android.settings.ACCESSIBILITY_SETTINGS"
             });

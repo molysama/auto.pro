@@ -301,11 +301,11 @@ export function getPrototype(obj: any): string {
 
 
 /**
- * 
+ * @param {object} param  
  * @param {number | 1280} param.baseWidth 基准宽度
  * @param {number | 720} param.baseHeight 基准高度
  * @param {boolean | false} param.needCap 是否需要截图功能
- * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false，但在非root环境下将强制开启
+ * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
  */
 export default function (param: {
     baseWidth?: number
@@ -313,7 +313,8 @@ export default function (param: {
     needCap?: boolean
     needService?: boolean
     needFloaty?: boolean
-} = {}) {
+} = {
+    }) {
     needCap = param.needCap === true ? true : false
     needService = param.needService === true ? true : false
 
@@ -339,7 +340,7 @@ export default function (param: {
             }
         }
 
-        if ((needService || !isRoot) && auto.service == null) {
+        if (needService && auto.service == null) {
             app.startActivity({
                 action: "android.settings.ACCESSIBILITY_SETTINGS"
             });
