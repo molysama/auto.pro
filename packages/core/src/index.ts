@@ -40,15 +40,6 @@ export type Plugin =
 let isRoot: boolean
 
 /**
- * 是否需要截图
- */
-let needCap: boolean
-/**
- * 是否需要无障碍服务
- */
-let needService: boolean
-
-/**
  * 基准宽度
  */
 let baseWidth = 1280
@@ -56,6 +47,11 @@ let baseWidth = 1280
  * 基准高度
  */
 let baseHeight = 720
+
+function init(width = 1280, height = 720) {
+    baseWidth = width
+    baseHeight = height
+}
 /**
  * 当前设备宽度，为最长的那条边
  */
@@ -79,9 +75,6 @@ let screenType: ('w' | 'h')
  * @param path 要保存的图片路径
  */
 function cap(path?: string) {
-    if (!needCap) {
-        throw 'cap仅当needCap为真值时可用'
-    }
     if (path) {
         return images.captureScreen(path)
     } else {
@@ -321,6 +314,8 @@ export default function ({
     needStableMode = true
 } = {
     }) {
+
+    init(baseWidth, baseHeight)
 
     screenType = baseWidth >= baseHeight ? 'w' : 'h'
     isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false

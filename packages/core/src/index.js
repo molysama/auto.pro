@@ -23,14 +23,6 @@ __exportStar(require("./utils/settings"), exports);
 var isRoot;
 exports.isRoot = isRoot;
 /**
- * 是否需要截图
- */
-var needCap;
-/**
- * 是否需要无障碍服务
- */
-var needService;
-/**
  * 基准宽度
  */
 var baseWidth = 1280;
@@ -38,6 +30,12 @@ var baseWidth = 1280;
  * 基准高度
  */
 var baseHeight = 720;
+function init(width, height) {
+    if (width === void 0) { width = 1280; }
+    if (height === void 0) { height = 720; }
+    baseWidth = width;
+    baseHeight = height;
+}
 /**
  * 当前设备宽度，为最长的那条边
  */
@@ -63,9 +61,6 @@ exports.screenType = screenType;
  * @param path 要保存的图片路径
  */
 function cap(path) {
-    if (!needCap) {
-        throw 'cap仅当needCap为真值时可用';
-    }
     if (path) {
         return images.captureScreen(path);
     }
@@ -276,6 +271,7 @@ exports.getPrototype = getPrototype;
  */
 function default_1(_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.baseWidth, baseWidth = _c === void 0 ? 1280 : _c, _d = _b.baseHeight, baseHeight = _d === void 0 ? 720 : _d, _e = _b.needCap, needCap = _e === void 0 ? false : _e, _f = _b.needService, needService = _f === void 0 ? false : _f, _g = _b.needFloaty, needFloaty = _g === void 0 ? false : _g, _h = _b.needForeground, needForeground = _h === void 0 ? false : _h, _j = _b.needStableMode, needStableMode = _j === void 0 ? true : _j;
+    init(baseWidth, baseHeight);
     exports.screenType = screenType = baseWidth >= baseHeight ? 'w' : 'h';
     exports.isRoot = isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false;
     var max = typeof device != 'undefined' ? Math.max(device.width, device.height) : 0;
