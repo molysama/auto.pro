@@ -1,12 +1,7 @@
 'use strict';
 
-import { Plugin, isRoot, scale, width, height, pausable, getPrototype } from '@auto.pro/core'
-import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { height, isRoot, pausable, Plugin, scale, width } from '@auto.pro/core';
 import { tap } from 'rxjs/operators';
-import { map } from 'rxjs/operators';
-import { of } from 'rxjs';
-import { MonoTypeOperatorFunction } from 'rxjs';
 const Bezier = require('bezier-js')
 
 /**
