@@ -20,7 +20,6 @@ var AutoProWebpackPlugin = /** @class */ (function () {
                     result = '"ui";';
                 }
                 result += source;
-                console.log("exclude " + sourceFileName + " ?: " + excludeEncode.includes(sourceFileName));
                 if (encode && !excludeEncode.includes(sourceFileName)) {
                     try {
                         result = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(result), CryptoJS.enc.Utf8.parse(encode.key), {
