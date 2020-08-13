@@ -9,6 +9,7 @@ var AutoProWebpackPlugin = /** @class */ (function () {
     AutoProWebpackPlugin.prototype.apply = function (compiler) {
         var ui = this.option.ui || [];
         var encode = this.option.encode;
+        var excludeEncode = (encode === null || encode === void 0 ? void 0 : encode.exclude) || [];
         compiler.hooks.emit.tap('AutoProWebpackPlugin', function (compilation) {
             var _loop_1 = function (filename) {
                 var sourceFileName = filename.split('.')[0];
@@ -19,7 +20,8 @@ var AutoProWebpackPlugin = /** @class */ (function () {
                     result = '"ui";';
                 }
                 result += source;
-                if (encode) {
+                console.log("exclude " + sourceFileName + " ?: " + excludeEncode.includes(sourceFileName));
+                if (encode && !excludeEncode.includes(sourceFileName)) {
                     try {
                         result = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(result), CryptoJS.enc.Utf8.parse(encode.key), {
                             mode: CryptoJS.mode.ECB,

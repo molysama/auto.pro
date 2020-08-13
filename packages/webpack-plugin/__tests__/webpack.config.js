@@ -1,21 +1,26 @@
 
 const path = require('path')
 const AutoProWebpackPlugin = require('..')
+const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 
 module.exports = {
     entry: {
-        first: path.resolve(__dirname, 'first.js'),
-        second: path.resolve(__dirname, 'second.js')
+        1: path.resolve(__dirname, '1.js'),
+        2: path.resolve(__dirname, '2.js'),
+        3: path.resolve(__dirname, '3.js')
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
         // filename: '[name].[chunkhash].js'
     },
+    mode: 'production',
     plugins: [
+        new CleanWebpackPlugin(),
         new AutoProWebpackPlugin({
-            ui: ['second'],
+            ui: ['2', '3'],
             encode: {
-                key: 'SecretPassphrase'
+                key: 'SecretPassphrase',
+                exclude: ['1', '3']
             }
         }),
     ]

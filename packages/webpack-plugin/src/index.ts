@@ -4,6 +4,7 @@ export interface Option {
     ui?: string[]
     encode?: {
         key: string
+        exclude?: string[]
     }
 }
 
@@ -13,19 +14,14 @@ export class AutoProWebpackPlugin {
 
     option: Option
 
-    constructor(option: {
-        ui?: string[]
-        encode?: {
-            key: string
-        }
-
-    }) {
+    constructor(option: Option) {
         this.option = option
     }
 
     apply(compiler) {
         const ui = this.option.ui || []
         const encode = this.option.encode
+        const excludeEncode = encode?.exclude || []
 
         compiler.hooks.emit.tap('AutoProWebpackPlugin', function (compilation) {
 
@@ -40,7 +36,7 @@ export class AutoProWebpackPlugin {
                 }
                 result += source
 
-                if (encode) {
+                if (encode && !excludeEncode.includes(sourceFileName)) {
                     try {
                         result = CryptoJS.AES.encrypt(
                             CryptoJS.enc.Utf8.parse(result),

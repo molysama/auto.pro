@@ -28,18 +28,19 @@
         "url": "git+https://github.com/molysama/auto.pro.git"
     },
     "scripts": {
-        "test": "node __tests__/index.js",
+        "test": "npx webpack --config __tests__/webpack.config.js",
         "build": "tsc"
     },
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"
     },
     "dependencies": {
-        "crypto-js": "^4.0.0",
-        "webpack": "^4.43.0"
+        "crypto-js": "^4.0.0"
     },
     "devDependencies": {
-        "webpack-dev-server": "^3.11.0"
+        "clean-webpack-plugin": "^3.0.0",
+        "webpack": "^4.44.1",
+        "webpack-cli": "^3.3.12"
     },
     "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136"
 }
