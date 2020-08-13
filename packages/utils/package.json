@@ -1,0 +1,39 @@
+{
+    "name": "@auto.pro/utils",
+    "version": "1.0.0",
+    "description": "utils for auto.pro",
+    "keywords": [
+        "auto.pro",
+        "molysama",
+        "webpack"
+    ],
+    "author": "molysama <molysama.i@gmail.com>",
+    "homepage": "https://github.com/molysama/auto.pro#readme",
+    "license": "MIT",
+    "main": "src/index.js",
+    "types": "src/index.d.ts",
+    "directories": {
+        "src": "src",
+        "test": "__tests__"
+    },
+    "files": [
+        "src"
+    ],
+    "publishConfig": {
+        "registry": "http://registry.npmjs.org/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/molysama/auto.pro.git"
+    },
+    "scripts": {
+        "test": "echo \"Error: run tests from root\" && exit 1",
+        "build": "tsc"
+    },
+    "bugs": {
+        "url": "https://github.com/molysama/auto.pro/issues"
+    },
+    "dependencies": {
+        "@auto.pro/core": "^8.11.3"
+    }
+}

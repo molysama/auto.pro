@@ -62,11 +62,15 @@ function call(eventName, ...params) {
  * @param {string} option.xmlString 自定义界面
  * @param {string} option.webviewId 自定义界面的webviewId，使用自定义时必填，且要与字符串内的webview的id一致
  */
-export function run(url: string, { xmlString = `
+export function run(url: string, {
+    xmlString = `
     <linear w="*" h="*">
         <webview id="webview" h="*" w="*" />
     </linear>
-`, webviewId = 'webview' } = {}) {
+`,
+    webviewId = 'webview',
+} = {
+    }) {
 
     ui.layout(xmlString)
 
