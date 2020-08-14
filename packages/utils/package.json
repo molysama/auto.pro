@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/utils",
-    "version": "8.11.5",
+    "version": "8.11.6",
     "description": "utils for auto.pro",
     "keywords": [
         "auto.pro",
@@ -35,7 +35,7 @@
         "url": "https://github.com/molysama/auto.pro/issues"
     },
     "dependencies": {
-        "@auto.pro/core": "^8.11.5",
+        "@auto.pro/core": "^8.11.6",
         "rxjs": "^6.6.2"
     }
 }

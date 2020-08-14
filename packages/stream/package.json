@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/stream",
-    "version": "8.11.5",
+    "version": "8.11.6",
     "description": "run task as stream",
     "keywords": [
         "auto.pro"
@@ -32,7 +32,7 @@
         "url": "https://github.com/molysama/auto.pro/issues"
     },
     "dependencies": {
-        "@auto.pro/core": "^8.11.5",
+        "@auto.pro/core": "^8.11.6",
         "rxjs": "^6.6.2"
     },
     "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136"
