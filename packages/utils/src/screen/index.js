@@ -49,14 +49,14 @@ var screenDirectionSource = new rxjs_1.Subject();
 /**
  * 屏幕旋转事件，返回旋转后的屏幕类型
  */
-exports.screenDirection$ = screenDirectionSource.asObservable().pipe(operators_1.debounceTime(50), operators_2.skip(1), operators_3.map(function () { return context.getResources().getConfiguration().orientation; }), operators_3.map(function (v) {
+exports.screenDirection$ = screenDirectionSource.asObservable().pipe(operators_1.debounceTime(50), operators_3.map(function () { return context.getResources().getConfiguration().orientation; }), operators_3.map(function (v) {
     if (v === 1) {
         return '竖屏';
     }
     else {
         return '横屏';
     }
-}), operators_4.distinctUntilChanged(), operators_5.share());
+}), operators_4.distinctUntilChanged(), operators_2.skip(1), operators_5.share());
 activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
     onGlobalLayout: function () {
         screenDirectionSource.next(true);

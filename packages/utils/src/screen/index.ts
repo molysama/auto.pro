@@ -60,7 +60,6 @@ const screenDirectionSource = new Subject()
  */
 export const screenDirection$: Observable<ScreenType> = screenDirectionSource.asObservable().pipe(
     debounceTime(50),
-    skip(1),
     map(() => context.getResources().getConfiguration().orientation),
     map(v => {
         if (v === 1) {
@@ -70,6 +69,7 @@ export const screenDirection$: Observable<ScreenType> = screenDirectionSource.as
         }
     }),
     distinctUntilChanged(),
+    skip(1),
     share()
 )
 activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(
