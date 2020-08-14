@@ -4,6 +4,7 @@ import { isFunction } from "./utils"
 import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode, closeForeground } from './utils/settings'
 export * from './utils/index'
 export * from './utils/settings'
+export * from './utils/store'
 export {
     isRoot,
     cap,

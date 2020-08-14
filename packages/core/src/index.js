@@ -17,6 +17,7 @@ var utils_1 = require("./utils");
 var settings_1 = require("./utils/settings");
 __exportStar(require("./utils/index"), exports);
 __exportStar(require("./utils/settings"), exports);
+__exportStar(require("./utils/store"), exports);
 /**
  * 设备是否Root
  */

@@ -1,6 +1,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 export * from './utils/index';
 export * from './utils/settings';
+export * from './utils/store';
 export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
 declare type PluginInstallFunction = (option?: any) => any;
 export declare type Plugin = PluginInstallFunction | {
