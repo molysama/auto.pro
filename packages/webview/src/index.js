@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __spreadArrays = (this && this.__spreadArrays) || function () {
     for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
     for (var r = Array(s), k = 0, i = 0; i < il; i++)
@@ -74,11 +85,11 @@ function call(eventName) {
  * @param {string} option.webviewId 自定义界面的webviewId，使用自定义时必填，且要与字符串内的webview的id一致
  */
 function run(url, _a) {
-    var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d;
+    var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.webviewClientOption, webviewClientOption = _e === void 0 ? {} : _e;
     ui.layout(xmlString);
     webview = ui[webviewId];
     set = webview.getSettings();
-    if (url.startsWith('file://')) {
+    if (url.startsWith('file:')) {
         set.setAllowFileAccess(true);
         set.setAllowFileAccessFromFileURLs(true);
         set.setAllowUniversalAccessFromFileURLs(true);
@@ -90,22 +101,17 @@ function run(url, _a) {
     }
     set.setSupportZoom(false);
     set.setJavaScriptEnabled(true);
-    var webcc = new JavaAdapter(WebChromeClient, {
-        onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
+    var webcc = new JavaAdapter(WebChromeClient, __assign({ onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
             var result = call(fnName, defaultValue && JSON.parse(defaultValue));
             jsPromptResult.confirm(result && JSON.stringify(result));
             return true;
-        },
-        onReceivedHttpError: function (view, request, error) {
+        }, onReceivedHttpError: function (view, request, error) {
             log('webview http error', error);
-        },
-        onReceivedError: function (view, errorCode, desc, failingUrl) {
+        }, onReceivedError: function (view, errorCode, desc, failingUrl) {
             log('webview error', desc);
-        },
-        onConsoleMessage: function (msg) {
+        }, onConsoleMessage: function (msg) {
             log(msg.message());
-        }
-    });
+        } }, webviewClientOption));
     webview.setWebChromeClient(webcc);
     webview.loadUrl(url);
     var subject = new rxjs_1.Subject();

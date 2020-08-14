@@ -8,9 +8,10 @@ declare function off(eventName: string): void;
  * @param {string} option.xmlString 自定义界面
  * @param {string} option.webviewId 自定义界面的webviewId，使用自定义时必填，且要与字符串内的webview的id一致
  */
-export declare function run(url: string, { xmlString, webviewId, }?: {
+export declare function run(url: string, { xmlString, webviewId, webviewClientOption }?: {
     xmlString?: string | undefined;
     webviewId?: string | undefined;
+    webviewClientOption?: {} | undefined;
 }): {
     on: typeof on;
     off: typeof off;

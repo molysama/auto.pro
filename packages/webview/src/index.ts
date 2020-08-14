@@ -69,6 +69,7 @@ export function run(url: string, {
     </linear>
 `,
     webviewId = 'webview',
+    webviewClientOption = {}
 } = {
     }) {
 
@@ -77,7 +78,7 @@ export function run(url: string, {
     webview = ui[webviewId]
     set = webview.getSettings()
 
-    if (url.startsWith('file://')) {
+    if (url.startsWith('file:')) {
         set.setAllowFileAccess(true);
         set.setAllowFileAccessFromFileURLs(true);
         set.setAllowUniversalAccessFromFileURLs(true);
@@ -105,7 +106,8 @@ export function run(url: string, {
         },
         onConsoleMessage: function (msg) {
             log(msg.message())
-        }
+        },
+        ...webviewClientOption
     })
 
     webview.setWebChromeClient(webcc)
