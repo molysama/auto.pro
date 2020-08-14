@@ -1,3 +1,4 @@
+type ScreenType = '横屏' | '竖屏'
 interface AutoStorage {
 
     /**
