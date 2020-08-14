@@ -14,6 +14,7 @@ type VISIBILITY_TYPE =
     | '无状态栏的沉浸式界面'
     | '有状态栏的沉浸式界面'
 
+let systemUiVisibilitySub
 /**
  * 设置状态栏和界面的显示情况
  * 
@@ -23,23 +24,24 @@ export function setSystemUiVisibility(type: VISIBILITY_TYPE) {
     const window = activity.getWindow()
     const decorView = window.getDecorView()
 
-    switch (type) {
-        case '无状态栏的沉浸式界面':
-            window.getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN)
-            decorView.getChildAt(0).getLayoutParams().height = statusBarHeight + getHeightPixels()
-            window.setStatusBarColor(android.graphics.Color.TRANSPARENT)
-            break;
+    if (type === '无状态栏的沉浸式界面') {
+        decorView.setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN)
 
-        case '有状态栏的沉浸式界面':
-            decorView.setSystemUiVisibility(
-                android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            )
-            decorView.getChildAt(0).getLayoutParams().height = statusBarHeight + getHeightPixels()
-            window.setStatusBarColor(android.graphics.Color.TRANSPARENT)
-            screenDirection$.subscribe(requestLayout)
-        default:
-            break;
+    } else if (type === '有状态栏的沉浸式界面') {
+        decorView.setSystemUiVisibility(
+            android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            | android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        )
+
+    } else {
+        return
+    }
+
+    decorView.getChildAt(0).getLayoutParams().height = statusBarHeight + getHeightPixels()
+    window.setStatusBarColor(android.graphics.Color.TRANSPARENT)
+
+    if (!systemUiVisibilitySub) {
+        systemUiVisibilitySub = screenDirection$.subscribe(requestLayout)
     }
 
 }

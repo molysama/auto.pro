@@ -11,6 +11,7 @@ var operators_5 = require("rxjs/operators");
 var resources = context.getResources();
 var resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
 exports.statusBarHeight = resources.getDimensionPixelSize(resourceId);
+var systemUiVisibilitySub;
 /**
  * 设置状态栏和界面的显示情况
  *
@@ -19,20 +20,20 @@ exports.statusBarHeight = resources.getDimensionPixelSize(resourceId);
 function setSystemUiVisibility(type) {
     var window = activity.getWindow();
     var decorView = window.getDecorView();
-    switch (type) {
-        case '无状态栏的沉浸式界面':
-            window.getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN);
-            decorView.getChildAt(0).getLayoutParams().height = exports.statusBarHeight + core_1.getHeightPixels();
-            window.setStatusBarColor(android.graphics.Color.TRANSPARENT);
-            break;
-        case '有状态栏的沉浸式界面':
-            decorView.setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-            decorView.getChildAt(0).getLayoutParams().height = exports.statusBarHeight + core_1.getHeightPixels();
-            window.setStatusBarColor(android.graphics.Color.TRANSPARENT);
-            exports.screenDirection$.subscribe(requestLayout);
-        default:
-            break;
+    if (type === '无状态栏的沉浸式界面') {
+        decorView.setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+    else if (type === '有状态栏的沉浸式界面') {
+        decorView.setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            | android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+    }
+    else {
+        return;
+    }
+    decorView.getChildAt(0).getLayoutParams().height = exports.statusBarHeight + core_1.getHeightPixels();
+    window.setStatusBarColor(android.graphics.Color.TRANSPARENT);
+    if (!systemUiVisibilitySub) {
+        systemUiVisibilitySub = exports.screenDirection$.subscribe(requestLayout);
     }
 }
 exports.setSystemUiVisibility = setSystemUiVisibility;
