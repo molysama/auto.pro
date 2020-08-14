@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/action",
-    "version": "8.11.4",
+    "version": "8.11.5",
     "description": "module for control app",
     "author": "molysama <molysama.i@gmail.com>",
     "publishConfig": {
@@ -28,7 +28,7 @@
     },
     "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136",
     "dependencies": {
-        "@auto.pro/core": "^8.11.3",
+        "@auto.pro/core": "^8.11.5",
         "bezier-js": "^2.4.4",
         "rxjs": "^6.5.5"
     }
