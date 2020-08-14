@@ -77,8 +77,16 @@ export function run(url: string, {
     webview = ui[webviewId]
     set = webview.getSettings()
 
-    set.setAllowFileAccessFromFileURLs(false)
-    set.setAllowUniversalAccessFromFileURLs(false)
+    if (url.startsWith('file://')) {
+        set.setAllowFileAccess(true);
+        set.setAllowFileAccessFromFileURLs(true);
+        set.setAllowUniversalAccessFromFileURLs(true);
+    } else {
+        set.setAllowFileAccess(false);
+        set.setAllowFileAccessFromFileURLs(false)
+        set.setAllowUniversalAccessFromFileURLs(false)
+    }
+
     set.setSupportZoom(false)
     set.setJavaScriptEnabled(true)
 
