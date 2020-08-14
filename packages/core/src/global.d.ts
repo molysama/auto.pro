@@ -1,3 +1,33 @@
+interface AutoStorage {
+
+    /**
+     * 取key对应的值，值不存在时返回defaultValue或undefined
+     * @param key 
+     * @param defaultValue 
+     */
+    get(key: string, defaultValue?: any): any
+    /**
+     * 把value保存到key，value必须是可JSON化的值
+     * @param key 
+     * @param value 
+     */
+    put(key: string, value: any): void
+    /**
+     * 移除key对应的数据
+     * @param key 
+     */
+    remove(key: string): void
+    /**
+     * 是否存在key对应的数据
+     * @param key 
+     */
+    contains(key: string): boolean
+
+    /**
+     * 清除所有数据
+     */
+    clear(): void
+}
 interface Image {
     width: number
     height: number
@@ -181,7 +211,15 @@ declare const $settings: {
     setEnabled(str, state: boolean): void
 }
 
-declare function toastLog(string): void
+declare const activity: any
+declare const dialogs: any
+declare const storages: {
+    create(text: string): AutoStorage
+    remove(text: string): boolean
+}
+declare function log(text: string): void
+declare function toastLog(text: string): void
+
 declare const Animator: any
 declare const AnimatorSet: any
 declare const ObjectAnimator: any
