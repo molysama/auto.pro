@@ -1,10 +1,6 @@
 import { getHeightPixels } from "@auto.pro/core"
-import { Subject, Observable } from "rxjs"
-import { debounceTime } from "rxjs/operators"
-import { skip } from "rxjs/operators"
-import { map } from "rxjs/operators"
-import { distinctUntilChanged } from "rxjs/operators"
-import { share } from "rxjs/operators"
+import { Observable, Subject } from "rxjs"
+import { debounceTime, distinctUntilChanged, map, share, skip } from "rxjs/operators"
 
 const resources = context.getResources()
 const resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -51,7 +47,9 @@ export function setSystemUiVisibility(type: VISIBILITY_TYPE) {
  */
 export function requestLayout() {
     const target = activity.getWindow().getDecorView().getChildAt(0)
-    target.getLayoutParams().height = statusBarHeight + getHeightPixels()
+    // 由于未知的原因，requestLayout时不需要加状态栏的高度
+    // target.getLayoutParams().height = statusBarHeight + getHeightPixels()
+    target.getLayoutParams().height = getHeightPixels()
     target.requestLayout()
 }
 
@@ -60,7 +58,7 @@ const screenDirectionSource = new Subject()
 /**
  * 屏幕旋转事件，返回旋转后的屏幕类型
  */
-export const screenDirection$: Observable<ScreenType> = screenDirectionSource.asObservable().pipe(
+export const screenDirection$ = screenDirectionSource.asObservable().pipe(
     debounceTime(50),
     map(() => context.getResources().getConfiguration().orientation),
     map(v => {

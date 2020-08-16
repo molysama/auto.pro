@@ -14,5 +14,5 @@ export declare function requestLayout(): void;
 /**
  * 屏幕旋转事件，返回旋转后的屏幕类型
  */
-export declare const screenDirection$: Observable<ScreenType>;
+export declare const screenDirection$: Observable<"竖屏" | "横屏">;
 export {};

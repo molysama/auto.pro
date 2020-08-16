@@ -4,10 +4,6 @@ exports.screenDirection$ = exports.requestLayout = exports.setSystemUiVisibility
 var core_1 = require("@auto.pro/core");
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
-var operators_2 = require("rxjs/operators");
-var operators_3 = require("rxjs/operators");
-var operators_4 = require("rxjs/operators");
-var operators_5 = require("rxjs/operators");
 var resources = context.getResources();
 var resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
 exports.statusBarHeight = resources.getDimensionPixelSize(resourceId);
@@ -42,7 +38,9 @@ exports.setSystemUiVisibility = setSystemUiVisibility;
  */
 function requestLayout() {
     var target = activity.getWindow().getDecorView().getChildAt(0);
-    target.getLayoutParams().height = exports.statusBarHeight + core_1.getHeightPixels();
+    // 由于未知的原因，requestLayout时不需要加状态栏的高度
+    // target.getLayoutParams().height = statusBarHeight + getHeightPixels()
+    target.getLayoutParams().height = core_1.getHeightPixels();
     target.requestLayout();
 }
 exports.requestLayout = requestLayout;
@@ -50,14 +48,14 @@ var screenDirectionSource = new rxjs_1.Subject();
 /**
  * 屏幕旋转事件，返回旋转后的屏幕类型
  */
-exports.screenDirection$ = screenDirectionSource.asObservable().pipe(operators_1.debounceTime(50), operators_3.map(function () { return context.getResources().getConfiguration().orientation; }), operators_3.map(function (v) {
+exports.screenDirection$ = screenDirectionSource.asObservable().pipe(operators_1.debounceTime(50), operators_1.map(function () { return context.getResources().getConfiguration().orientation; }), operators_1.map(function (v) {
     if (v === 1) {
         return '竖屏';
     }
     else {
         return '横屏';
     }
-}), operators_4.distinctUntilChanged(), operators_2.skip(1), operators_5.share());
+}), operators_1.distinctUntilChanged(), operators_1.skip(1), operators_1.share());
 activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
     onGlobalLayout: function () {
         screenDirectionSource.next(true);
