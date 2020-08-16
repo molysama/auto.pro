@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.screenDirection$ = exports.requestLayout = exports.setSystemUiVisibility = exports.statusBarHeight = void 0;
+var core_1 = require("@auto.pro/core");
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var resources = context.getResources();
@@ -17,6 +18,7 @@ function setSystemUiVisibility(type) {
     var decorView = window.getDecorView();
     var rect = new android.graphics.Rect();
     decorView.getWindowVisibleDisplayFrame(rect);
+    var rectHeight = rect.height();
     if (type === '无状态栏的沉浸式界面') {
         decorView.setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
@@ -27,8 +29,14 @@ function setSystemUiVisibility(type) {
     else {
         return;
     }
-    decorView.getChildAt(0).getLayoutParams().height = exports.statusBarHeight * 2 + rect.height();
     window.setStatusBarColor(android.graphics.Color.TRANSPARENT);
+    var params = decorView.getChildAt(0).getChildAt(1).getLayoutParams();
+    if (exports.statusBarHeight + rectHeight > core_1.getHeightPixels()) {
+        params.height = rectHeight;
+    }
+    else {
+        params.height = exports.statusBarHeight + rectHeight;
+    }
     if (!systemUiVisibilitySub) {
         systemUiVisibilitySub = exports.screenDirection$.subscribe(requestLayout);
     }
@@ -39,7 +47,7 @@ exports.setSystemUiVisibility = setSystemUiVisibility;
  */
 function requestLayout() {
     var decorView = activity.getWindow().getDecorView();
-    var target = decorView.getChildAt(0);
+    var target = decorView.getChildAt(0).getChildAt(1);
     var rect = new android.graphics.Rect();
     decorView.getWindowVisibleDisplayFrame(rect);
     target.getLayoutParams().height = exports.statusBarHeight + rect.height();

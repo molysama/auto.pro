@@ -21,6 +21,7 @@ export function setSystemUiVisibility(type: VISIBILITY_TYPE) {
     const decorView = window.getDecorView()
     const rect = new android.graphics.Rect()
     decorView.getWindowVisibleDisplayFrame(rect)
+    const rectHeight = rect.height()
 
     if (type === '无状态栏的沉浸式界面') {
         decorView.setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_FULLSCREEN)
@@ -35,8 +36,15 @@ export function setSystemUiVisibility(type: VISIBILITY_TYPE) {
         return
     }
 
-    decorView.getChildAt(0).getLayoutParams().height = statusBarHeight * 2 + rect.height()
     window.setStatusBarColor(android.graphics.Color.TRANSPARENT)
+
+    const params = decorView.getChildAt(0).getChildAt(1).getLayoutParams()
+    if (statusBarHeight + rectHeight > getHeightPixels()) {
+        params.height = rectHeight
+    } else {
+        params.height = statusBarHeight + rectHeight
+    }
+
 
     if (!systemUiVisibilitySub) {
         systemUiVisibilitySub = screenDirection$.subscribe(requestLayout)
@@ -49,7 +57,7 @@ export function setSystemUiVisibility(type: VISIBILITY_TYPE) {
  */
 export function requestLayout() {
     const decorView = activity.getWindow().getDecorView()
-    const target = decorView.getChildAt(0)
+    const target = decorView.getChildAt(0).getChildAt(1)
     const rect = new android.graphics.Rect()
     decorView.getWindowVisibleDisplayFrame(rect)
     target.getLayoutParams().height = statusBarHeight + rect.height()
