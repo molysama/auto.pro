@@ -28,7 +28,6 @@
     },
     "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136",
     "dependencies": {
-        "bezier-js": "^2.4.4",
-        "rxjs": "^6.6.2"
+        "bezier-js": "^2.4.4"
     }
 }

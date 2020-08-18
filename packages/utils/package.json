@@ -34,7 +34,5 @@
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"
     },
-    "dependencies": {
-        "rxjs": "^6.6.2"
-    }
+    "dependencies": {}
 }

@@ -29,7 +29,6 @@
         "url": "https://github.com/molysama/auto.pro/issues"
     },
     "dependencies": {
-        "rxjs": "^6.6.2",
         "uuid-js": "^0.7.5"
     },
     "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136"
