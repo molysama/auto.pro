@@ -35,6 +35,7 @@
     },
     "gitHead": "c500369bacf210b86eb41dddff9dd1865c083cc8",
     "dependencies": {
-        "@auto.pro/core": "^8.11.15"
+        "@auto.pro/core": "^8.11.15",
+        "rxjs": "^6.6.2"
     }
 }

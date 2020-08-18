@@ -141,6 +141,7 @@ function createFloaty(_a) {
         // 按下后有移动，则弹起时视为移动结束
         up$.pipe(operators_1.skipUntil(move$), operators_1.tap(function (e_up) {
             var upX = e_up.getRawX();
+            var nowX = STAND.getX();
             var nowY = STAND.getY();
             var widthPixels = core_1.getWidthPixels();
             // 吸附左右边界
@@ -151,6 +152,9 @@ function createFloaty(_a) {
             else if (upX > widthPixels - 100) {
                 STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowY);
                 FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowY - FLOATY_STAND_OFFSET_Y);
+            }
+            else {
+                FLOATY.setPosition(nowX - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y);
             }
         })));
     })).subscribe();
