@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/search",
-    "version": "8.11.12",
+    "version": "8.11.13",
     "publishConfig": {
         "access": "public"
     },
@@ -27,6 +27,5 @@
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"
     },
-    "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136",
-    "dependencies": {}
+    "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136"
 }

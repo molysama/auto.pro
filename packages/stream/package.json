@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/stream",
-    "version": "8.11.12",
+    "version": "8.11.13",
     "description": "run task as stream",
     "keywords": [
         "auto.pro"
@@ -31,6 +31,5 @@
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"
     },
-    "dependencies": {},
     "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136"
 }
