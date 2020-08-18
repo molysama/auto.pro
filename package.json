@@ -5,7 +5,8 @@
         "packages/*"
     ],
     "scripts": {
-        "test": "jest -C jest.config.js"
+        "test": "jest -C jest.config.js",
+        "bootstrap": "lerna bootstrap --use-workspaces"
     },
     "devDependencies": {
         "lerna": "^3.16.5"
@@ -15,6 +16,7 @@
         "jest": "^24.9.0",
         "minimist": "^1.2.0",
         "nyc": "^14.1.1",
-        "rollup": "^2.23.1"
+        "rollup": "^2.23.1",
+        "rxjs": "^6.6.2"
     }
 }
