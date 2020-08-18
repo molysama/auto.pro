@@ -34,7 +34,8 @@
         "download-git-repo": "^2.0.0",
         "inquirer": "^7.0.0",
         "log-symbols": "^3.0.0",
-        "ora": "^4.0.2"
+        "ora": "^4.0.2",
+        "rxjs": "^6.6.2"
     },
     "gitHead": "c9d6c87c65e3c1d5f96c0fd60214ec939cf64136"
 }
