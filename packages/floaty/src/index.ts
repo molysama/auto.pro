@@ -248,6 +248,7 @@ export function createFloaty({
                 skipUntil(move$),
                 tap((e_up) => {
                     const upX = e_up.getRawX()
+                    const nowX = STAND.getX()
                     const nowY = STAND.getY()
                     const widthPixels = getWidthPixels()
 
@@ -258,6 +259,8 @@ export function createFloaty({
                     } else if (upX > widthPixels - 100) {
                         STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowY)
                         FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowY - FLOATY_STAND_OFFSET_Y)
+                    } else {
+                        FLOATY.setPosition(nowX - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y)
                     }
                 })
             )
