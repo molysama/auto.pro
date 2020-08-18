@@ -132,16 +132,14 @@ function createFloaty(_a) {
         up$.pipe(operators_1.takeUntil(move$), operators_1.tap(function () {
             toggleFloaty();
         })), move$.pipe(operators_1.tap(function (e_move) {
-            // const rawX = e_move.getRawX() - dx
-            // const rawY = e_move.getRawY() - dy
-            STAND.setPosition(sx + e_move.getRawX() - dx, sy + e_move.getRawY() - dy);
-            // 悬浮窗只在关闭时可以移动，因此不需要实时移动
-            // FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y)
+            var rawX = e_move.getRawX() - dx;
+            var rawY = e_move.getRawY() - dy;
+            STAND.setPosition(sx + rawX, sy + rawY);
+            FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y);
         }), operators_1.takeUntil(up$)), 
         // 按下后有移动，则弹起时视为移动结束
         up$.pipe(operators_1.skipUntil(move$), operators_1.tap(function (e_up) {
             var upX = e_up.getRawX();
-            var nowX = STAND.getX();
             var nowY = STAND.getY();
             var widthPixels = core_1.getWidthPixels();
             // 吸附左右边界
@@ -152,9 +150,6 @@ function createFloaty(_a) {
             else if (upX > widthPixels - 100) {
                 STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowY);
                 FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowY - FLOATY_STAND_OFFSET_Y);
-            }
-            else {
-                FLOATY.setPosition(nowX - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y);
             }
         })));
     })).subscribe();

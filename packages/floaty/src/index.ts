@@ -235,11 +235,10 @@ export function createFloaty({
             ),
             move$.pipe(
                 tap(e_move => {
-                    // const rawX = e_move.getRawX() - dx
-                    // const rawY = e_move.getRawY() - dy
-                    STAND.setPosition(sx + e_move.getRawX() - dx, sy + e_move.getRawY() - dy)
-                    // 悬浮窗只在关闭时可以移动，因此不需要实时移动
-                    // FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y)
+                    const rawX = e_move.getRawX() - dx
+                    const rawY = e_move.getRawY() - dy
+                    STAND.setPosition(sx + rawX, sy + rawY)
+                    FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y)
                 }),
                 takeUntil(up$),
             ),
@@ -248,7 +247,6 @@ export function createFloaty({
                 skipUntil(move$),
                 tap((e_up) => {
                     const upX = e_up.getRawX()
-                    const nowX = STAND.getX()
                     const nowY = STAND.getY()
                     const widthPixels = getWidthPixels()
 
@@ -259,8 +257,6 @@ export function createFloaty({
                     } else if (upX > widthPixels - 100) {
                         STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowY)
                         FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowY - FLOATY_STAND_OFFSET_Y)
-                    } else {
-                        FLOATY.setPosition(nowX - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y)
                     }
                 })
             )
