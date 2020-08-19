@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/webpack-loader",
-    "version": "8.12.0",
+    "version": "8.12.1",
     "description": "webpack loader for auto.pro",
     "keywords": [
         "auto.js",

@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/webpack-plugin",
-    "version": "8.12.0",
+    "version": "8.12.1",
     "description": "webpack plugin for auto.pro project",
     "keywords": [
         "auto.pro",
