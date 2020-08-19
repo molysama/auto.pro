@@ -14,6 +14,16 @@ module.exports = {
         // filename: '[name].[chunkhash].js'
     },
     mode: 'production',
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                use: {
+                    loader: '@auto.pro/webpack-loader'
+                }
+            }
+        ]
+    },
     plugins: [
         new CleanWebpackPlugin(),
         new AutoProWebpackPlugin({
