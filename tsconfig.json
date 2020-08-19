@@ -67,7 +67,8 @@
             "@auto.pro/stream": ["packages/stream/src"],
             "@auto.pro/webview": ["packages/webview/src"],
             "@auto.pro/floaty": ["packages/floaty/src"],
-            "@auto.pro/webpack-plugin": ["packages/webpack-plugin/src"]
+            "@auto.pro/webpack-plugin": ["packages/webpack-plugin/src"],
+            "@auto.pro/webpack-loader": ["packages/webpack-loader/src"]
         }
     },
     "include": ["packages/core/src/global.d.ts", "packages/*/src"],
