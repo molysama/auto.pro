@@ -11,15 +11,17 @@
     "homepage": "https://github.com/molysama/auto.pro#readme",
     "license": "MIT",
     "main": "src/index.js",
+    "types": "src/index.d.ts",
     "directories": {
-        "lib": "lib",
+        "src": "src",
         "test": "__tests__"
     },
     "files": [
-        "lib"
+        "src"
     ],
     "publishConfig": {
-        "registry": "https://registry.npm.taobao.org/"
+        "registry": "https://registry.npm.taobao.org/",
+        "access": "public"
     },
     "repository": {
         "type": "git",
@@ -31,5 +33,6 @@
     },
     "bugs": {
         "url": "https://github.com/molysama/auto.pro/issues"
-    }
+    },
+    "gitHead": "549bdda265e5030426ad2c3be2590c5c94cf5c3c"
 }
