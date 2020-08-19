@@ -5,18 +5,14 @@
         "packages/*"
     ],
     "scripts": {
-        "test": "jest -C jest.config.js",
-        "bootstrap": "lerna bootstrap --use-workspaces"
+        "bootstrap": "lerna bootstrap --use-workspaces",
+        "test": "mocha packages/webpack-loader/__tests__/*.test.js"
     },
     "devDependencies": {
         "lerna": "^3.16.5"
     },
     "dependencies": {
-        "@types/jest": "^24.0.18",
-        "jest": "^24.9.0",
-        "minimist": "^1.2.0",
-        "nyc": "^14.1.1",
-        "rollup": "^2.23.1",
+        "expect": "^26.4.0",
         "rxjs": "^6.6.2"
     }
 }
