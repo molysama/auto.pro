@@ -12,5 +12,14 @@
 | @auto.pro/webview | ![](https://img.shields.io/npm/v/@auto.pro/webview.svg) | 网页插件，可使用 html 作为 UI 界面，有便捷的双向通信功能        |
 | @auto.pro/floaty  | ![](https://img.shields.io/npm/v/@auto.pro/floaty.svg)  | 悬浮窗插件，快速创建悬浮窗，能拖动和切换，支持多个自定义按钮     |
 
+# 本项目能做什么
+- 使用完善的js、ts语法特性
+- 框架级的应用设计
+- 将多个JS打包成单文件
+- 将JS进行混淆、加密、dex化
+- 加载各种npm包，使babel等编译工具支持auto语法
+- 使用集成的auto模块
+- 使用html网页作为UI
+
 # 文档
 **[wiki文档](https://github.com/molysama/auto.pro/wiki)**
