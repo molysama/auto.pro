@@ -13,4 +13,4 @@
 | @auto.pro/floaty  | ![](https://img.shields.io/npm/v/@auto.pro/floaty.svg)  | 悬浮窗插件，快速创建悬浮窗，能拖动和切换，支持多个自定义按钮     |
 
 # 文档
-[wiki](https://github.com/molysama/auto.pro/wiki)
+**[wiki文档](https://github.com/molysama/auto.pro/wiki)**
