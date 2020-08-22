@@ -1,28 +1,15 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPrototype = exports.getTime = exports.pausableTimeoutWith = exports.pausableTimeout = exports.pausableTimer = exports.pausableInterval = exports.pauseState$ = exports.pausable = exports.resume = exports.pause = exports.screenType = exports.getHeight = exports.getWidth = exports.scale = exports.height = exports.width = exports.use = exports.cap = exports.isRoot = void 0;
-var rxjs_1 = require("rxjs");
-var operators_1 = require("rxjs/operators");
-var utils_1 = require("./utils");
-var settings_1 = require("./utils/settings");
-__exportStar(require("./utils/index"), exports);
-__exportStar(require("./utils/settings"), exports);
-__exportStar(require("./utils/store"), exports);
+import { BehaviorSubject, merge, throwError, TimeoutError, timer } from 'rxjs';
+import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators';
+import { isFunction } from "./utils";
+import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode } from './utils/settings';
+export * from './utils/index';
+export * from './utils/settings';
+export * from './utils/store';
+export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
 /**
  * 设备是否Root
  */
 var isRoot;
-exports.isRoot = isRoot;
 /**
  * 基准宽度
  */
@@ -41,22 +28,18 @@ function init(width, height) {
  * 当前设备宽度，为最长的那条边
  */
 var width;
-exports.width = width;
 /**
  * 当前设备高度，为最短的那条边
  */
 var height;
-exports.height = height;
 /**
  * 当前设备高宽与基准高宽的缩放比
  */
 var scale;
-exports.scale = scale;
 /**
  * 脚本需求的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
  */
 var screenType;
-exports.screenType = screenType;
 /**
  * 截图，仅当needCap设为true时可用
  * @param path 要保存的图片路径
@@ -69,7 +52,6 @@ function cap(path) {
         return images.captureScreen();
     }
 }
-exports.cap = cap;
 var plugins = [];
 /**
  * 加载插件
@@ -80,15 +62,14 @@ function use(plugin, option) {
     if (plugins.indexOf(plugin) !== -1) {
         return;
     }
-    else if (utils_1.isFunction(plugin)) {
+    else if (isFunction(plugin)) {
         plugin(option);
     }
-    else if (utils_1.isFunction(plugin.install)) {
+    else if (isFunction(plugin.install)) {
         plugin.install(option);
     }
     return plugins.push(plugin);
 }
-exports.use = use;
 //################################################################################
 //                                   暂停功能
 /**
@@ -96,8 +77,7 @@ exports.use = use;
  *
  * 程序是否处于暂停状态
  */
-var pauseState$ = new rxjs_1.BehaviorSubject(false);
-exports.pauseState$ = pauseState$;
+var pauseState$ = new BehaviorSubject(false);
 /**
  * 操作符，使流可暂停，可设ispausable为false来强制关闭暂停效果
  * @param {boolean} isPausable 是否强制取消暂停效果
@@ -109,12 +89,12 @@ var pausable = function (isPausable, wait) {
     return function (source) {
         if (isPausable) {
             if (wait) {
-                return source.pipe(operators_1.concatMap(function (value) {
-                    return pauseState$.pipe(operators_1.filter(function (v) { return !v; }), operators_1.take(1), operators_1.map(function () { return value; }));
+                return source.pipe(concatMap(function (value) {
+                    return pauseState$.pipe(filter(function (v) { return !v; }), take(1), map(function () { return value; }));
                 }));
             }
             else {
-                return source.pipe(operators_1.exhaustMap(function (value) { return pauseState$.pipe(operators_1.filter(function (v) { return !v; }), operators_1.take(1), operators_1.map(function () { return value; })); }));
+                return source.pipe(exhaustMap(function (value) { return pauseState$.pipe(filter(function (v) { return !v; }), take(1), map(function () { return value; })); }));
             }
         }
         else {
@@ -122,21 +102,18 @@ var pausable = function (isPausable, wait) {
         }
     };
 };
-exports.pausable = pausable;
 /**
  * 将程序暂停
  */
 function pause() {
     pauseState$.next(true);
 }
-exports.pause = pause;
 /**
  * 将程序恢复运行
  */
 function resume() {
     pauseState$.next(false);
 }
-exports.resume = resume;
 /**
  * 可暂停的interval
  * @param t 时间间隔
@@ -146,7 +123,6 @@ function pausableInterval(t, isWait) {
     if (isWait === void 0) { isWait = true; }
     return pausableTimer(0, t, isWait);
 }
-exports.pausableInterval = pausableInterval;
 /**
  * 可暂停的timer
  * @param t 首次延迟
@@ -154,9 +130,8 @@ exports.pausableInterval = pausableInterval;
  */
 function pausableTimer(t, each, isWait) {
     if (isWait === void 0) { isWait = true; }
-    return rxjs_1.timer(t, each).pipe(pausable(true, isWait));
+    return timer(t, each).pipe(pausable(true, isWait));
 }
-exports.pausableTimer = pausableTimer;
 /**
  * 可暂停的TimeoutWith
  * @param t
@@ -166,10 +141,10 @@ function pausableTimeoutWith(t, ob) {
     return function (source) {
         var begin = Date.now();
         var total = t;
-        var source$ = source.pipe(operators_1.share());
-        return rxjs_1.merge(source$, 
+        var source$ = source.pipe(share());
+        return merge(source$, 
         // 只允许默认和【非暂停->暂停】状态通过的流
-        pauseState$.pipe(operators_1.scan(function (_a, now) {
+        pauseState$.pipe(scan(function (_a, now) {
             var result = _a[0], prev = _a[1];
             if (prev === undefined) {
                 result = true;
@@ -181,43 +156,41 @@ function pausableTimeoutWith(t, ob) {
                 result = false;
             }
             return [result, now];
-        }, [true, undefined]), operators_1.filter(function (v) { return v[0]; }), operators_1.map(function (v) { return v[1]; }))
-            .pipe(operators_1.switchMap(function (vp) {
+        }, [true, undefined]), filter(function (v) { return v[0]; }), map(function (v) { return v[1]; }))
+            .pipe(switchMap(function (vp) {
             // 如果是暂停，则延迟时间为：剩余时间 - (当前时间 - 起始时间)
             if (vp) {
                 total = total - (Date.now() - begin);
-                return pauseState$.pipe(operators_1.filter(function (v) { return !v; }), operators_1.concatMap(function () {
+                return pauseState$.pipe(filter(function (v) { return !v; }), concatMap(function () {
                     begin = Date.now();
-                    return rxjs_1.timer(total);
+                    return timer(total);
                 }));
             }
             else {
                 // 如果是非暂停，则延迟t毫秒，并初始化起始时间
                 begin = Date.now();
-                return rxjs_1.timer(t);
+                return timer(t);
             }
-        }), operators_1.takeUntil(source$.pipe(operators_1.tap(function () {
+        }), takeUntil(source$.pipe(tap(function () {
             begin = Date.now();
             total = t;
-        }))), operators_1.repeat(), operators_1.takeUntil(source$.pipe(operators_1.toArray())), operators_1.switchMap(function () { return rxjs_1.throwError(new rxjs_1.TimeoutError()); }))).pipe(operators_1.catchError(function (err) {
-            if (err instanceof rxjs_1.TimeoutError) {
+        }))), repeat(), takeUntil(source$.pipe(toArray())), switchMap(function () { return throwError(new TimeoutError()); }))).pipe(catchError(function (err) {
+            if (err instanceof TimeoutError) {
                 return ob;
             }
             else {
-                return rxjs_1.throwError(err);
+                return throwError(err);
             }
         }));
     };
 }
-exports.pausableTimeoutWith = pausableTimeoutWith;
 /**
  * 可暂停的timeout
  * @param t
  */
 function pausableTimeout(t) {
-    return pausableTimeoutWith(t, rxjs_1.throwError(new rxjs_1.TimeoutError()));
+    return pausableTimeoutWith(t, throwError(new TimeoutError()));
 }
-exports.pausableTimeout = pausableTimeout;
 //                                 暂停功能结束
 //#############################################################################
 /**
@@ -229,7 +202,6 @@ function getWidth(value) {
     if (value === void 0) { value = 1; }
     return Math.floor(width * value);
 }
-exports.getWidth = getWidth;
 /**
  * 获取当前设备高度的分式值，如value = 1/4，则获取高度的1/4，并向下取整
  * @param value 要获取的高度百分比
@@ -239,11 +211,9 @@ function getHeight(value) {
     if (value === void 0) { value = 1; }
     return Math.floor(height * value);
 }
-exports.getHeight = getHeight;
-function getTime() {
+export function getTime() {
     return android.os.SystemClock.uptimeMillis();
 }
-exports.getTime = getTime;
 /**
  * 获取对象的原型
  * Java对象直接返回Java类名，如'Image'、'Point'
@@ -251,7 +221,7 @@ exports.getTime = getTime;
  * @param obj 要获取原型的对象
  * @returns {string}
  */
-function getPrototype(obj) {
+export function getPrototype(obj) {
     var prototype = Object.prototype.toString.call(obj);
     if (prototype == '[object JavaObject]') {
         return obj.getClass().getSimpleName();
@@ -260,7 +230,6 @@ function getPrototype(obj) {
         return prototype.substring(prototype.indexOf(' ') + 1, prototype.indexOf(']'));
     }
 }
-exports.getPrototype = getPrototype;
 /**
  * @param {object} param
  * @param {number | 1280} param.baseWidth 基准宽度
@@ -270,16 +239,16 @@ exports.getPrototype = getPrototype;
  * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
  */
-function default_1(_a) {
+export default function (_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.baseWidth, baseWidth = _c === void 0 ? 1280 : _c, _d = _b.baseHeight, baseHeight = _d === void 0 ? 720 : _d, _e = _b.needCap, needCap = _e === void 0 ? false : _e, _f = _b.needService, needService = _f === void 0 ? false : _f, _g = _b.needFloaty, needFloaty = _g === void 0 ? false : _g, _h = _b.needForeground, needForeground = _h === void 0 ? false : _h, _j = _b.needStableMode, needStableMode = _j === void 0 ? true : _j;
     init(baseWidth, baseHeight);
-    exports.screenType = screenType = baseWidth >= baseHeight ? 'w' : 'h';
-    exports.isRoot = isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false;
+    screenType = baseWidth >= baseHeight ? 'w' : 'h';
+    isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false;
     var max = typeof device != 'undefined' ? Math.max(device.width, device.height) : 0;
     var min = typeof device != 'undefined' ? Math.min(device.width, device.height) : 0;
-    exports.width = width = screenType === 'w' ? max : min;
-    exports.height = height = screenType === 'w' ? min : max;
-    exports.scale = scale = Math.min(width / baseWidth, height / baseHeight);
+    width = screenType === 'w' ? max : min;
+    height = screenType === 'w' ? min : max;
+    scale = Math.min(width / baseWidth, height / baseHeight);
     threads && threads.start && threads.start(function () {
         if (needCap) {
             if (!images.requestScreenCapture(width, height)) {
@@ -288,8 +257,8 @@ function default_1(_a) {
             }
         }
         if (needService) {
-            if (isRoot && !settings_1.isOpenAccessibilityByRoot()) {
-                settings_1.openAccessibilityByRoot();
+            if (isRoot && !isOpenAccessibilityByRoot()) {
+                openAccessibilityByRoot();
             }
             else if (!isRoot && auto.service == null) {
                 app.startActivity({
@@ -297,15 +266,14 @@ function default_1(_a) {
                 });
             }
         }
-        if (needFloaty && !settings_1.checkFloatyPermission()) {
-            settings_1.requestFloatyPermission();
+        if (needFloaty && !checkFloatyPermission()) {
+            requestFloatyPermission();
         }
-        if (needForeground && !settings_1.isOpenForeground()) {
-            settings_1.openForeground();
+        if (needForeground && !isOpenForeground()) {
+            openForeground();
         }
-        if (needStableMode && !settings_1.isOpenStableMode()) {
-            settings_1.openStableMode();
+        if (needStableMode && !isOpenStableMode()) {
+            openStableMode();
         }
     });
 }
-exports.default = default_1;

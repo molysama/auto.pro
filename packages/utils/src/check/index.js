@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkUpdate = void 0;
-var core_1 = require("@auto.pro/core");
-function checkUpdate(_a) {
+import { storage } from "@auto.pro/core";
+export function checkUpdate(_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.validFunction, validFunction = _c === void 0 ? function () { return false; } : _c, _d = _b.updateFunction, updateFunction = _d === void 0 ? function () { } : _d, _e = _b.shopUrl, shopUrl = _e === void 0 ? '' : _e;
     var KEY_CHECK_UPDATE_PASS = 'xYDqPDF9ZI4jbYS';
-    var pass = core_1.storage.get(KEY_CHECK_UPDATE_PASS);
+    var pass = storage.get(KEY_CHECK_UPDATE_PASS);
     if (pass) {
         return;
     }
@@ -35,7 +32,6 @@ function checkUpdate(_a) {
         app.openUrl(shopUrl);
     }).on("check", function (checked) {
         //监听勾选框
-        core_1.storage.put(KEY_CHECK_UPDATE_PASS, checked);
+        storage.put(KEY_CHECK_UPDATE_PASS, checked);
     }).show();
 }
-exports.checkUpdate = checkUpdate;

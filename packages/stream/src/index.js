@@ -1,22 +1,18 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.tag = void 0;
-var core_1 = require("@auto.pro/core");
-var operators_1 = require("rxjs/operators");
-var rxjs_1 = require("rxjs");
-Object.defineProperty(exports, "concat", { enumerable: true, get: function () { return rxjs_1.concat; } });
+import { getPrototype } from '@auto.pro/core';
+import { tap } from 'rxjs/operators';
+export { concat } from 'rxjs';
 function isFindImgParam(param) {
-    return core_1.getPrototype(param) === 'Object' && param.path !== undefined;
+    return getPrototype(param) === 'Object' && param.path !== undefined;
 }
 function isFunction(param) {
-    return core_1.getPrototype(param) === 'Function';
+    return getPrototype(param) === 'Function';
 }
 function isString(param) {
-    return core_1.getPrototype(param) === 'String';
+    return getPrototype(param) === 'String';
 }
-exports.tag = function (text, showValue, fn) {
+export var tag = function (text, showValue, fn) {
     if (showValue === void 0) { showValue = false; }
-    operators_1.tap(function (v) {
+    tap(function (v) {
         if (showValue) {
             console.log('tag', text, v);
         }
@@ -88,7 +84,7 @@ exports.tag = function (text, showValue, fn) {
 //         finalize(() => param.useCache?.key && clearCache(param.useCache.key))
 //     )
 // }
-exports.default = {
+export default {
     install: function () {
     }
 };

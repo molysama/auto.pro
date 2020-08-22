@@ -1,4 +1,3 @@
-"use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -17,16 +16,13 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.hasAnyColors = exports.hasMulColors = exports.noAnyColors = exports.findImg = exports.readImg = exports.clearCache = void 0;
-var rxjs_1 = require("rxjs");
-var operators_1 = require("rxjs/operators");
-var core_1 = require("@auto.pro/core");
+import { throwError, of, timer, defer } from 'rxjs';
+import { map, filter, take, tap, exhaustMap, finalize } from 'rxjs/operators';
+import { cap, scale, width, height, getPrototype, pausable } from '@auto.pro/core';
 var cache = {};
-function clearCache(cacheName) {
+export function clearCache(cacheName) {
     delete cache[cacheName];
 }
-exports.clearCache = clearCache;
 /**
  * 将坐标转换成region类型，即[x1, y1, x2, y2] -> [x, y, w, h]，并做好边界处理
  * @param param
@@ -37,14 +33,14 @@ function region(param) {
         var y = Math.max(0, param[1]);
         var w = param[2] - x;
         var h = param[3] - y;
-        w = x + w >= core_1.width ? core_1.width - x : w;
-        h = y + h >= core_1.height ? core_1.height - y : h;
+        w = x + w >= width ? width - x : w;
+        h = y + h >= height ? height - y : h;
         return [x, y, w, h];
     }
     else if (param.length == 2) {
         return [
-            Math.min(Math.max(0, param[0]), core_1.width),
-            Math.min(Math.max(0, param[1]), core_1.height)
+            Math.min(Math.max(0, param[0]), width),
+            Math.min(Math.max(0, param[1]), height)
         ];
     }
     else {
@@ -57,12 +53,12 @@ function region(param) {
  * @param {number | undefined} mode 获取模式，若为0则返回灰度图像
  * @returns {Image | null}
  */
-function readImg(imgPath, mode) {
+export function readImg(imgPath, mode) {
     if (!imgPath) {
         return null;
     }
     var result;
-    if (core_1.getPrototype(imgPath) != 'String') {
+    if (getPrototype(imgPath) != 'String') {
         result = imgPath;
     }
     else {
@@ -73,7 +69,6 @@ function readImg(imgPath, mode) {
     }
     return result;
 }
-exports.readImg = readImg;
 /**
  * 找图函数，此函数为异步函数！
  * @param {string} path 待查图片路径
@@ -92,8 +87,8 @@ exports.readImg = readImg;
  * @param {boolean} isLog 是否打印匹配信息
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
-function findImg(param) {
-    return rxjs_1.defer(function () {
+export function findImg(param) {
+    return defer(function () {
         var path = param.path || '';
         var option = param.option || {};
         var index = param.index === undefined ? 1 : param.index;
@@ -112,10 +107,10 @@ function findImg(param) {
         var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
         var template = readImg(path);
         if (!template) {
-            return rxjs_1.throwError('template path is null');
+            return throwError('template path is null');
         }
-        if (core_1.scale !== 1) {
-            template = images.scale(template, core_1.scale, core_1.scale);
+        if (scale !== 1) {
+            template = images.scale(template, scale, scale);
         }
         var queryOption = __assign({}, option);
         queryOption.threshold = queryOption.threshold || 0.8;
@@ -134,11 +129,11 @@ function findImg(param) {
             if (region_1.length == 4) {
                 var x = region_1[0] + region_1[2];
                 var y = region_1[1] + region_1[3];
-                if (x > core_1.width) {
-                    region_1[2] = core_1.width - region_1[0];
+                if (x > width) {
+                    region_1[2] = width - region_1[0];
                 }
-                if (y > core_1.height) {
-                    region_1[3] = core_1.height - region_1[1];
+                if (y > height) {
+                    region_1[3] = height - region_1[1];
                 }
             }
             queryOption.region = region_1;
@@ -147,8 +142,8 @@ function findImg(param) {
         var when = param.when || (function () { return true; });
         var isPass = true;
         var t;
-        return rxjs_1.timer(0, eachTime).pipe(operators_1.filter(function () { return isPass && when(); }), core_1.pausable(isPausable, false), operators_1.exhaustMap(function () {
-            var src = image || core_1.cap();
+        return timer(0, eachTime).pipe(filter(function () { return isPass && when(); }), pausable(isPausable, false), exhaustMap(function () {
+            var src = image || cap();
             var matches = images.matchTemplate(src, template, queryOption).matches;
             if (valid > 0) {
                 if (isLog) {
@@ -165,10 +160,10 @@ function findImg(param) {
             if (matches.length == 0 && DO_IF_NOT_FOUND) {
                 DO_IF_NOT_FOUND();
             }
-            return rxjs_1.of(matches);
-        }), operators_1.take(ONCE ? 1 : 99999999), operators_1.filter(function (v) { return ONCE ? true : v.length > 0; }), operators_1.take(TAKE_NUM), 
+            return of(matches);
+        }), take(ONCE ? 1 : 99999999), filter(function (v) { return ONCE ? true : v.length > 0; }), take(TAKE_NUM), 
         // TODO 使用MatchingResult自带的排序
-        operators_1.map(function (res) {
+        map(function (res) {
             var result = res.map(function (p) {
                 return [
                     Math.floor(p.point['x']),
@@ -199,7 +194,7 @@ function findImg(param) {
                 }
             }
             return result;
-        }), operators_1.tap(function (res) {
+        }), tap(function (res) {
             // 如果有结果，且确认要缓存
             if (res && res.length > 0 && useCache && cachePath && !cache[cachePath]) {
                 var xArray = res.map(function (e) { return e[0]; });
@@ -212,7 +207,7 @@ function findImg(param) {
                 ]);
                 queryOption.region = cache[cachePath];
             }
-        }), operators_1.map(function (res) {
+        }), map(function (res) {
             var result;
             // 如果设置了取第几个，则对最后结果进行处理，有结果则直接返回索引0的值，无结果则返回null
             if (index != undefined) {
@@ -224,21 +219,21 @@ function findImg(param) {
             return result;
         }), 
         // 如果没有设置ONCE，且设置了index，则对最终结果进行过滤
-        operators_1.filter(function (v) {
+        filter(function (v) {
             if (!ONCE && index != undefined) {
                 return v;
             }
             else {
                 return true;
             }
-        }), operators_1.tap(function (v) {
+        }), tap(function (v) {
             if (v && nextTime && isPass) {
                 isPass = false;
                 t = setTimeout(function () {
                     isPass = true;
                 }, nextTime);
             }
-        }), operators_1.finalize(function () {
+        }), finalize(function () {
             if (t) {
                 clearTimeout(t);
             }
@@ -246,7 +241,6 @@ function findImg(param) {
         }));
     });
 }
-exports.findImg = findImg;
 /**
  * (精确查找)
  * 判断区域内是否不含有colors中的任意一个，不含有则返回true，含有则返回false
@@ -255,7 +249,7 @@ exports.findImg = findImg;
  * @param {Array} region    查找范围
  * @param {Array<Color>} colors    待查颜色数组
  */
-function noAnyColors(image, region, colors) {
+export function noAnyColors(image, region, colors) {
     if (region === void 0) { region = [0, 0]; }
     if (colors === void 0) { colors = []; }
     var src = readImg(image);
@@ -267,12 +261,11 @@ function noAnyColors(image, region, colors) {
             return false;
         }
     });
-    if (core_1.getPrototype(image) === 'String') {
+    if (getPrototype(image) === 'String') {
         src.recycle();
     }
     return result;
 }
-exports.noAnyColors = noAnyColors;
 /**
  * (精确查找)
  * 区域内含有colors中的全部颜色时，返回true，否则返回false
@@ -281,7 +274,7 @@ exports.noAnyColors = noAnyColors;
  * @param {Array} region 范围
  * @param {Array<Color>} colors 待查颜色数组
  */
-function hasMulColors(image, region, colors) {
+export function hasMulColors(image, region, colors) {
     if (region === void 0) { region = [0, 0]; }
     if (colors === void 0) { colors = []; }
     var src = readImg(image);
@@ -293,12 +286,11 @@ function hasMulColors(image, region, colors) {
             return false;
         }
     });
-    if (core_1.getPrototype(image) === 'String') {
+    if (getPrototype(image) === 'String') {
         src.recycle();
     }
     return result;
 }
-exports.hasMulColors = hasMulColors;
 /**
  * 存在任意颜色，则返回颜色坐标，否则返回false
  *
@@ -310,7 +302,7 @@ exports.hasMulColors = hasMulColors;
  * }} option 查找参数
  * @returns {[number, number] | false}
  */
-function hasAnyColors(image, colors, option) {
+export function hasAnyColors(image, colors, option) {
     if (colors === void 0) { colors = []; }
     if (option === void 0) { option = {
         threshold: 10
@@ -327,14 +319,13 @@ function hasAnyColors(image, colors, option) {
             return false;
         }
     });
-    if (core_1.getPrototype(image) === 'String') {
+    if (getPrototype(image) === 'String') {
         src.recycle();
     }
     return result;
 }
-exports.hasAnyColors = hasAnyColors;
 var SearchPlugin = {
     install: function (option) {
     }
 };
-exports.default = SearchPlugin;
+export default SearchPlugin;

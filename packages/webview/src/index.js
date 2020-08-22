@@ -1,4 +1,3 @@
-"use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -17,14 +16,9 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.run = void 0;
-var rxjs_1 = require("rxjs");
-var operators_1 = require("rxjs/operators");
-var uuid_js_1 = __importDefault(require("uuid-js"));
+import { defer, of, Subject, zip } from "rxjs";
+import { filter, map, take, tap } from 'rxjs/operators';
+import uuidjs from 'uuid-js';
 var log = console.log;
 var threadEvents;
 var webview;
@@ -84,7 +78,7 @@ function call(eventName) {
  * @param {string} option.xmlString 自定义界面
  * @param {string} option.webviewId 自定义界面的webviewId，使用自定义时必填，且要与字符串内的webview的id一致
  */
-function run(url, _a) {
+export function run(url, _a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.webviewClientOption, webviewClientOption = _e === void 0 ? {} : _e;
     ui.layout(xmlString);
     webview = ui[webviewId];
@@ -114,7 +108,7 @@ function run(url, _a) {
         } }, webviewClientOption));
     webview.setWebChromeClient(webcc);
     webview.loadUrl(url);
-    var subject = new rxjs_1.Subject();
+    var subject = new Subject();
     // webview的方法必须在同一个线程内执行，因此要用线程间的事件传递
     threadEvents = events.emitter(threads.currentThread());
     threadEvents.on('fn', function (_a) {
@@ -146,14 +140,14 @@ function run(url, _a) {
             for (var _i = 1; _i < arguments.length; _i++) {
                 value[_i - 1] = arguments[_i];
             }
-            return rxjs_1.defer(function () {
-                var uuid = uuid_js_1.default.create(4).toString();
-                return rxjs_1.zip(subject.pipe(operators_1.filter(function (v) { return v['uuid'] === uuid; }), operators_1.map(function (v) { return v['promise']; }), operators_1.take(1)), rxjs_1.of(false).pipe(operators_1.tap(function () {
+            return defer(function () {
+                var uuid = uuidjs.create(4).toString();
+                return zip(subject.pipe(filter(function (v) { return v['uuid'] === uuid; }), map(function (v) { return v['promise']; }), take(1)), of(false).pipe(tap(function () {
                     threadEvents.emit('fn', {
                         uuid: uuid,
                         params: __spreadArrays([fnName], value)
                     });
-                }))).pipe(operators_1.map(function (v) { return v[0]; }));
+                }))).pipe(map(function (v) { return v[0]; }));
             }).toPromise();
         },
         /**
@@ -161,20 +155,19 @@ function run(url, _a) {
          * @param js
          */
         runHtmlJS: function (js) {
-            return rxjs_1.defer(function () {
-                var uuid = uuid_js_1.default.create(4).toString();
-                return rxjs_1.zip(subject.pipe(operators_1.filter(function (v) { return v['uuid'] === uuid; }), operators_1.map(function (v) { return v['promise']; }), operators_1.take(1)), rxjs_1.of(false).pipe(operators_1.tap(function () {
+            return defer(function () {
+                var uuid = uuidjs.create(4).toString();
+                return zip(subject.pipe(filter(function (v) { return v['uuid'] === uuid; }), map(function (v) { return v['promise']; }), take(1)), of(false).pipe(tap(function () {
                     threadEvents.emit('js', {
                         uuid: uuid,
                         js: js
                     });
-                }))).pipe(operators_1.map(function (v) { return v[0]; }));
+                }))).pipe(map(function (v) { return v[0]; }));
             }).toPromise();
         },
         webview: webview
     };
 }
-exports.run = run;
 var WebViewPlugin = {
     install: function (option) {
         importClass(android.webkit.WebView);
@@ -184,4 +177,4 @@ var WebViewPlugin = {
         importClass(android.webkit.WebViewClient);
     }
 };
-exports.default = WebViewPlugin;
+export default WebViewPlugin;

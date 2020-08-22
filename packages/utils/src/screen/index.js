@@ -1,19 +1,16 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.screenDirection$ = exports.requestLayout = exports.setSystemUiVisibility = exports.statusBarHeight = void 0;
-var core_1 = require("@auto.pro/core");
-var rxjs_1 = require("rxjs");
-var operators_1 = require("rxjs/operators");
+import { getHeightPixels } from "@auto.pro/core";
+import { Subject } from "rxjs";
+import { debounceTime, distinctUntilChanged, map, share, skip } from "rxjs/operators";
 var resources = context.getResources();
 var resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
-exports.statusBarHeight = resources.getDimensionPixelSize(resourceId);
+export var statusBarHeight = resources.getDimensionPixelSize(resourceId);
 var systemUiVisibilitySub;
 /**
  * 设置状态栏和界面的显示情况
  *
  * @param {VISIBILITY_TYPE} type
  */
-function setSystemUiVisibility(type) {
+export function setSystemUiVisibility(type) {
     var window = activity.getWindow();
     var decorView = window.getDecorView();
     var rect = new android.graphics.Rect();
@@ -31,41 +28,39 @@ function setSystemUiVisibility(type) {
     }
     window.setStatusBarColor(android.graphics.Color.TRANSPARENT);
     var params = decorView.getChildAt(0).getChildAt(1).getLayoutParams();
-    if (exports.statusBarHeight + rectHeight > core_1.getHeightPixels()) {
+    if (statusBarHeight + rectHeight > getHeightPixels()) {
         params.height = rectHeight;
     }
     else {
-        params.height = exports.statusBarHeight + rectHeight;
+        params.height = statusBarHeight + rectHeight;
     }
     if (!systemUiVisibilitySub) {
-        systemUiVisibilitySub = exports.screenDirection$.subscribe(requestLayout);
+        systemUiVisibilitySub = screenDirection$.subscribe(requestLayout);
     }
 }
-exports.setSystemUiVisibility = setSystemUiVisibility;
 /**
  * 刷新屏幕
  */
-function requestLayout() {
+export function requestLayout() {
     var decorView = activity.getWindow().getDecorView();
     var target = decorView.getChildAt(0).getChildAt(1);
     var rect = new android.graphics.Rect();
     decorView.getWindowVisibleDisplayFrame(rect);
-    target.getLayoutParams().height = exports.statusBarHeight + rect.height();
+    target.getLayoutParams().height = statusBarHeight + rect.height();
     target.requestLayout();
 }
-exports.requestLayout = requestLayout;
-var screenDirectionSource = new rxjs_1.Subject();
+var screenDirectionSource = new Subject();
 /**
  * 屏幕旋转事件，返回旋转后的屏幕类型
  */
-exports.screenDirection$ = screenDirectionSource.asObservable().pipe(operators_1.debounceTime(50), operators_1.map(function () { return context.getResources().getConfiguration().orientation; }), operators_1.map(function (v) {
+export var screenDirection$ = screenDirectionSource.asObservable().pipe(debounceTime(50), map(function () { return context.getResources().getConfiguration().orientation; }), map(function (v) {
     if (v === 1) {
         return '竖屏';
     }
     else {
         return '横屏';
     }
-}), operators_1.distinctUntilChanged(), operators_1.skip(1), operators_1.share());
+}), distinctUntilChanged(), skip(1), share());
 activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
     onGlobalLayout: function () {
         screenDirectionSource.next(true);

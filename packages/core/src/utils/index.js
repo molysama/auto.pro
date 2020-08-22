@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHeightPixels = exports.getWidthPixels = exports.isScreenLandscape = exports.isFunction = exports.toArray = void 0;
-function toArray(list, start) {
+export function toArray(list, start) {
     start = start || 0;
     var i = list.length - start;
     var ret = new Array(i);
@@ -10,12 +7,11 @@ function toArray(list, start) {
     }
     return ret;
 }
-exports.toArray = toArray;
-exports.isFunction = function (val) { return typeof val === 'function'; };
+export var isFunction = function (val) { return typeof val === 'function'; };
 /**
  * 判断当前是否为横屏
  */
-exports.isScreenLandscape = function () {
+export var isScreenLandscape = function () {
     var dm = context.getResources().getDisplayMetrics();
     var wm = context.getSystemService(context.WINDOW_SERVICE);
     wm.getDefaultDisplay().getRealMetrics(dm);
@@ -24,7 +20,7 @@ exports.isScreenLandscape = function () {
 /**
  * 返回屏幕水平像素
  */
-exports.getWidthPixels = function () {
+export var getWidthPixels = function () {
     var dm = context.getResources().getDisplayMetrics();
     var wm = context.getSystemService(context.WINDOW_SERVICE);
     wm.getDefaultDisplay().getRealMetrics(dm);
@@ -33,7 +29,7 @@ exports.getWidthPixels = function () {
 /**
  * 返回屏幕纵向像素
  */
-exports.getHeightPixels = function () {
+export var getHeightPixels = function () {
     var dm = context.getResources().getDisplayMetrics();
     var wm = context.getSystemService(context.WINDOW_SERVICE);
     wm.getDefaultDisplay().getRealMetrics(dm);
