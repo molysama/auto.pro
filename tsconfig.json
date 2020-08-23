@@ -75,5 +75,9 @@
         }
     },
     "include": ["packages/core/src/global.d.ts", "packages/*/src"],
-    "exclude": ["packages/*/__test__"]
+    "exclude": [
+        "packages/*/__test__",
+        "packages/webpack-plugin",
+        "packages/webpack-loader"
+    ]
 }

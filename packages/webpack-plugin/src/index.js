@@ -1,4 +1,6 @@
 'use strict';
+exports.__esModule = true;
+exports.AutoProWebpackPlugin = void 0;
 var CryptoJS = require("crypto-js");
 var AutoProWebpackPlugin = /** @class */ (function () {
     function AutoProWebpackPlugin(option) {
@@ -22,7 +24,7 @@ var AutoProWebpackPlugin = /** @class */ (function () {
                     try {
                         result = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(result), CryptoJS.enc.Utf8.parse(encode.key), {
                             mode: CryptoJS.mode.ECB,
-                            padding: CryptoJS.pad.Pkcs7,
+                            padding: CryptoJS.pad.Pkcs7
                         }).toString();
                     }
                     catch (error) {
@@ -46,5 +48,5 @@ var AutoProWebpackPlugin = /** @class */ (function () {
     };
     return AutoProWebpackPlugin;
 }());
-export { AutoProWebpackPlugin };
+exports.AutoProWebpackPlugin = AutoProWebpackPlugin;
 module.exports = AutoProWebpackPlugin;
