@@ -1,5 +1,2 @@
-console.log('hello,world')
-console.log('hello,world')
-console.log('hello,world')
-console.log('hello,world')
-console.log('hello,world') 
+var a = '你好啊'
+a = 123

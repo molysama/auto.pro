@@ -11,8 +11,7 @@ var inquirer = require('inquirer')
 var symbols = require('log-symbols')
 var download = require('download-git-repo')
 
-const rhinoLibDir = './'
-const jsc = 'org.mozilla.javascript.tools.jsc.Main'
+const jsc = 'org.mozilla.javascript.tools.jsc.Main -opt 1 -nosource -encoding UTF-8'
 
 const { logWithSpinner, stopSpinner, failSpinner } = require('./spinner')
 
@@ -84,12 +83,14 @@ program
 
         const orgPath = path.resolve(__dirname, '..')
         const classPath = `java -cp ${orgPath} ${jsc} ${filePath}`
+        // const classPath = `java -jar ${path.resolve(__dirname, 'rhino1712.jar')} ${orgPath} ${jsc} ${filePath}`
+        console.log('classPath', classPath);
         logWithSpinner(`转换${basename}.js为${basename}.dex`)
 
         exec(classPath, (err, stdout, stderr) => {
-            if (err) {
+            if (err || stderr) {
                 failSpinner()
-                console.log(chalk.red(err))
+                console.log(chalk.red(err || stderr))
                 process.exit(1)
             } else {
                 const dxPath = path.resolve(__dirname, 'dx.jar')
@@ -97,9 +98,10 @@ program
                 exec(dxCmd, (err, stdout, stderr) => {
                     if (err || stderr) {
                         failSpinner()
-                        console.log(chalk.red(err))
+                        console.log(chalk.red(err || stderr))
+                    } else {
+                        stopSpinner()
                     }
-                    stopSpinner()
                     process.exit(1)
                 })
             }

@@ -14,8 +14,7 @@
     "main": "lib/cli.js",
     "directories": {
         "lib": "lib",
-        "org": "org",
-        "test": "__tests__"
+        "org": "org"
     },
     "files": [
         "lib",
