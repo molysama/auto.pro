@@ -1,8 +1,11 @@
 {
-  "useWorkspaces": true,
-  "npmClient": "yarn",
-  "packages": [
-    "packages/*"
-  ],
-  "version": "8.13.2"
+    "useWorkspaces": true,
+    "npmClient": "yarn",
+    "packages": ["packages/*"],
+    "command": {
+        "publish": {
+            "ignoreChanges": ["packages/*/__tests__"]
+        }
+    },
+    "version": "8.13.2"
 }
