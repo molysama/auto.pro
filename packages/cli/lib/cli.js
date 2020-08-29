@@ -83,8 +83,6 @@ program
 
         const orgPath = path.resolve(__dirname, '..')
         const classPath = `java -cp ${orgPath} ${jsc} ${filePath}`
-        // const classPath = `java -jar ${path.resolve(__dirname, 'rhino1712.jar')} ${orgPath} ${jsc} ${filePath}`
-        console.log('classPath', classPath);
         logWithSpinner(`转换${basename}.js为${basename}.dex`)
 
         exec(classPath, (err, stdout, stderr) => {
