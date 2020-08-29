@@ -1,11 +1,15 @@
 {
     "useWorkspaces": true,
     "npmClient": "yarn",
-    "packages": ["packages/*"],
+    "packages": [
+        "packages/*"
+    ],
     "command": {
         "publish": {
-            "ignoreChanges": ["packages/*/__tests__"]
+            "ignoreChanges": [
+                "packages/*/__tests__"
+            ]
         }
     },
-    "version": "8.13.2"
+    "version": "8.13.3"
 }
