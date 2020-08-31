@@ -1,4 +1,4 @@
-import { BehaviorSubject, merge, Observable, throwError, TimeoutError, timer } from 'rxjs'
+import { BehaviorSubject, merge, Observable, throwError, TimeoutError, timer, Subject } from 'rxjs'
 import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators'
 import { isFunction } from "./utils"
 import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode, closeForeground } from './utils/settings'
@@ -295,6 +295,21 @@ export function getPrototype(obj: any): string {
     }
 }
 
+/**
+ * 作业用
+ */
+export const effect$ = new Subject()
+
+/**
+ * ui线程
+ */
+export const uiThread = threads.currentThread()
+
+/**
+ * 作业线程
+ */
+export let effectThread: Thread
+
 
 /**
  * @param {object} param  
@@ -328,7 +343,7 @@ export default function ({
     height = screenType === 'w' ? min : max
     scale = Math.min(width / baseWidth, height / baseHeight)
 
-    threads && threads.start && threads.start(function () {
+    effectThread = threads.start(function () {
 
         if (needCap) {
             if (!images.requestScreenCapture(width, height)) {
@@ -358,6 +373,10 @@ export default function ({
         if (needStableMode && !isOpenStableMode()) {
             openStableMode()
         }
+
+        effect$.next(threads.currentThread())
+
+        setInterval(() => { }, 10000)
     })
 
 }

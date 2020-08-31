@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 export * from './utils/index';
 export * from './utils/settings';
 export * from './utils/store';
@@ -101,6 +101,18 @@ export declare function getTime(): any;
  * @returns {string}
  */
 export declare function getPrototype(obj: any): string;
+/**
+ * 作业用
+ */
+export declare const effect$: Subject<unknown>;
+/**
+ * ui线程
+ */
+export declare const uiThread: any;
+/**
+ * 作业线程
+ */
+export declare let effectThread: Thread;
 /**
  * @param {object} param
  * @param {number | 1280} param.baseWidth 基准宽度

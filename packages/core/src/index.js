@@ -1,4 +1,4 @@
-import { BehaviorSubject, merge, throwError, TimeoutError, timer } from 'rxjs';
+import { BehaviorSubject, merge, throwError, TimeoutError, timer, Subject } from 'rxjs';
 import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators';
 import { isFunction } from "./utils";
 import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode } from './utils/settings';
@@ -231,6 +231,18 @@ export function getPrototype(obj) {
     }
 }
 /**
+ * 作业用
+ */
+export var effect$ = new Subject();
+/**
+ * ui线程
+ */
+export var uiThread = threads.currentThread();
+/**
+ * 作业线程
+ */
+export var effectThread;
+/**
  * @param {object} param
  * @param {number | 1280} param.baseWidth 基准宽度
  * @param {number | 720} param.baseHeight 基准高度
@@ -249,7 +261,7 @@ export default function (_a) {
     width = screenType === 'w' ? max : min;
     height = screenType === 'w' ? min : max;
     scale = Math.min(width / baseWidth, height / baseHeight);
-    threads && threads.start && threads.start(function () {
+    effectThread = threads.start(function () {
         if (needCap) {
             if (!images.requestScreenCapture(width, height)) {
                 toast("请求截图失败");
@@ -275,5 +287,7 @@ export default function (_a) {
         if (needStableMode && !isOpenStableMode()) {
             openStableMode();
         }
+        effect$.next(threads.currentThread());
+        setInterval(function () { }, 10000);
     });
 }

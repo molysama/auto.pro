@@ -1,4 +1,5 @@
 type ScreenType = '横屏' | '竖屏'
+interface Thread { }
 interface AutoStorage {
 
     /**
@@ -218,7 +219,7 @@ declare const storages: {
     create(text: string): AutoStorage
     remove(text: string): boolean
 }
-declare function log(text: string): void
+declare function log(text: string, ...args): void
 declare function toastLog(text: string): void
 
 declare const Animator: any
