@@ -83,7 +83,7 @@ export const screenDirection$ = screenDirectionSource.asObservable().pipe(
     skip(1),
     share()
 )
-activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(
+activity && activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(
     new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
         onGlobalLayout() {
             screenDirectionSource.next(true)

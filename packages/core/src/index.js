@@ -1,11 +1,10 @@
 import { BehaviorSubject, merge, throwError, TimeoutError, timer, Subject } from 'rxjs';
 import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators';
-import { isFunction } from "./utils";
 import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode } from './utils/settings';
 export * from './utils/index';
 export * from './utils/settings';
 export * from './utils/store';
-export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
+export { isRoot, cap, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
 /**
  * 设备是否Root
  */
@@ -51,24 +50,6 @@ function cap(path) {
     else {
         return images.captureScreen();
     }
-}
-var plugins = [];
-/**
- * 加载插件
- * @param plugin 要加载的插件
- * @param option 插件需要的参数
- */
-function use(plugin, option) {
-    if (plugins.indexOf(plugin) !== -1) {
-        return;
-    }
-    else if (isFunction(plugin)) {
-        plugin(option);
-    }
-    else if (isFunction(plugin.install)) {
-        plugin.install(option);
-    }
-    return plugins.push(plugin);
 }
 //################################################################################
 //                                   暂停功能

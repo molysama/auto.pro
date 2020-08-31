@@ -21,7 +21,6 @@ export declare type FindImgParam = {
     isLog?: boolean;
 };
 import { Observable } from 'rxjs';
-import { Plugin } from '@auto.pro/core';
 export declare function clearCache(cacheName: string): void;
 /**
  * 获取指定路径的Image对象，若已是Image则不重复获取
@@ -81,5 +80,3 @@ export declare function hasMulColors(image: Image | string, region?: RegionType,
 export declare function hasAnyColors(image: Image | string, colors?: [], option?: {
     threshold: number;
 }): ([number, number] | false);
-declare const SearchPlugin: Plugin;
-export default SearchPlugin;

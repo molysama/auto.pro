@@ -16,9 +16,9 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
-import { throwError, of, timer, defer } from 'rxjs';
-import { map, filter, take, tap, exhaustMap, finalize } from 'rxjs/operators';
-import { cap, scale, width, height, getPrototype, pausable } from '@auto.pro/core';
+import { cap, getPrototype, height, pausable, scale, width } from '@auto.pro/core';
+import { defer, of, throwError, timer } from 'rxjs';
+import { exhaustMap, filter, finalize, map, take, tap } from 'rxjs/operators';
 var cache = {};
 export function clearCache(cacheName) {
     delete cache[cacheName];
@@ -324,8 +324,3 @@ export function hasAnyColors(image, colors, option) {
     }
     return result;
 }
-var SearchPlugin = {
-    install: function (option) {
-    }
-};
-export default SearchPlugin;

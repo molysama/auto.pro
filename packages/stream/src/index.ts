@@ -88,9 +88,3 @@ export const clickImgWithCheck = (
         finalize(() => param.useCache?.key && clearCache(param.useCache.key))
     )
 }
-
-export default {
-    install() {
-
-    }
-}

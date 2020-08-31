@@ -21,10 +21,10 @@ export type FindImgParam = {
     isLog?: boolean
 }
 
-import { throwError, of, timer, Observable, defer } from 'rxjs'
-import { map, filter, take, tap, exhaustMap, finalize } from 'rxjs/operators'
+import { cap, getPrototype, height, pausable, scale, width } from '@auto.pro/core'
+import { defer, Observable, of, throwError, timer } from 'rxjs'
+import { exhaustMap, filter, finalize, map, take, tap } from 'rxjs/operators'
 
-import { Plugin, cap, scale, width, height, getPrototype, pausable } from '@auto.pro/core'
 
 const cache: Record<string, any> = {}
 
@@ -350,11 +350,3 @@ export function hasAnyColors(image: Image | string, colors: [] = [], option = {
     }
     return result
 }
-
-
-const SearchPlugin: Plugin = {
-    install(option: any) {
-    }
-}
-
-export default SearchPlugin

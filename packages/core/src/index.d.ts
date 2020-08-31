@@ -2,11 +2,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 export * from './utils/index';
 export * from './utils/settings';
 export * from './utils/store';
-export { isRoot, cap, use, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
-declare type PluginInstallFunction = (option?: any) => any;
-export declare type Plugin = PluginInstallFunction | {
-    install: PluginInstallFunction;
-};
+export { isRoot, cap, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
 /**
  * 设备是否Root
  */
@@ -32,12 +28,6 @@ declare let screenType: ('w' | 'h');
  * @param path 要保存的图片路径
  */
 declare function cap(path?: string): void | Image;
-/**
- * 加载插件
- * @param plugin 要加载的插件
- * @param option 插件需要的参数
- */
-declare function use(plugin: Plugin, option?: any): number | undefined;
 /**
  *
  *

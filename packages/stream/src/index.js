@@ -84,7 +84,3 @@ export var clickImgWithCheck = function (path, region, threshold, checkDelay, us
     // 由于是按时间戳生成的唯一缓存，结束后清掉
     finalize(function () { var _a; return ((_a = param.useCache) === null || _a === void 0 ? void 0 : _a.key) && clearCache(param.useCache.key); }));
 };
-export default {
-    install: function () {
-    }
-};

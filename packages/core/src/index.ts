@@ -8,7 +8,6 @@ export * from './utils/store'
 export {
     isRoot,
     cap,
-    use,
 
     width,
     height,
@@ -26,14 +25,6 @@ export {
     pausableTimeout,
     pausableTimeoutWith
 }
-
-type PluginInstallFunction = (option?: any) => any
-
-export type Plugin =
-    | PluginInstallFunction
-    | {
-        install: PluginInstallFunction
-    }
 
 /**
  * 设备是否Root
@@ -82,23 +73,7 @@ function cap(path?: string) {
         return images.captureScreen()
     }
 }
-const plugins: Plugin[] = []
 
-/**
- * 加载插件
- * @param plugin 要加载的插件
- * @param option 插件需要的参数
- */
-function use(plugin: Plugin, option?: any) {
-    if (plugins.indexOf(plugin) !== -1) {
-        return
-    } else if (isFunction(plugin)) {
-        plugin(option)
-    } else if (isFunction(plugin.install)) {
-        plugin.install(option)
-    }
-    return plugins.push(plugin)
-}
 
 //################################################################################
 //                                   暂停功能

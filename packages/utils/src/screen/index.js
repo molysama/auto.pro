@@ -61,7 +61,7 @@ export var screenDirection$ = screenDirectionSource.asObservable().pipe(debounce
         return '横屏';
     }
 }), distinctUntilChanged(), skip(1), share());
-activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
+activity && activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
     onGlobalLayout: function () {
         screenDirectionSource.next(true);
     }

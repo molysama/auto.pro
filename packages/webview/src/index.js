@@ -41,7 +41,7 @@ uiThreadEvent.on(CREATE_WEBVIEW, function (url, _a) {
     }
     set.setSupportZoom(false);
     set.setJavaScriptEnabled(true);
-    // webview的方法必须在同一个线程内执行，因此要用线程间的事件传递
+    // webview执行html方法时必须在主线程执行，因此要用线程间的事件传递
     uiThreadEvent.on(WEBVIEW_EVENT, function (uuid, js) {
         webview.evaluateJavascript(js, new JavaAdapter(ValueCallback, {
             onReceiveValue: function (result) {

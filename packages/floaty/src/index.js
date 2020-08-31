@@ -1,3 +1,30 @@
+importClass(java.lang.Runnable);
+importClass(android.animation.ObjectAnimator);
+importClass(android.animation.PropertyValuesHolder);
+importClass(android.animation.ValueAnimator);
+importClass(android.animation.Animator);
+importClass(android.animation.AnimatorSet);
+importClass(android.animation.AnimatorListenerAdapter);
+importClass(android.view.animation.AccelerateInterpolator);
+importClass(android.view.animation.TranslateAnimation);
+importClass(android.animation.ObjectAnimator);
+importClass(android.animation.TimeInterpolator);
+importClass(android.os.Bundle);
+importClass(android.view.View);
+importClass(android.view.Window);
+importClass(android.view.animation.AccelerateDecelerateInterpolator);
+importClass(android.view.animation.AccelerateInterpolator);
+importClass(android.view.animation.AnticipateInterpolator);
+importClass(android.view.animation.AnticipateOvershootInterpolator);
+importClass(android.view.animation.BounceInterpolator);
+importClass(android.view.animation.CycleInterpolator);
+importClass(android.view.animation.DecelerateInterpolator);
+importClass(android.view.animation.LinearInterpolator);
+importClass(android.view.animation.OvershootInterpolator);
+importClass(android.view.animation.PathInterpolator);
+importClass(android.widget.Button);
+importClass(android.widget.ImageView);
+importClass(android.widget.TextView);
 import { getHeightPixels, getPrototype, getWidthPixels } from "@auto.pro/core";
 import { from, merge, Subject } from 'rxjs';
 import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
@@ -184,35 +211,3 @@ export function createFloaty(_a) {
         }
     };
 }
-var FloatyPlugin = {
-    install: function (option) {
-        importClass(java.lang.Runnable);
-        importClass(android.animation.ObjectAnimator);
-        importClass(android.animation.PropertyValuesHolder);
-        importClass(android.animation.ValueAnimator);
-        importClass(android.animation.Animator);
-        importClass(android.animation.AnimatorSet);
-        importClass(android.animation.AnimatorListenerAdapter);
-        importClass(android.view.animation.AccelerateInterpolator);
-        importClass(android.view.animation.TranslateAnimation);
-        importClass(android.animation.ObjectAnimator);
-        importClass(android.animation.TimeInterpolator);
-        importClass(android.os.Bundle);
-        importClass(android.view.View);
-        importClass(android.view.Window);
-        importClass(android.view.animation.AccelerateDecelerateInterpolator);
-        importClass(android.view.animation.AccelerateInterpolator);
-        importClass(android.view.animation.AnticipateInterpolator);
-        importClass(android.view.animation.AnticipateOvershootInterpolator);
-        importClass(android.view.animation.BounceInterpolator);
-        importClass(android.view.animation.CycleInterpolator);
-        importClass(android.view.animation.DecelerateInterpolator);
-        importClass(android.view.animation.LinearInterpolator);
-        importClass(android.view.animation.OvershootInterpolator);
-        importClass(android.view.animation.PathInterpolator);
-        importClass(android.widget.Button);
-        importClass(android.widget.ImageView);
-        importClass(android.widget.TextView);
-    }
-};
-export default FloatyPlugin;
