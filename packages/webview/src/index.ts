@@ -17,7 +17,6 @@ import uuidjs from 'uuid-js'
 import { effectThread, uiThread } from "@auto.pro/core"
 
 const uiThreadEvent = events.emitter(uiThread)
-const effectThreadEvent = events.emitter(effectThread)
 
 const CREATE_WEBVIEW = uuidjs.create(4).toString()
 const CREATE_WEBVIEW_RESULT = CREATE_WEBVIEW + '_RESULT'
@@ -32,6 +31,8 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     webviewClientOption = {}
 } = {
     }) => {
+
+    const effectThreadEvent = events.emitter(effectThread)
 
     // 每一个webview的事件id都不同
     const WEBVIEW_EVENT = uuidjs.create(4).toString()

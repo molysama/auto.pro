@@ -19,11 +19,11 @@ import { take } from 'rxjs/operators';
 import uuidjs from 'uuid-js';
 import { effectThread, uiThread } from "@auto.pro/core";
 var uiThreadEvent = events.emitter(uiThread);
-var effectThreadEvent = events.emitter(effectThread);
 var CREATE_WEBVIEW = uuidjs.create(4).toString();
 var CREATE_WEBVIEW_RESULT = CREATE_WEBVIEW + '_RESULT';
 uiThreadEvent.on(CREATE_WEBVIEW, function (url, _a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.webviewClientOption, webviewClientOption = _e === void 0 ? {} : _e;
+    var effectThreadEvent = events.emitter(effectThread);
     // 每一个webview的事件id都不同
     var WEBVIEW_EVENT = uuidjs.create(4).toString();
     ui.layout(xmlString);
