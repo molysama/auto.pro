@@ -2,6 +2,7 @@ interface WebViewOption {
     xmlString: string;
     webviewId: string;
     webviewClientOption?: any;
+    afterLayout: Function;
 }
 import { Observable } from "rxjs";
 declare type CreateWebviewResult = Observable<{

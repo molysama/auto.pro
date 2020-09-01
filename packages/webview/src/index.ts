@@ -9,12 +9,13 @@ interface WebViewOption {
     xmlString: string
     webviewId: string
     webviewClientOption?: any
+    afterLayout: Function
 }
 
 import { fromEvent, Observable } from "rxjs"
 import { take } from 'rxjs/operators'
 import uuidjs from 'uuid-js'
-import { effectThread, uiThread } from "@auto.pro/core"
+import { effectThread, uiThread, isFunction } from "@auto.pro/core"
 
 const uiThreadEvent = events.emitter(uiThread)
 
@@ -28,7 +29,8 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     </linear>
 `,
     webviewId = 'webview',
-    webviewClientOption = {}
+    webviewClientOption = {},
+    afterLayout = () => { }
 } = {
     }) => {
 
@@ -38,6 +40,7 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     const WEBVIEW_EVENT = uuidjs.create(4).toString()
 
     ui.layout(xmlString)
+    afterLayout()
 
     const webview = ui[webviewId]
     const set = webview.getSettings()
