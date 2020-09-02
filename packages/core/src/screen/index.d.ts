@@ -57,3 +57,17 @@ export declare const getWidthPixels: () => number;
  * 返回屏幕纵向像素
  */
 export declare const getHeightPixels: () => number;
+export declare const statusBarHeight: any;
+declare type VISIBILITY_TYPE = '无状态栏的沉浸式界面' | '有状态栏的沉浸式界面';
+/**
+ * 设置状态栏和界面的显示情况
+ *
+ * @param {VISIBILITY_TYPE} type
+ */
+export declare function setSystemUiVisibility(type: VISIBILITY_TYPE): void;
+/**
+ * 屏幕旋转事件，返回旋转后的屏幕类型
+ * @returns {'横屏'|'竖屏'}
+ */
+export declare const screenDirection$: import("rxjs").Observable<"竖屏" | "横屏">;
+export {};

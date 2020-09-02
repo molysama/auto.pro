@@ -1,7 +1,7 @@
 
-import { defer, iif, of, timer, throwError } from 'rxjs'
-import { filter, map, switchMap, take, tap, catchError, delay } from 'rxjs/operators'
-import { getPrototype } from '..'
+import { defer, iif, of, throwError, timer } from 'rxjs'
+import { catchError, delay, filter, map, switchMap, take, tap } from 'rxjs/operators'
+import { getPrototype } from '../utils'
 
 /**
  * 请求无障碍权限

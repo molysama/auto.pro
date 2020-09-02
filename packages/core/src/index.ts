@@ -1,6 +1,6 @@
 import { concat, iif, of, Subject } from 'rxjs'
 import { toArray } from 'rxjs/operators'
-import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission } from './permission'
+import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission, requestScreenCapturePermission } from './permission'
 import { initScreenSet } from './screen'
 
 export * from './pausable'
@@ -9,26 +9,6 @@ export * from './screen'
 export * from './store'
 export * from './utils'
 
-declare const android
-export function getTime() {
-    return android.os.SystemClock.uptimeMillis()
-}
-
-/**
- * 获取对象的原型
- * Java对象直接返回Java类名，如'Image'、'Point'
- * JS对象返回对应的原型，如 'Null' 'Undefined' 'String' 'Number' 'Function' 'Boolean' 'Array'
- * @param obj 要获取原型的对象
- * @returns {string}
- */
-export function getPrototype(obj: any): string {
-    const prototype = Object.prototype.toString.call(obj)
-    if (prototype == '[object JavaObject]') {
-        return obj.getClass().getSimpleName()
-    } else {
-        return prototype.substring(prototype.indexOf(' ') + 1, prototype.indexOf(']'))
-    }
-}
 
 /**
  * 作业用
@@ -85,7 +65,7 @@ export default function ({
 
         const requestScreenCapture$ = iif(
             () => needCap,
-            requestFloatyPermission(),
+            requestScreenCapturePermission(),
             of(true)
         )
 
