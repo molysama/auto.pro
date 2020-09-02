@@ -1,87 +1,9 @@
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-export * from './utils/index';
-export * from './utils/settings';
-export * from './utils/store';
-export { isRoot, cap, width, height, scale, getWidth, getHeight, screenType, pause, resume, pausable, pauseState$, pausableInterval, pausableTimer, pausableTimeout, pausableTimeoutWith };
-/**
- * 设备是否Root
- */
-declare let isRoot: boolean;
-/**
- * 当前设备宽度，为最长的那条边
- */
-declare let width: number;
-/**
- * 当前设备高度，为最短的那条边
- */
-declare let height: number;
-/**
- * 当前设备高宽与基准高宽的缩放比
- */
-declare let scale: number;
-/**
- * 脚本需求的屏幕类型，'w'代表横屏，'h'代表竖屏，若高宽相等则判定为横屏
- */
-declare let screenType: ('w' | 'h');
-/**
- * 截图，仅当needCap设为true时可用
- * @param path 要保存的图片路径
- */
-declare function cap(path?: string): void | Image;
-/**
- *
- *
- * 程序是否处于暂停状态
- */
-declare const pauseState$: BehaviorSubject<boolean>;
-/**
- * 操作符，使流可暂停，可设ispausable为false来强制关闭暂停效果
- * @param {boolean} isPausable 是否强制取消暂停效果
- * @param {boolean} wait wait为true时将阻塞并存储所有输入，为false时忽略暂停期间的输入
- */
-declare const pausable: (isPausable?: boolean, wait?: boolean) => (source: any) => any;
-/**
- * 将程序暂停
- */
-declare function pause(): void;
-/**
- * 将程序恢复运行
- */
-declare function resume(): void;
-/**
- * 可暂停的interval
- * @param t 时间间隔
- */
-declare function pausableInterval(t?: number, isWait?: boolean): Observable<unknown>;
-/**
- * 可暂停的timer
- * @param t 首次延迟
- * @param each 之后的每次输出间隔
- */
-declare function pausableTimer(t: number, each?: number, isWait?: boolean): Observable<unknown>;
-/**
- * 可暂停的TimeoutWith
- * @param t
- * @param ob
- */
-declare function pausableTimeoutWith(t: number, ob: Observable<any>): (source: any) => Observable<any>;
-/**
- * 可暂停的timeout
- * @param t
- */
-declare function pausableTimeout(t: number): (source: any) => Observable<any>;
-/**
- * 获取当前设备宽度的分式值，如value = 1/4，则获取宽度的1/4，并向下取整
- * @param value 要获取的宽度百分比
- * @returns 当前设备宽度 * value
- */
-declare function getWidth(value?: number): number;
-/**
- * 获取当前设备高度的分式值，如value = 1/4，则获取高度的1/4，并向下取整
- * @param value 要获取的高度百分比
- * @returns 当前设备高度 * value
- */
-declare function getHeight(value?: number): number;
+import { Subject } from 'rxjs';
+export * from './pausable';
+export * from './permission';
+export * from './screen';
+export * from './store';
+export * from './utils';
 export declare function getTime(): any;
 /**
  * 获取对象的原型
@@ -103,8 +25,6 @@ export declare const uiThread: any;
  * 作业线程
  */
 export declare let effectThread: Thread;
-export declare function requestService(): Observable<boolean>;
-export declare function requestFloaty(): Observable<boolean>;
 /**
  * @param {object} param
  * @param {number | 1280} param.baseWidth 基准宽度
@@ -114,7 +34,7 @@ export declare function requestFloaty(): Observable<boolean>;
  * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
  */
-export default function ({ baseWidth: w, baseHeight: h, needCap, needService, needFloaty, needForeground, needStableMode }?: {
+export default function ({ baseWidth, baseHeight, needCap, needService, needFloaty, needForeground, needStableMode }?: {
     baseWidth?: number | undefined;
     baseHeight?: number | undefined;
     needCap?: boolean | undefined;
