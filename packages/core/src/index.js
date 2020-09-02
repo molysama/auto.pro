@@ -1,7 +1,7 @@
-import { concat, iif, of, Subject } from 'rxjs';
+import { concat, iif, of, ReplaySubject } from 'rxjs';
 import { toArray } from 'rxjs/operators';
 import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission, requestScreenCapturePermission } from './permission';
-import { initScreenSet } from './screen';
+import { initScreenSet, width, height } from './screen';
 export * from './pausable';
 export * from './permission';
 export * from './screen';
@@ -10,7 +10,7 @@ export * from './utils';
 /**
  * 作业用
  */
-export var effect$ = new Subject();
+export var effect$ = new ReplaySubject(1);
 /**
  * ui线程
  */
@@ -35,15 +35,21 @@ export default function (_a) {
         var effectThread = threads.currentThread();
         var requestService$ = iif(function () { return needService; }, requestServicePermission(), of(true));
         var requestFloaty$ = iif(function () { return needFloaty; }, requestFloatyPermission(), of(true));
-        var requestScreenCapture$ = iif(function () { return needCap; }, requestScreenCapturePermission(), of(true));
+        var requestScreenCapture$ = iif(function () { return needCap; }, requestScreenCapturePermission([width, height]), of(true));
         if (needForeground && !isOpenForeground()) {
             openForeground();
         }
         if (needStableMode && !isOpenStableMode()) {
             openStableMode();
         }
-        concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(toArray()).subscribe(function () {
-            effect$.next(effectThread);
+        concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(toArray()).subscribe({
+            next: function () {
+                effect$.next(effectThread);
+            },
+            error: function (err) {
+                toastLog(err);
+                exit();
+            }
         });
         setInterval(function () { }, 10000);
     });

@@ -1,7 +1,7 @@
-import { concat, iif, of, Subject } from 'rxjs'
+import { concat, iif, of, Subject, ReplaySubject } from 'rxjs'
 import { toArray } from 'rxjs/operators'
 import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission, requestScreenCapturePermission } from './permission'
-import { initScreenSet } from './screen'
+import { initScreenSet, width, height } from './screen'
 
 export * from './pausable'
 export * from './permission'
@@ -9,11 +9,10 @@ export * from './screen'
 export * from './store'
 export * from './utils'
 
-
 /**
  * 作业用
  */
-export const effect$ = new Subject()
+export const effect$ = new ReplaySubject(1)
 
 /**
  * ui线程
@@ -65,7 +64,7 @@ export default function ({
 
         const requestScreenCapture$ = iif(
             () => needCap,
-            requestScreenCapturePermission(),
+            requestScreenCapturePermission([width, height]),
             of(true)
         )
 
@@ -79,8 +78,14 @@ export default function ({
 
         concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(
             toArray()
-        ).subscribe(() => {
-            effect$.next(effectThread)
+        ).subscribe({
+            next() {
+                effect$.next(effectThread)
+            },
+            error(err) {
+                toastLog(err)
+                exit()
+            }
         })
 
         setInterval(() => { }, 10000)

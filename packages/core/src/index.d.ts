@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 export * from './pausable';
 export * from './permission';
 export * from './screen';
@@ -7,7 +7,7 @@ export * from './utils';
 /**
  * 作业用
  */
-export declare const effect$: Subject<unknown>;
+export declare const effect$: ReplaySubject<unknown>;
 /**
  * ui线程
  */

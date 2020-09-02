@@ -58,24 +58,23 @@ export function requestScreenCapturePermission(param?: boolean | [number, number
 
     return defer(() => {
         const paramType = getPrototype(param)
+        let result
         if (paramType === 'Boolean') {
-            return of(images.requestScreenCapture(param as boolean))
+            result = images.requestScreenCapture(param as boolean)
         } else if (paramType === 'Array' && (param as [number, number]).length === 2) {
-            return of(images.requestScreenCapture((param as [number, number])[0], (param as [number, number])[1]))
+            result = images.requestScreenCapture((param as [number, number])[0], (param as [number, number])[1])
         } else {
-            return of(images.requestScreenCapture())
+            result = images.requestScreenCapture()
+        }
+        if (result) {
+            return of(true)
+        } else {
+            toastLog('请求截图权限失败')
+            exit()
+            return of(false)
         }
     }).pipe(
-        tap(v => {
-            if (!v) {
-                throw '请求截图失败'
-            }
-        }),
-        delay(500),
-        catchError(err => {
-            toastLog(err)
-            return throwError(err)
-        })
+        delay(500)
     )
 
 }
