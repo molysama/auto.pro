@@ -7,10 +7,6 @@ export declare function requestServicePermission(): import("rxjs").Observable<bo
  */
 export declare function requestFloatyPermission(): import("rxjs").Observable<boolean>;
 /**
- * 请求悬浮窗权限
- */
-export declare function requestScreenCapturePermission(param?: boolean | [number, number]): import("rxjs").Observable<boolean>;
-/**
  * 通过root开启无障碍服务
  */
 export declare function openAccessibilityByRoot(): void;

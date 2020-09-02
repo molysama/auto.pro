@@ -52,34 +52,6 @@ export function requestFloatyPermission() {
 }
 
 /**
- * 请求悬浮窗权限
- */
-export function requestScreenCapturePermission(param?: boolean | [number, number]) {
-
-    return defer(() => {
-        const paramType = getPrototype(param)
-        let result
-        if (paramType === 'Boolean') {
-            result = images.requestScreenCapture(param as boolean)
-        } else if (paramType === 'Array' && (param as [number, number]).length === 2) {
-            result = images.requestScreenCapture((param as [number, number])[0], (param as [number, number])[1])
-        } else {
-            result = images.requestScreenCapture()
-        }
-        if (result) {
-            return of(true)
-        } else {
-            toastLog('请求截图权限失败')
-            exit()
-            return of(false)
-        }
-    }).pipe(
-        delay(500)
-    )
-
-}
-
-/**
  * 通过root开启无障碍服务
  */
 export function openAccessibilityByRoot() {

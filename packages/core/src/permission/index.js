@@ -1,6 +1,5 @@
 import { defer, iif, of, timer } from 'rxjs';
-import { delay, filter, map, switchMap, take } from 'rxjs/operators';
-import { getPrototype } from '../utils';
+import { filter, map, switchMap, take } from 'rxjs/operators';
 /**
  * 请求无障碍权限
  */
@@ -30,32 +29,6 @@ export function requestFloatyPermission() {
         floaty.requestPermission();
         return timer(0, 200).pipe(map(function () { return floaty.checkPermission(); }), filter(function (v) { return v; }), take(1));
     }));
-}
-/**
- * 请求悬浮窗权限
- */
-export function requestScreenCapturePermission(param) {
-    return defer(function () {
-        var paramType = getPrototype(param);
-        var result;
-        if (paramType === 'Boolean') {
-            result = images.requestScreenCapture(param);
-        }
-        else if (paramType === 'Array' && param.length === 2) {
-            result = images.requestScreenCapture(param[0], param[1]);
-        }
-        else {
-            result = images.requestScreenCapture();
-        }
-        if (result) {
-            return of(true);
-        }
-        else {
-            toastLog('请求截图权限失败');
-            exit();
-            return of(false);
-        }
-    }).pipe(delay(500));
 }
 /**
  * 通过root开启无障碍服务

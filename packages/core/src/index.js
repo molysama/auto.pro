@@ -1,7 +1,7 @@
-import { concat, iif, of, ReplaySubject } from 'rxjs';
+import { concat, iif, of, ReplaySubject, timer } from 'rxjs';
 import { toArray } from 'rxjs/operators';
-import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission, requestScreenCapturePermission } from './permission';
-import { initScreenSet, width, height } from './screen';
+import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission } from './permission';
+import { height, initScreenSet, width } from './screen';
 export * from './pausable';
 export * from './permission';
 export * from './screen';
@@ -35,7 +35,16 @@ export default function (_a) {
         var effectThread = threads.currentThread();
         var requestService$ = iif(function () { return needService; }, requestServicePermission(), of(true));
         var requestFloaty$ = iif(function () { return needFloaty; }, requestFloatyPermission(), of(true));
-        var requestScreenCapture$ = iif(function () { return needCap; }, requestScreenCapturePermission([width, height]), of(true));
+        var requestScreenCapture$ = timer(0);
+        if (needCap) {
+            if (images.requestScreenCapture(width, height)) {
+                requestScreenCapture$ = timer(500);
+            }
+            else {
+                toastLog('请求截图权限失败');
+                exit();
+            }
+        }
         if (needForeground && !isOpenForeground()) {
             openForeground();
         }
