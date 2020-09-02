@@ -1,7 +1,6 @@
-import { BehaviorSubject, merge, Observable, throwError, TimeoutError, timer, Subject } from 'rxjs'
-import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators'
-import { isFunction } from "./utils"
-import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode, closeForeground } from './utils/settings'
+import { BehaviorSubject, concat, defer, iif, merge, Observable, of, Subject, throwError, TimeoutError, timer } from 'rxjs'
+import { catchError, concatMap, delay, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators'
+import { isOpenAccessibilityByRoot, isOpenForeground, isOpenStableMode, openAccessibilityByRoot, openForeground, openStableMode } from './utils/settings'
 export * from './utils/index'
 export * from './utils/settings'
 export * from './utils/store'
@@ -40,10 +39,6 @@ let baseWidth = 1280
  */
 let baseHeight = 720
 
-function init(width = 1280, height = 720) {
-    baseWidth = width
-    baseHeight = height
-}
 /**
  * 当前设备宽度，为最长的那条边
  */
@@ -286,6 +281,48 @@ export const uiThread = threads.currentThread()
 export let effectThread: Thread
 
 
+export function requestService() {
+    const isRoot = $shell.checkAccess('root')
+    return of(isRoot).pipe(
+        switchMap(v => {
+            if (v && !isOpenAccessibilityByRoot()) {
+                openAccessibilityByRoot()
+                return timer(0, 200).pipe(
+                    map(() => isOpenAccessibilityByRoot()),
+                    filter(v => v),
+                    take(1)
+                )
+            } else if (!v && auto.service === null) {
+                app.startActivity({
+                    action: "android.settings.ACCESSIBILITY_SETTINGS"
+                })
+                return timer(0, 200).pipe(
+                    map(() => auto.service !== null),
+                    filter(v => v),
+                    take(1)
+                )
+            } else {
+                return of(true)
+            }
+        })
+    )
+}
+
+export function requestFloaty() {
+    return iif(
+        floaty.checkPermission,
+        of(true),
+        defer(() => {
+            floaty.requestPermission()
+            return timer(0, 200).pipe(
+                map(() => floaty.checkPermission()),
+                filter(v => v),
+                take(1)
+            )
+        })
+    )
+}
+
 /**
  * @param {object} param  
  * @param {number | 1280} param.baseWidth 基准宽度
@@ -296,8 +333,8 @@ export let effectThread: Thread
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
  */
 export default function ({
-    baseWidth = 1280,
-    baseHeight = 720,
+    baseWidth: w = 1280,
+    baseHeight: h = 720,
     needCap = false,
     needService = false,
     needFloaty = false,
@@ -306,13 +343,14 @@ export default function ({
 } = {
     }) {
 
-    init(baseWidth, baseHeight)
+    baseWidth = w
+    baseHeight = h
 
     screenType = baseWidth >= baseHeight ? 'w' : 'h'
-    isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false
+    isRoot = $shell.checkAccess('root')
 
-    const max = typeof device != 'undefined' ? Math.max(device.width, device.height) : 0
-    const min = typeof device != 'undefined' ? Math.min(device.width, device.height) : 0
+    const max = Math.max(device.width, device.height)
+    const min = Math.min(device.width, device.height)
 
     width = screenType === 'w' ? max : min
     height = screenType === 'w' ? min : max
@@ -320,26 +358,33 @@ export default function ({
 
     effectThread = threads.start(function () {
 
-        if (needCap) {
-            if (!images.requestScreenCapture(width, height)) {
-                toast("请求截图失败");
-                exit();
-            }
-        }
+        const effectThread = threads.currentThread()
 
-        if (needService) {
-            if (isRoot && !isOpenAccessibilityByRoot()) {
-                openAccessibilityByRoot()
-            } else if (!isRoot && auto.service == null) {
-                app.startActivity({
-                    action: "android.settings.ACCESSIBILITY_SETTINGS"
-                })
-            }
-        }
+        const requestService$ = iif(
+            () => needService,
+            requestService(),
+            of(true)
+        )
 
-        if (needFloaty && !checkFloatyPermission()) {
-            requestFloatyPermission()
-        }
+        const requestFloaty$ = iif(
+            () => needFloaty,
+            requestFloaty(),
+            of(true)
+        )
+
+        const requestScreenCapture$ = iif(
+            () => needCap,
+            of(images.requestScreenCapture(width, height)).pipe(
+                tap(v => {
+                    if (!v) {
+                        toast("请求截图失败");
+                        exit();
+                    }
+                }),
+                delay(500)
+            ),
+            of(true)
+        )
 
         if (needForeground && !isOpenForeground()) {
             openForeground()
@@ -349,7 +394,11 @@ export default function ({
             openStableMode()
         }
 
-        effect$.next(threads.currentThread())
+        concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(
+            toArray()
+        ).subscribe(() => {
+            effect$.next(effectThread)
+        })
 
         setInterval(() => { }, 10000)
     })

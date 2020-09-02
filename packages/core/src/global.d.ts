@@ -227,7 +227,26 @@ declare const AnimatorSet: any
 declare const ObjectAnimator: any
 declare const context: any
 declare const java: any
-declare const floaty: any
+interface FloatyWindow {
+    setAdjustEnabled(enabled: boolean): void
+    setPosition(x: number, y: number): void
+    getX(): number
+    getY(): number
+    setSize(width: number, height: number): void
+    getWidth(): number
+    getHeight(): number
+    close(): void
+    exitOnClose(): void
+}
+interface FloatyRawWindow extends Omit<FloatyWindow, 'setAdjustEnabled'> {
+    setTouchable(toucable: boolean)
+}
+declare const floaty: {
+    checkPermission(): boolean
+    requestPermission(): boolean
+    window(layout: any): FloatyWindow & { [key: string]: any }
+    rawWindow(layout: any): FloatyRawWindow & { [key: string]: any }
+}
 declare const runtime: any
 declare const android: any
 declare const ui: any

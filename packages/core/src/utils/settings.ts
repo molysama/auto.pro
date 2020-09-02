@@ -44,32 +44,6 @@ export function closeStableMode() {
     $settings.setEnabled('stable_mode', false)
 }
 
-//#################################################################################
-//                                   悬浮窗权限
-
-
-importClass(android.provider.Settings);
-importClass(android.net.Uri);
-
-declare const Settings: any
-declare const Uri: any
-export function checkFloatyPermission() {
-    importClass(android.provider.Settings);
-    if (!Settings.canDrawOverlays(context.getApplicationContext())) {
-        return false
-    } else {
-        return true
-    }
-}
-export function requestFloatyPermission() {
-    app.startActivity({
-        action: Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-        data: Uri.parse("package:" + context.getPackageName())
-    })
-}
-
-//                                 悬浮窗权限结束
-//##################################################################################
 
 //##################################################################################
 //                             使用adb权限开启无障碍服务

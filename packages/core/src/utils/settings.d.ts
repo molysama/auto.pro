@@ -21,5 +21,3 @@ export declare function openStableMode(): void;
  * 关闭稳定模式
  */
 export declare function closeStableMode(): void;
-export declare function checkFloatyPermission(): boolean;
-export declare function requestFloatyPermission(): void;

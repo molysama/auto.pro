@@ -1,6 +1,6 @@
-import { BehaviorSubject, merge, throwError, TimeoutError, timer, Subject } from 'rxjs';
-import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators';
-import { isOpenAccessibilityByRoot, isOpenForeground, openAccessibilityByRoot, openForeground, requestFloatyPermission, checkFloatyPermission, isOpenStableMode, openStableMode } from './utils/settings';
+import { BehaviorSubject, concat, defer, iif, merge, of, Subject, throwError, TimeoutError, timer } from 'rxjs';
+import { catchError, concatMap, delay, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators';
+import { isOpenAccessibilityByRoot, isOpenForeground, isOpenStableMode, openAccessibilityByRoot, openForeground, openStableMode } from './utils/settings';
 export * from './utils/index';
 export * from './utils/settings';
 export * from './utils/store';
@@ -17,12 +17,6 @@ var baseWidth = 1280;
  * 基准高度
  */
 var baseHeight = 720;
-function init(width, height) {
-    if (width === void 0) { width = 1280; }
-    if (height === void 0) { height = 720; }
-    baseWidth = width;
-    baseHeight = height;
-}
 /**
  * 当前设备宽度，为最长的那条边
  */
@@ -223,6 +217,30 @@ export var uiThread = threads.currentThread();
  * 作业线程
  */
 export var effectThread;
+export function requestService() {
+    var isRoot = $shell.checkAccess('root');
+    return of(isRoot).pipe(switchMap(function (v) {
+        if (v && !isOpenAccessibilityByRoot()) {
+            openAccessibilityByRoot();
+            return timer(0, 200).pipe(map(function () { return isOpenAccessibilityByRoot(); }), filter(function (v) { return v; }), take(1));
+        }
+        else if (!v && auto.service === null) {
+            app.startActivity({
+                action: "android.settings.ACCESSIBILITY_SETTINGS"
+            });
+            return timer(0, 200).pipe(map(function () { return auto.service !== null; }), filter(function (v) { return v; }), take(1));
+        }
+        else {
+            return of(true);
+        }
+    }));
+}
+export function requestFloaty() {
+    return iif(floaty.checkPermission, of(true), defer(function () {
+        floaty.requestPermission();
+        return timer(0, 200).pipe(map(function () { return floaty.checkPermission(); }), filter(function (v) { return v; }), take(1));
+    }));
+}
 /**
  * @param {object} param
  * @param {number | 1280} param.baseWidth 基准宽度
@@ -233,42 +251,35 @@ export var effectThread;
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
  */
 export default function (_a) {
-    var _b = _a === void 0 ? {} : _a, _c = _b.baseWidth, baseWidth = _c === void 0 ? 1280 : _c, _d = _b.baseHeight, baseHeight = _d === void 0 ? 720 : _d, _e = _b.needCap, needCap = _e === void 0 ? false : _e, _f = _b.needService, needService = _f === void 0 ? false : _f, _g = _b.needFloaty, needFloaty = _g === void 0 ? false : _g, _h = _b.needForeground, needForeground = _h === void 0 ? false : _h, _j = _b.needStableMode, needStableMode = _j === void 0 ? true : _j;
-    init(baseWidth, baseHeight);
+    var _b = _a === void 0 ? {} : _a, _c = _b.baseWidth, w = _c === void 0 ? 1280 : _c, _d = _b.baseHeight, h = _d === void 0 ? 720 : _d, _e = _b.needCap, needCap = _e === void 0 ? false : _e, _f = _b.needService, needService = _f === void 0 ? false : _f, _g = _b.needFloaty, needFloaty = _g === void 0 ? false : _g, _h = _b.needForeground, needForeground = _h === void 0 ? false : _h, _j = _b.needStableMode, needStableMode = _j === void 0 ? true : _j;
+    baseWidth = w;
+    baseHeight = h;
     screenType = baseWidth >= baseHeight ? 'w' : 'h';
-    isRoot = typeof $shell != 'undefined' && $shell.checkAccess && $shell.checkAccess('root') || false;
-    var max = typeof device != 'undefined' ? Math.max(device.width, device.height) : 0;
-    var min = typeof device != 'undefined' ? Math.min(device.width, device.height) : 0;
+    isRoot = $shell.checkAccess('root');
+    var max = Math.max(device.width, device.height);
+    var min = Math.min(device.width, device.height);
     width = screenType === 'w' ? max : min;
     height = screenType === 'w' ? min : max;
     scale = Math.min(width / baseWidth, height / baseHeight);
     effectThread = threads.start(function () {
-        if (needCap) {
-            if (!images.requestScreenCapture(width, height)) {
+        var effectThread = threads.currentThread();
+        var requestService$ = iif(function () { return needService; }, requestService(), of(true));
+        var requestFloaty$ = iif(function () { return needFloaty; }, requestFloaty(), of(true));
+        var requestScreenCapture$ = iif(function () { return needCap; }, of(images.requestScreenCapture(width, height)).pipe(tap(function (v) {
+            if (!v) {
                 toast("请求截图失败");
                 exit();
             }
-        }
-        if (needService) {
-            if (isRoot && !isOpenAccessibilityByRoot()) {
-                openAccessibilityByRoot();
-            }
-            else if (!isRoot && auto.service == null) {
-                app.startActivity({
-                    action: "android.settings.ACCESSIBILITY_SETTINGS"
-                });
-            }
-        }
-        if (needFloaty && !checkFloatyPermission()) {
-            requestFloatyPermission();
-        }
+        }), delay(500)), of(true));
         if (needForeground && !isOpenForeground()) {
             openForeground();
         }
         if (needStableMode && !isOpenStableMode()) {
             openStableMode();
         }
-        effect$.next(threads.currentThread());
+        concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(toArray()).subscribe(function () {
+            effect$.next(effectThread);
+        });
         setInterval(function () { }, 10000);
     });
 }
