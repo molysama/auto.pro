@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/search",
-    "version": "9.0.0-alpha.4",
+    "version": "9.0.0-alpha.5",
     "publishConfig": {
         "access": "public"
     },
@@ -29,7 +29,7 @@
     },
     "gitHead": "c500369bacf210b86eb41dddff9dd1865c083cc8",
     "dependencies": {
-        "@auto.pro/core": "^9.0.0-alpha.4",
+        "@auto.pro/core": "^9.0.0-alpha.5",
         "rxjs": "^6.6.2"
     }
 }
