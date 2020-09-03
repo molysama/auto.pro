@@ -107,7 +107,7 @@ export function findImg(param) {
         var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
         var template = readImg(path);
         if (!template) {
-            return throwError('template path is null');
+            return throwError("template path " + path + " is null");
         }
         if (scale !== 1) {
             template = images.scale(template, scale, scale);

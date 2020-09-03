@@ -125,7 +125,7 @@ export function findImg(param: FindImgParam): Observable<any> {
 
         let template = readImg(path)
         if (!template) {
-            return throwError('template path is null')
+            return throwError(`template path ${path} is null`)
         }
 
         if (scale !== 1) {

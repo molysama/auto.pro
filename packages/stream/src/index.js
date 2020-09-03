@@ -9,11 +9,11 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+import { click } from '@auto.pro/action';
 import { getPrototype, pausableTimer } from '@auto.pro/core';
-import { findImg, clearCache } from '@auto.pro/search';
-import { delay, tap, switchMap, retry, catchError, finalize } from 'rxjs/operators';
-import { clickOP, click } from '@auto.pro/action';
-import { of, throwError } from 'rxjs';
+import { clearCache, findImg } from '@auto.pro/search';
+import { throwError } from 'rxjs';
+import { catchError, delay, finalize, retry, switchMap, tap } from 'rxjs/operators';
 export { concat } from 'rxjs';
 function isFindImgParam(param) {
     return getPrototype(param) === 'Object' && param.path !== undefined;
@@ -47,7 +47,7 @@ export var clickImg = function (path, region, threshold) {
             region: region,
             threshold: threshold,
         },
-    }).pipe(clickOP(5, 5, true), delay(1000));
+    }).pipe(click(5, 5), delay(1000));
 };
 export var clickImgWithCheck = function (path, region, threshold, checkDelay, useCache) {
     if (region === void 0) { region = [0, 0]; }
@@ -66,15 +66,10 @@ export var clickImgWithCheck = function (path, region, threshold, checkDelay, us
             key: path + Date.now(),
         } : undefined,
     };
-    return findImg(param).pipe(clickOP(2, 2), switchMap(function (pt) {
-        return pausableTimer(checkDelay).pipe(switchMap(function () { return findImg(__assign(__assign({}, param), { once: true })); }), switchMap(function (v) {
-            // 如果点击后能再次找到该图，则再次点击并抛出错误，随后retry会重试确认
+    return findImg(param).pipe(click(5, 5), switchMap(function () {
+        return pausableTimer(checkDelay).pipe(switchMap(function () { return findImg(__assign(__assign({}, param), { once: true })); }), click(5, 5), tap(function (v) {
             if (v) {
-                click(v[0], v[1]);
-                return throwError("check unpass");
-            }
-            else {
-                return of(pt);
+                throw 'check unpass';
             }
         }), retry());
     }), catchError(function (err) {

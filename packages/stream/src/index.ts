@@ -1,9 +1,9 @@
 
+import { click } from '@auto.pro/action'
 import { getPrototype, pausableTimer } from '@auto.pro/core'
-import { findImg, FindImgParam, clearCache } from '@auto.pro/search'
-import { delay, tap, switchMap, retry, catchError, finalize } from 'rxjs/operators'
-import { clickOP, click } from '@auto.pro/action'
-import { of, throwError } from 'rxjs'
+import { clearCache, findImg, FindImgParam } from '@auto.pro/search'
+import { throwError } from 'rxjs'
+import { catchError, delay, finalize, retry, switchMap, tap } from 'rxjs/operators'
 
 export { concat } from 'rxjs'
 
@@ -38,7 +38,7 @@ export const clickImg = (path: string, region: RegionType = [0, 0], threshold = 
             threshold,
         },
     }).pipe(
-        clickOP(5, 5, true),
+        click(5, 5),
         delay(1000)
     )
 }
@@ -64,17 +64,14 @@ export const clickImgWithCheck = (
         } : undefined,
     }
     return findImg(param).pipe(
-        clickOP(2, 2),
-        switchMap((pt) =>
+        click(5, 5),
+        switchMap(() =>
             pausableTimer(checkDelay).pipe(
                 switchMap(() => findImg({ ...param, once: true })),
-                switchMap((v) => {
-                    // 如果点击后能再次找到该图，则再次点击并抛出错误，随后retry会重试确认
+                click(5, 5),
+                tap(v => {
                     if (v) {
-                        click(v[0], v[1])
-                        return throwError("check unpass")
-                    } else {
-                        return of(pt)
+                        throw 'check unpass'
                     }
                 }),
                 retry()
