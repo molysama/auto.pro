@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/utils",
-    "version": "9.0.0",
+    "version": "9.0.1",
     "description": "utils for auto.pro",
     "keywords": [
         "auto.pro",
@@ -36,7 +36,7 @@
     },
     "gitHead": "47599db3a54d21d053f0857ccc61e3e7da1498b9",
     "dependencies": {
-        "@auto.pro/core": "^9.0.0",
+        "@auto.pro/core": "^9.0.1",
         "rxjs": "^6.6.2"
     }
 }
