@@ -1,36 +1,55 @@
 
-import { defer, iif, of, throwError, timer } from 'rxjs'
-import { catchError, delay, filter, map, switchMap, take, tap } from 'rxjs/operators'
+import { defer, iif, of, throwError, timer, interval } from 'rxjs'
+import { catchError, delay, filter, map, switchMap, take, tap, exhaustMap } from 'rxjs/operators'
 import { getPrototype } from '../utils'
+
+/**
+ * 是否具有root权限
+ */
+export const isRoot = $shell.checkAccess('root')
 
 /**
  * 请求无障碍权限
  */
 export function requestServicePermission() {
-    const isRoot = $shell.checkAccess('root')
-    return of(isRoot).pipe(
-        switchMap(v => {
-            if (v && !isOpenAccessibilityByRoot()) {
-                openAccessibilityByRoot()
-                return timer(0, 200).pipe(
-                    map(() => isOpenAccessibilityByRoot()),
-                    filter(v => v),
-                    take(1)
-                )
-            } else if (!v && auto.service === null) {
-                app.startActivity({
-                    action: "android.settings.ACCESSIBILITY_SETTINGS"
-                })
-                return timer(0, 200).pipe(
-                    map(() => auto.service !== null),
-                    filter(v => v),
-                    take(1)
-                )
-            } else {
-                return of(true)
-            }
-        })
-    )
+    return defer(() => {
+
+        // 有root权限则使用root开启
+        if (isRoot && !isOpenAccessibilityByRoot()) {
+            openAccessibilityByRoot()
+            return timer(0, 200).pipe(
+                map(() => isOpenAccessibilityByRoot()),
+                filter(v => v),
+                take(1)
+            )
+            // 无root权限则要跳到无障碍服务页面，并等待返回
+        } else if (!isRoot && auto.service === null) {
+            app.startActivity({
+                action: "android.settings.ACCESSIBILITY_SETTINGS"
+            })
+            return timer(0, 200).pipe(
+                map(() => auto.service !== null),
+                filter(v => v),
+                take(1),
+                switchMap(waitBack)
+            )
+        } else {
+            return of(true)
+        }
+
+    })
+}
+
+
+export function waitBack() {
+    return defer(() => {
+        waitForPackage(context.getPackageName())
+        return of(true)
+    })
+}
+
+export function checkFloatyPermission() {
+    return context.getSystemService("appops").checkOpNoThrow(24, android.os.Process.myUid(), context.getPackageName()) === 0
 }
 
 /**
@@ -38,14 +57,15 @@ export function requestServicePermission() {
  */
 export function requestFloatyPermission() {
     return iif(
-        floaty.checkPermission,
+        checkFloatyPermission,
         of(true),
         defer(() => {
             floaty.requestPermission()
             return timer(0, 200).pipe(
-                map(() => floaty.checkPermission()),
+                map(checkFloatyPermission),
                 filter(v => v),
-                take(1)
+                take(1),
+                switchMap(waitBack)
             )
         })
     )

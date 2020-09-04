@@ -227,6 +227,8 @@ declare const AnimatorSet: any
 declare const ObjectAnimator: any
 declare const context: any
 declare const java: any
+declare function waitForPackage(packageName: string, eachTime?: number): void
+
 interface FloatyWindow {
     setAdjustEnabled(enabled: boolean): void
     setPosition(x: number, y: number): void

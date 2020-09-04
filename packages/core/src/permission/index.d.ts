@@ -1,7 +1,13 @@
 /**
+ * 是否具有root权限
+ */
+export declare const isRoot: any;
+/**
  * 请求无障碍权限
  */
 export declare function requestServicePermission(): import("rxjs").Observable<boolean>;
+export declare function waitBack(): import("rxjs").Observable<boolean>;
+export declare function checkFloatyPermission(): boolean;
 /**
  * 请求悬浮窗权限
  */

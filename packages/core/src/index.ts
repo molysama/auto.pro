@@ -80,7 +80,7 @@ export default function ({
             openStableMode()
         }
 
-        concat(requestFloaty$, requestService$, requestScreenCapture$).pipe(
+        concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(
             toArray()
         ).subscribe({
             next() {

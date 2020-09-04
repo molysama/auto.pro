@@ -3,11 +3,6 @@ import { Subject } from "rxjs"
 import { debounceTime, distinctUntilChanged, map, share, skip } from "rxjs/operators"
 
 /**
- * 设备是否Root
- */
-export const isRoot = $shell.checkAccess('root')
-
-/**
  * 编写脚本时的基准宽度
  */
 export let baseWidth = 1280

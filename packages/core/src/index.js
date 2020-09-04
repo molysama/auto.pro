@@ -51,7 +51,7 @@ export default function (_a) {
         if (needStableMode && !isOpenStableMode()) {
             openStableMode();
         }
-        concat(requestFloaty$, requestService$, requestScreenCapture$).pipe(toArray()).subscribe({
+        concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(toArray()).subscribe({
             next: function () {
                 effect$.next(effectThread);
             },

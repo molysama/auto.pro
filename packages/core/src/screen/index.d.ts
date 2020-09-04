@@ -1,8 +1,4 @@
 /**
- * 设备是否Root
- */
-export declare const isRoot: any;
-/**
  * 编写脚本时的基准宽度
  */
 export declare let baseWidth: number;
