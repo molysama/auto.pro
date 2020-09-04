@@ -12,10 +12,10 @@ interface WebViewOption {
     afterLayout: Function
 }
 
+import { effectThread, uiThread } from "@auto.pro/core"
 import { fromEvent, Observable } from "rxjs"
 import { take } from 'rxjs/operators'
 import uuidjs from 'uuid-js'
-import { effectThread, uiThread, isFunction } from "@auto.pro/core"
 
 const uiThreadEvent = events.emitter(uiThread)
 

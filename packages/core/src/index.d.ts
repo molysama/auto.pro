@@ -1,6 +1,6 @@
 import { ReplaySubject } from 'rxjs';
-export * from './pausable';
 export * from './permission';
+export * from './pausable';
 export * from './screen';
 export * from './store';
 export * from './utils';
