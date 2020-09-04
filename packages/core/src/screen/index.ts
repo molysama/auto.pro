@@ -188,10 +188,15 @@ export const screenDirection$ = screenDirectionSource.asObservable().pipe(
     share()
 )
 
-activity && activity.getWindow && activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(
-    new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
-        onGlobalLayout() {
-            screenDirectionSource.next(true)
-        }
-    })
-)
+// 带界面的情况下，可以通过布局变化检测到屏幕旋转
+if (typeof activity === 'undefined') {
+    // 无界面下尚无思路，欢迎提交pr
+} else {
+    activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(
+        new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
+            onGlobalLayout() {
+                screenDirectionSource.next(true)
+            }
+        })
+    )
+}

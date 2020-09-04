@@ -1,5 +1,5 @@
 
-import { defer, iif, of, throwError, timer, interval } from 'rxjs'
+import { defer, iif, of, throwError, timer, interval, fromEvent } from 'rxjs'
 import { catchError, delay, filter, map, switchMap, take, tap, exhaustMap } from 'rxjs/operators'
 import { getPrototype } from '../utils'
 
@@ -40,12 +40,14 @@ export function requestServicePermission() {
     })
 }
 
-
 export function waitBack() {
-    return defer(() => {
-        waitForPackage(context.getPackageName())
-        return of(true)
-    })
+    return iif(
+        () => typeof activity === 'undefined',
+        of(true),
+        fromEvent(ui.emitter, 'resume').pipe(
+            take(1)
+        )
+    )
 }
 
 export function checkFloatyPermission() {

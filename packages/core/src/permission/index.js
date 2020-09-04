@@ -1,4 +1,4 @@
-import { defer, iif, of, timer } from 'rxjs';
+import { defer, iif, of, timer, fromEvent } from 'rxjs';
 import { filter, map, switchMap, take } from 'rxjs/operators';
 /**
  * 是否具有root权限
@@ -27,10 +27,7 @@ export function requestServicePermission() {
     });
 }
 export function waitBack() {
-    return defer(function () {
-        waitForPackage(context.getPackageName());
-        return of(true);
-    });
+    return iif(function () { return typeof activity === 'undefined'; }, of(true), fromEvent(ui.emitter, 'resume').pipe(take(1)));
 }
 export function checkFloatyPermission() {
     return context.getSystemService("appops").checkOpNoThrow(24, android.os.Process.myUid(), context.getPackageName()) === 0;
