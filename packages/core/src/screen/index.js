@@ -1,4 +1,4 @@
-import { Subject } from "rxjs";
+import { Subject, fromEvent } from "rxjs";
 import { debounceTime, distinctUntilChanged, map, share, skip } from "rxjs/operators";
 /**
  * 编写脚本时的基准宽度
@@ -47,6 +47,11 @@ export function cap(path) {
         return images.captureScreen();
     }
 }
+/**
+ * 返回异步截图流
+ * @param value
+ */
+export var cap$ = fromEvent($images, 'screen_capture').pipe(share());
 /**
  * 获取当前width的分式值，如value = 1/4，则获取width的1/4，并向下取整
  * @param value 要获取的宽度百分比

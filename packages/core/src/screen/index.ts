@@ -1,5 +1,5 @@
 
-import { Subject } from "rxjs"
+import { Subject, fromEvent, Observable } from "rxjs"
 import { debounceTime, distinctUntilChanged, map, share, skip } from "rxjs/operators"
 
 /**
@@ -55,6 +55,14 @@ export function cap(path?: string) {
         return images.captureScreen()
     }
 }
+
+/**
+ * 返回异步截图流
+ * @param value 
+ */
+export const cap$ = (fromEvent($images, 'screen_capture') as Observable<Image>).pipe(
+    share()
+)
 
 /**
  * 获取当前width的分式值，如value = 1/4，则获取width的1/4，并向下取整

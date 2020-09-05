@@ -134,6 +134,11 @@ declare const colors: {
 
 }
 
+declare const $images: {
+    on(eventName, callback: any): void
+    off: any
+}
+
 declare const images: {
     read(path: string): Image
 
@@ -179,6 +184,12 @@ declare const images: {
 
     requestScreenCapture(landscape?: boolean): boolean
     requestScreenCapture(width: number, height: number): boolean
+    requestScreenCapture(option: {
+        async?: boolean
+        orientation?: number
+        width?: number
+        height?: number
+    }): boolean
 
     captureScreen(): Image
     captureScreen(path: string): void

@@ -9,7 +9,7 @@ export declare const pauseState$: BehaviorSubject<boolean>;
  * @param {boolean} isPausable 是否强制取消暂停效果
  * @param {boolean} wait wait为true时将阻塞并存储所有输入，为false时忽略暂停期间的输入
  */
-export declare const pausable: (isPausable?: boolean, wait?: boolean) => (source: any) => any;
+export declare const pausable: <T>(isPausable?: boolean, wait?: boolean) => (source: Observable<T>) => Observable<T>;
 /**
  * 将程序暂停
  */
@@ -22,13 +22,13 @@ export declare function resume(): void;
  * 可暂停的interval
  * @param t 时间间隔
  */
-export declare function pausableInterval(t?: number, isWait?: boolean): Observable<unknown>;
+export declare function pausableInterval(t?: number, isWait?: boolean): Observable<number>;
 /**
  * 可暂停的timer
  * @param t 首次延迟
  * @param each 之后的每次输出间隔
  */
-export declare function pausableTimer(t: number, each?: number, isWait?: boolean): Observable<unknown>;
+export declare function pausableTimer(t: number, each?: number, isWait?: boolean): Observable<number>;
 /**
  * 可暂停的timeoutWith
  * @param t

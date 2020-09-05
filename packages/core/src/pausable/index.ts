@@ -1,5 +1,5 @@
 
-import { BehaviorSubject, merge, Observable, throwError, TimeoutError, timer } from 'rxjs'
+import { BehaviorSubject, merge, Observable, throwError, TimeoutError, timer, MonoTypeOperatorFunction } from 'rxjs'
 import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, switchMap, take, takeUntil, tap, toArray } from 'rxjs/operators'
 
 /**
@@ -8,12 +8,13 @@ import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, sw
  */
 export const pauseState$ = new BehaviorSubject(false)
 
+// export declare function filter<T>(predicate: (value: T, index: number) => boolean, thisArg?: any): MonoTypeOperatorFunction<T>;
 /**
  * 操作符，使流可暂停，可设ispausable为false来强制关闭暂停效果
  * @param {boolean} isPausable 是否强制取消暂停效果
  * @param {boolean} wait wait为true时将阻塞并存储所有输入，为false时忽略暂停期间的输入
  */
-export const pausable = (isPausable = true, wait = true) => (source) => {
+export const pausable = <T>(isPausable = true, wait = true) => (source: Observable<T>) => {
     if (isPausable) {
         if (wait) {
             return source.pipe(

@@ -5,6 +5,7 @@ import { catchError, concatMap, exhaustMap, filter, map, repeat, scan, share, sw
  * true为正在暂停，false为非暂停
  */
 export var pauseState$ = new BehaviorSubject(false);
+// export declare function filter<T>(predicate: (value: T, index: number) => boolean, thisArg?: any): MonoTypeOperatorFunction<T>;
 /**
  * 操作符，使流可暂停，可设ispausable为false来强制关闭暂停效果
  * @param {boolean} isPausable 是否强制取消暂停效果

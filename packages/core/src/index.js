@@ -1,7 +1,7 @@
 import { concat, iif, of, ReplaySubject, timer } from 'rxjs';
 import { toArray } from 'rxjs/operators';
 import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission } from './permission';
-import { height, initScreenSet, width } from './screen';
+import { initScreenSet } from './screen';
 export * from './permission';
 export * from './pausable';
 export * from './screen';
@@ -23,7 +23,7 @@ export var effectThread;
  * @param {object} param
  * @param {number | 1280} param.baseWidth 基准宽度
  * @param {number | 720} param.baseHeight 基准高度
- * @param {boolean | false} param.needCap 是否需要截图功能
+ * @param { false | '横屏' | '竖屏' | '自动'} param.needCap 是否需要截图功能
  * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
  * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
@@ -37,7 +37,15 @@ export default function (_a) {
         var requestFloaty$ = iif(function () { return needFloaty; }, requestFloatyPermission(), of(true));
         var requestScreenCapture$ = timer(0);
         if (needCap) {
-            if (images.requestScreenCapture(width, height)) {
+            if (images.requestScreenCapture({
+                async: true,
+                orientation: {
+                    '横屏': 1,
+                    '竖屏': 2,
+                    '自动': 3,
+                    'true': 3
+                }[needCap]
+            })) {
                 requestScreenCapture$ = timer(500);
             }
             else {

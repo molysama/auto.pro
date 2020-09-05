@@ -16,9 +16,9 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
-import { cap, getPrototype, height, pausable, scale, width } from '@auto.pro/core';
-import { defer, of, throwError, timer } from 'rxjs';
-import { exhaustMap, filter, finalize, map, take, tap } from 'rxjs/operators';
+import { getPrototype, height, pausable, scale, width, cap$ } from '@auto.pro/core';
+import { defer, of, throwError } from 'rxjs';
+import { exhaustMap, filter, finalize, map, take, tap, throttleTime } from 'rxjs/operators';
 var cache = {};
 export function clearCache(cacheName) {
     delete cache[cacheName];
@@ -84,7 +84,6 @@ export function readImg(imgPath, mode) {
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差，默认为30
  * @param {boolean} isPausable 是否受暂停状态影响，默认为true，受影响
- * @param {boolean} isLog 是否打印匹配信息
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export function findImg(param) {
@@ -138,24 +137,16 @@ export function findImg(param) {
             }
             queryOption.region = region_1;
         }
-        var isLog = param.isLog;
         var when = param.when || (function () { return true; });
         var isPass = true;
         var t;
-        return timer(0, eachTime).pipe(filter(function () { return isPass && when(); }), pausable(isPausable, false), exhaustMap(function () {
-            var src = image || cap();
+        return cap$.pipe(pausable(isPausable, false), throttleTime(eachTime), filter(function () { return isPass && when(); }), exhaustMap(function (cap) {
+            var src = image || cap;
             var matches = images.matchTemplate(src, template, queryOption).matches;
             if (valid > 0) {
-                if (isLog) {
-                    console.log(path, 'before valid', matches);
-                }
                 matches = matches.filter(function (match) {
-                    // return images.detectsColor(src, images.pixel(template, 0, 0), match.point.x, match.point.y, valid)
                     return images.findColorInRegion(src, images.pixel(template, 0, 0), match.point.x, match.point.y, 10, 10, valid);
                 });
-                if (isLog) {
-                    console.log(path, 'after valid', matches);
-                }
             }
             if (matches.length == 0 && DO_IF_NOT_FOUND) {
                 DO_IF_NOT_FOUND();
