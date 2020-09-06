@@ -6,10 +6,12 @@ var path = require('path')
 var exec = require('child_process').exec
 
 var chalk = require('chalk')
+var link = require('terminal-link')
 var program = require('commander')
 var inquirer = require('inquirer')
 var symbols = require('log-symbols')
 var download = require('download-git-repo')
+var chalkLink = chalk.hex('#54CC7C')
 
 const jsc = 'org.mozilla.javascript.tools.jsc.Main -opt 1 -nosource -encoding UTF-8'
 
@@ -32,17 +34,14 @@ program
                 {
                     type: 'list',
                     name: 'mode',
-                    message: 'UI模式',
+                    message: '选择模板',
                     choices: [{
-                        name: '无',
+                        name: '默认',
                         value: 'default',
                         checked: true
                     }, {
-                        name: 'html',
+                        name: 'HTML',
                         value: 'html'
-                    }, {
-                        name: 'android',
-                        value: 'android'
                     }]
                 }
             ])
@@ -53,12 +52,24 @@ program
                 console.log(chalk.red(err))
             } else {
                 stopSpinner()
-                console.log(chalk.green(`cd ${name}`))
-                console.log(chalk.green('npm i'))
-                console.log(chalk.black.bgGreen('enjoy!'))
+                console.log(`模板下载完毕，接下来用vscode打开${chalk.black.bgGreen(name)}目录`)
+                console.log(`执行${chalk.black.bgGreen(' npm i ')}安装依赖\n`)
+                console.log(chalk.bold('相关链接'))
+                console.log(link(chalkLink('wiki说明'), 'https://github.com/molysama/auto.pro/wiki'))
+                console.log(link(chalkLink('QQ群'), 'https://qm.qq.com/cgi-bin/qm/qr?k=0QGU0lmFq_6LusJ8rOVmgUtlrU26DRAS&jump_from=webapi'))
+                console.log(chalk.black.bgGreen(` (^・ω・^ ) `))
             }
             process.exit(1)
         })
+    })
+
+program.command('doc')
+    .description('显示相关文档和联系方式')
+    .action((name, cmd) => {
+        console.log(link(chalkLink('auto文档'), 'http://docs.autojs.org'))
+        console.log(link(chalkLink('wiki说明'), 'https://github.com/molysama/auto.pro/wiki'))
+        console.log(link(chalkLink('脚本大全'), 'https://github.com/snailuncle/autojsDemo'))
+        console.log(link(chalkLink('QQ群'), 'https://qm.qq.com/cgi-bin/qm/qr?k=0QGU0lmFq_6LusJ8rOVmgUtlrU26DRAS&jump_from=webapi'))
     })
 
 program

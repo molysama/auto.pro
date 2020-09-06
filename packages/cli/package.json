@@ -33,7 +33,8 @@
         "download-git-repo": "^2.0.0",
         "inquirer": "^7.0.0",
         "log-symbols": "^3.0.0",
-        "ora": "^4.0.2"
+        "ora": "^4.0.2",
+        "terminal-link": "^2.1.1"
     },
     "gitHead": "c500369bacf210b86eb41dddff9dd1865c083cc8"
 }
