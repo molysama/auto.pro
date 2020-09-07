@@ -14,7 +14,7 @@ importClass(android.webkit.ValueCallback);
 importClass(android.webkit.WebChromeClient);
 importClass(android.webkit.WebResourceResponse);
 importClass(android.webkit.WebViewClient);
-import { uiThread, effectEvent } from "@auto.pro/core";
+import { effectEvent, uiThread } from "@auto.pro/core";
 import { fromEvent } from "rxjs";
 import { take } from 'rxjs/operators';
 import uuidjs from 'uuid-js';

@@ -12,7 +12,7 @@ interface WebViewOption {
     afterLayout: Function
 }
 
-import { effectThread, uiThread, effectEvent } from "@auto.pro/core"
+import { effectEvent, uiThread } from "@auto.pro/core"
 import { fromEvent, Observable } from "rxjs"
 import { take } from 'rxjs/operators'
 import uuidjs from 'uuid-js'
