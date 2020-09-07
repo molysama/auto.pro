@@ -14,18 +14,18 @@ importClass(android.webkit.ValueCallback);
 importClass(android.webkit.WebChromeClient);
 importClass(android.webkit.WebResourceResponse);
 importClass(android.webkit.WebViewClient);
-import { effectEvent, uiThread } from "@auto.pro/core";
+import { effectEvent, uiEvent } from "@auto.pro/core";
 import { fromEvent } from "rxjs";
 import { take } from 'rxjs/operators';
 import uuidjs from 'uuid-js';
-var uiThreadEvent = events.emitter(uiThread);
+var uiThreadEvent = uiEvent;
 var CREATE_WEBVIEW = uuidjs.create(4).toString();
 var CREATE_WEBVIEW_RESULT = CREATE_WEBVIEW + '_RESULT';
 uiThreadEvent.on(CREATE_WEBVIEW, function (url, _a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.webviewClientOption, webviewClientOption = _e === void 0 ? {} : _e, _f = _b.afterLayout, afterLayout = _f === void 0 ? function () { } : _f;
     var effectThreadEvent = effectEvent;
     // 每一个webview的事件id都不同
-    var WEBVIEW_EVENT = uuidjs.create(4).toString();
+    var WEBVIEW_UID = uuidjs.create(4).toString();
     ui.layout(xmlString);
     afterLayout();
     var webview = ui[webviewId];
@@ -43,7 +43,7 @@ uiThreadEvent.on(CREATE_WEBVIEW, function (url, _a) {
     set.setSupportZoom(false);
     set.setJavaScriptEnabled(true);
     // webview执行html方法时必须在主线程执行，因此要用线程间的事件传递
-    uiThreadEvent.on(WEBVIEW_EVENT, function (uuid, js) {
+    uiThreadEvent.on(WEBVIEW_UID, function (uuid, js) {
         webview.evaluateJavascript(js, new JavaAdapter(ValueCallback, {
             onReceiveValue: function (result) {
                 effectThreadEvent.emit(uuid, result);
@@ -67,13 +67,13 @@ uiThreadEvent.on(CREATE_WEBVIEW, function (url, _a) {
     }
     function getHtmlResult(js) {
         var uuid = uuidjs.create(4).toString();
-        uiThreadEvent.emit(WEBVIEW_EVENT, uuid, js);
+        uiThreadEvent.emit(WEBVIEW_UID, uuid, js);
         return fromEvent(effectThreadEvent, uuid).pipe(take(1));
     }
     var webcc = new JavaAdapter(WebChromeClient, __assign({ onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
             var param = defaultValue && JSON.parse(defaultValue);
-            if (effectThreadEvent.listenerCount(fnName + WEBVIEW_EVENT) > 0) {
-                effectThreadEvent.emit(fnName + WEBVIEW_EVENT, param, function (result) {
+            if (effectThreadEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
+                effectThreadEvent.emit(fnName + WEBVIEW_UID, param, function (result) {
                     jsPromptResult.confirm(result);
                 });
             }
@@ -91,7 +91,7 @@ uiThreadEvent.on(CREATE_WEBVIEW, function (url, _a) {
     webview.setWebChromeClient(webcc);
     webview.loadUrl(url);
     function on(eventName) {
-        return fromEvent(effectThreadEvent, eventName + WEBVIEW_EVENT);
+        return fromEvent(effectThreadEvent, eventName + WEBVIEW_UID);
     }
     uiThreadEvent.emit(CREATE_WEBVIEW_RESULT, {
         on: on,

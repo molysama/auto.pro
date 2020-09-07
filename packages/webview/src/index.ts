@@ -12,12 +12,12 @@ interface WebViewOption {
     afterLayout: Function
 }
 
-import { effectEvent, uiThread } from "@auto.pro/core"
+import { effectEvent, uiThread, uiEvent } from "@auto.pro/core"
 import { fromEvent, Observable } from "rxjs"
 import { take } from 'rxjs/operators'
 import uuidjs from 'uuid-js'
 
-const uiThreadEvent = events.emitter(uiThread)
+const uiThreadEvent = uiEvent
 
 const CREATE_WEBVIEW = uuidjs.create(4).toString()
 const CREATE_WEBVIEW_RESULT = CREATE_WEBVIEW + '_RESULT'
@@ -37,7 +37,7 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     const effectThreadEvent = effectEvent
 
     // 每一个webview的事件id都不同
-    const WEBVIEW_EVENT = uuidjs.create(4).toString()
+    const WEBVIEW_UID = uuidjs.create(4).toString()
 
     ui.layout(xmlString)
     afterLayout()
@@ -60,7 +60,7 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
 
     // webview执行html方法时必须在主线程执行，因此要用线程间的事件传递
 
-    uiThreadEvent.on(WEBVIEW_EVENT, (uuid, js) => {
+    uiThreadEvent.on(WEBVIEW_UID, (uuid, js) => {
         webview.evaluateJavascript(js, new JavaAdapter(ValueCallback, {
             onReceiveValue(result) {
                 effectThreadEvent.emit(uuid, result)
@@ -81,7 +81,7 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     }
     function getHtmlResult(js) {
         const uuid = uuidjs.create(4).toString()
-        uiThreadEvent.emit(WEBVIEW_EVENT, uuid, js)
+        uiThreadEvent.emit(WEBVIEW_UID, uuid, js)
         return fromEvent(effectThreadEvent, uuid).pipe(
             take(1)
         )
@@ -91,8 +91,8 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
         onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
             const param = defaultValue && JSON.parse(defaultValue)
 
-            if (effectThreadEvent.listenerCount(fnName + WEBVIEW_EVENT) > 0) {
-                effectThreadEvent.emit(fnName + WEBVIEW_EVENT, param, function (result) {
+            if (effectThreadEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
+                effectThreadEvent.emit(fnName + WEBVIEW_UID, param, function (result) {
                     jsPromptResult.confirm(result)
                 })
             } else {
@@ -117,7 +117,7 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     webview.loadUrl(url)
 
     function on(eventName) {
-        return fromEvent(effectThreadEvent, eventName + WEBVIEW_EVENT)
+        return fromEvent(effectThreadEvent, eventName + WEBVIEW_UID)
     }
 
     uiThreadEvent.emit(CREATE_WEBVIEW_RESULT, {
