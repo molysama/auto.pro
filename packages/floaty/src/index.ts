@@ -173,7 +173,7 @@ export function createFloaty({
     )
     isFloatyOpen$.subscribe(isOpen => FLOATY.setTouchable(isOpen))
 
-    uiEvent.on(FLOATY_UID + 'togleFloaty', () => {
+    uiEvent.on(FLOATY_UID + 'toggleFloaty', () => {
         toggleFloaty$.next(true)
     })
 

@@ -93,7 +93,7 @@ export function createFloaty(_a) {
         return from(animation());
     }), startWith(false), shareReplay(1));
     isFloatyOpen$.subscribe(function (isOpen) { return FLOATY.setTouchable(isOpen); });
-    uiEvent.on(FLOATY_UID + 'togleFloaty', function () {
+    uiEvent.on(FLOATY_UID + 'toggleFloaty', function () {
         toggleFloaty$.next(true);
     });
     function toggleFloaty() {
