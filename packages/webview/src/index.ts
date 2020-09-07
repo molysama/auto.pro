@@ -12,7 +12,7 @@ interface WebViewOption {
     afterLayout: Function
 }
 
-import { effectThread, uiThread } from "@auto.pro/core"
+import { effectThread, uiThread, effectEvent } from "@auto.pro/core"
 import { fromEvent, Observable } from "rxjs"
 import { take } from 'rxjs/operators'
 import uuidjs from 'uuid-js'
@@ -34,7 +34,7 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
 } = {
     }) => {
 
-    const effectThreadEvent = events.emitter(effectThread)
+    const effectThreadEvent = effectEvent
 
     // 每一个webview的事件id都不同
     const WEBVIEW_EVENT = uuidjs.create(4).toString()

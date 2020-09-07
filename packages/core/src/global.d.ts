@@ -1,5 +1,7 @@
 type ScreenType = '横屏' | '竖屏'
-interface Thread { }
+interface Thread {
+    [key: string]: any
+}
 interface AutoStorage {
 
     /**

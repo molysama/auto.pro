@@ -10,9 +10,10 @@ export * from './store'
 export * from './utils'
 
 /**
- * 作业用
+ * 作业流
  */
-export const effect$ = new ReplaySubject(1)
+export const effect$ = new ReplaySubject<[any, any]>(1)
+
 
 /**
  * ui线程
@@ -20,9 +21,19 @@ export const effect$ = new ReplaySubject(1)
 export const uiThread = threads.currentThread()
 
 /**
+ * ui线程事件
+ */
+export const uiEvent = events.emitter(uiThread)
+
+/**
  * 作业线程
  */
 export let effectThread: Thread
+
+/**
+ * 作业线程事件
+ */
+export let effectEvent
 
 /**
  * @param {object} param  
@@ -56,7 +67,8 @@ export default function ({
 
     effectThread = threads.start(function () {
 
-        const effectThread = threads.currentThread()
+        const thisThread = threads.currentThread()
+        effectEvent = events.emitter(thisThread)
 
         const requestService$ = iif(
             () => needService,
@@ -100,7 +112,7 @@ export default function ({
             toArray()
         ).subscribe({
             next() {
-                effect$.next(effectThread)
+                effect$.next([thisThread, effectEvent])
             },
             error(err) {
                 toastLog(err)
@@ -110,5 +122,7 @@ export default function ({
 
         setInterval(() => { }, 10000)
     })
+
+    effectThread.waitFor()
 
 }

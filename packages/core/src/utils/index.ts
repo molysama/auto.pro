@@ -1,3 +1,7 @@
+import { effectEvent } from ".."
+import uuidjs from 'uuid-js'
+import { fromEvent } from "rxjs"
+import { share } from "rxjs/operators"
 
 export function converToArray(list: any, start?: number): Array<any> {
     start = start || 0
@@ -13,6 +17,22 @@ export const isFunction = (val: any): val is Function => typeof val === 'functio
 
 export function getTime() {
     return android.os.SystemClock.uptimeMillis()
+}
+
+/**
+ * 将ui事件转化成作业线程事件
+ * @param target 
+ * @param eventName 
+ */
+export function fromUiEvent(target: any, eventName) {
+    const eventId = uuidjs.create(4).toString()
+    target.on(eventName, (...params) => {
+        effectEvent.emit(eventId, ...params)
+    })
+
+    return fromEvent(effectEvent, eventId).pipe(
+        share()
+    )
 }
 
 /**

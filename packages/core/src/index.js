@@ -8,7 +8,7 @@ export * from './screen';
 export * from './store';
 export * from './utils';
 /**
- * 作业用
+ * 作业流
  */
 export var effect$ = new ReplaySubject(1);
 /**
@@ -16,9 +16,17 @@ export var effect$ = new ReplaySubject(1);
  */
 export var uiThread = threads.currentThread();
 /**
+ * ui线程事件
+ */
+export var uiEvent = events.emitter(uiThread);
+/**
  * 作业线程
  */
 export var effectThread;
+/**
+ * 作业线程事件
+ */
+export var effectEvent;
 /**
  * @param {object} param
  * @param {number | 1280} param.baseWidth 基准宽度
@@ -32,7 +40,8 @@ export default function (_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.baseWidth, baseWidth = _c === void 0 ? 1280 : _c, _d = _b.baseHeight, baseHeight = _d === void 0 ? 720 : _d, _e = _b.needCap, needCap = _e === void 0 ? false : _e, _f = _b.needService, needService = _f === void 0 ? false : _f, _g = _b.needFloaty, needFloaty = _g === void 0 ? false : _g, _h = _b.needForeground, needForeground = _h === void 0 ? false : _h, _j = _b.needStableMode, needStableMode = _j === void 0 ? true : _j;
     initScreenSet(baseWidth, baseHeight);
     effectThread = threads.start(function () {
-        var effectThread = threads.currentThread();
+        var thisThread = threads.currentThread();
+        effectEvent = events.emitter(thisThread);
         var requestService$ = iif(function () { return needService; }, requestServicePermission(), of(true));
         var requestFloaty$ = iif(function () { return needFloaty; }, requestFloatyPermission(), of(true));
         var requestScreenCapture$ = timer(0);
@@ -61,7 +70,7 @@ export default function (_a) {
         }
         concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(toArray()).subscribe({
             next: function () {
-                effect$.next(effectThread);
+                effect$.next([thisThread, effectEvent]);
             },
             error: function (err) {
                 toastLog(err);
@@ -70,4 +79,5 @@ export default function (_a) {
         });
         setInterval(function () { }, 10000);
     });
+    effectThread.waitFor();
 }

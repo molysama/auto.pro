@@ -5,17 +5,25 @@ export * from './screen';
 export * from './store';
 export * from './utils';
 /**
- * 作业用
+ * 作业流
  */
-export declare const effect$: ReplaySubject<unknown>;
+export declare const effect$: ReplaySubject<[any, any]>;
 /**
  * ui线程
  */
 export declare const uiThread: any;
 /**
+ * ui线程事件
+ */
+export declare const uiEvent: any;
+/**
  * 作业线程
  */
 export declare let effectThread: Thread;
+/**
+ * 作业线程事件
+ */
+export declare let effectEvent: any;
 /**
  * @param {object} param
  * @param {number | 1280} param.baseWidth 基准宽度

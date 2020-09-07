@@ -27,9 +27,10 @@ importClass(android.widget.Button)
 importClass(android.widget.ImageView)
 importClass(android.widget.TextView)
 
-import { getHeightPixels, getPrototype, getWidthPixels } from "@auto.pro/core";
+import { getHeightPixels, getPrototype, getWidthPixels, fromUiEvent, uiThread } from "@auto.pro/core";
 import { from, merge, Observable, Subject } from 'rxjs';
 import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import uuidjs from 'uuid-js'
 
 const icons = [
     'ic_3d_rotation_black_48dp', 'ic_accessibility_black_48dp', 'ic_accessible_black_48dp', 'ic_account_balance_black_48dp', 'ic_account_balance_wallet_black_48dp', 'ic_account_box_black_48dp', 'ic_account_circle_black_48dp', 'ic_add_shopping_cart_black_48dp', 'ic_alarm_add_black_48dp', 'ic_alarm_black_48dp', 'ic_alarm_off_black_48dp', 'ic_alarm_on_black_48dp', 'ic_all_out_black_48dp', 'ic_android_black_48dp', 'ic_announcement_black_48dp', 'ic_aspect_ratio_black_48dp', 'ic_assessment_black_48dp', 'ic_assignment_black_48dp', 'ic_assignment_ind_black_48dp', 'ic_assignment_late_black_48dp', 'ic_assignment_returned_black_48dp', 'ic_assignment_return_black_48dp', 'ic_assignment_turned_in_black_48dp', 'ic_autorenew_black_48dp', 'ic_backup_black_48dp', 'ic_bookmark_black_48dp', 'ic_bookmark_border_black_48dp', 'ic_book_black_48dp', 'ic_bug_report_black_48dp', 'ic_build_black_48dp', 'ic_cached_black_48dp', 'ic_camera_enhance_black_48dp', 'ic_card_giftcard_black_48dp', 'ic_card_membership_black_48dp', 'ic_card_travel_black_48dp', 'ic_change_history_black_48dp', 'ic_check_circle_black_48dp', 'ic_chrome_reader_mode_black_48dp', 'ic_class_black_48dp', 'ic_code_black_48dp', 'ic_compare_arrows_black_48dp', 'ic_copyright_black_48dp', 'ic_credit_card_black_48dp', 'ic_dashboard_black_48dp', 'ic_date_range_black_48dp', 'ic_delete_black_48dp', 'ic_delete_forever_black_48dp', 'ic_description_black_48dp', 'ic_dns_black_48dp', 'ic_done_all_black_48dp', 'ic_done_black_48dp', 'ic_donut_large_black_48dp', 'ic_donut_small_black_48dp', 'ic_eject_black_48dp', 'ic_euro_symbol_black_48dp', 'ic_event_black_48dp', 'ic_event_seat_black_48dp', 'ic_exit_to_app_black_48dp', 'ic_explore_black_48dp', 'ic_extension_black_48dp', 'ic_face_black_48dp', 'ic_favorite_black_48dp', 'ic_favorite_border_black_48dp', 'ic_feedback_black_48dp', 'ic_find_in_page_black_48dp', 'ic_find_replace_black_48dp', 'ic_fingerprint_black_48dp', 'ic_flight_land_black_48dp', 'ic_flight_takeoff_black_48dp', 'ic_flip_to_back_black_48dp', 'ic_flip_to_front_black_48dp', 'ic_gavel_black_48dp', 'ic_get_app_black_48dp', 'ic_gif_black_48dp', 'ic_grade_black_48dp', 'ic_group_work_black_48dp', 'ic_g_translate_black_48dp', 'ic_help_black_48dp', 'ic_help_outline_black_48dp', 'ic_highlight_off_black_48dp', 'ic_history_black_48dp', 'ic_home_black_48dp', 'ic_hourglass_empty_black_48dp', 'ic_hourglass_full_black_48dp', 'ic_https_black_48dp', 'ic_http_black_48dp', 'ic_important_devices_black_48dp', 'ic_info_black_48dp', 'ic_info_outline_black_48dp', 'ic_input_black_48dp', 'ic_invert_colors_black_48dp', 'ic_label_black_48dp', 'ic_label_outline_black_48dp', 'ic_language_black_48dp', 'ic_launch_black_48dp', 'ic_lightbulb_outline_black_48dp', 'ic_line_style_black_48dp', 'ic_line_weight_black_48dp', 'ic_list_black_48dp', 'ic_lock_black_48dp', 'ic_lock_open_black_48dp', 'ic_lock_outline_black_48dp', 'ic_loyalty_black_48dp', 'ic_markunread_mailbox_black_48dp', 'ic_motorcycle_black_48dp', 'ic_note_add_black_48dp', 'ic_offline_pin_black_48dp', 'ic_opacity_black_48dp', 'ic_open_in_browser_black_48dp', 'ic_open_in_new_black_48dp', 'ic_open_with_black_48dp', 'ic_pageview_black_48dp', 'ic_pan_tool_black_48dp', 'ic_payment_black_48dp', 'ic_perm_camera_mic_black_48dp', 'ic_perm_contact_calendar_black_48dp', 'ic_perm_data_setting_black_48dp', 'ic_perm_device_information_black_48dp', 'ic_perm_identity_black_48dp', 'ic_perm_media_black_48dp', 'ic_perm_phone_msg_black_48dp', 'ic_perm_scan_wifi_black_48dp', 'ic_pets_black_48dp', 'ic_picture_in_picture_alt_black_48dp', 'ic_picture_in_picture_black_48dp', 'ic_play_for_work_black_48dp', 'ic_polymer_black_48dp', 'ic_power_settings_new_black_48dp', 'ic_pregnant_woman_black_48dp', 'ic_print_black_48dp', 'ic_query_builder_black_48dp', 'ic_question_answer_black_48dp', 'ic_receipt_black_48dp', 'ic_record_voice_over_black_48dp', 'ic_redeem_black_48dp', 'ic_remove_shopping_cart_black_48dp', 'ic_reorder_black_48dp', 'ic_report_problem_black_48dp', 'ic_restore_black_48dp', 'ic_restore_page_black_48dp', 'ic_room_black_48dp', 'ic_rounded_corner_black_48dp', 'ic_rowing_black_48dp', 'ic_schedule_black_48dp', 'ic_search_black_48dp', 'ic_settings_applications_black_48dp', 'ic_settings_backup_restore_black_48dp', 'ic_settings_black_48dp', 'ic_settings_bluetooth_black_48dp', 'ic_settings_brightness_black_48dp', 'ic_settings_cell_black_48dp', 'ic_settings_ethernet_black_48dp', 'ic_settings_input_antenna_black_48dp', 'ic_settings_input_component_black_48dp', 'ic_settings_input_composite_black_48dp', 'ic_settings_input_hdmi_black_48dp', 'ic_settings_input_svideo_black_48dp', 'ic_settings_overscan_black_48dp', 'ic_settings_phone_black_48dp', 'ic_settings_power_black_48dp', 'ic_settings_remote_black_48dp', 'ic_settings_voice_black_48dp', 'ic_shopping_basket_black_48dp', 'ic_shopping_cart_black_48dp', 'ic_shop_black_48dp', 'ic_shop_two_black_48dp', 'ic_speaker_notes_black_48dp', 'ic_speaker_notes_off_black_48dp', 'ic_spellcheck_black_48dp', 'ic_stars_black_48dp', 'ic_store_black_48dp', 'ic_subject_black_48dp', 'ic_supervisor_account_black_48dp', 'ic_swap_horiz_black_48dp', 'ic_swap_vertical_circle_black_48dp', 'ic_swap_vert_black_48dp', 'ic_system_update_alt_black_48dp', 'ic_tab_black_48dp', 'ic_tab_unselected_black_48dp', 'ic_theaters_black_48dp', 'ic_thumbs_up_down_black_48dp', 'ic_thumb_down_black_48dp', 'ic_thumb_up_black_48dp', 'ic_timeline_black_48dp', 'ic_toc_black_48dp', 'ic_today_black_48dp', 'ic_toll_black_48dp', 'ic_touch_app_black_48dp', 'ic_track_changes_black_48dp', 'ic_translate_black_48dp', 'ic_trending_down_black_48dp', 'ic_trending_flat_black_48dp', 'ic_trending_up_black_48dp', 'ic_turned_in_black_48dp', 'ic_turned_in_not_black_48dp', 'ic_update_black_48dp', 'ic_verified_user_black_48dp', 'ic_view_agenda_black_48dp', 'ic_view_array_black_48dp', 'ic_view_carousel_black_48dp', 'ic_view_column_black_48dp', 'ic_view_day_black_48dp', 'ic_view_headline_black_48dp', 'ic_view_list_black_48dp', 'ic_view_module_black_48dp', 'ic_view_quilt_black_48dp', 'ic_view_stream_black_48dp', 'ic_view_week_black_48dp', 'ic_visibility_black_48dp', 'ic_visibility_off_black_48dp', 'ic_watch_later_black_48dp', 'ic_work_black_48dp', 'ic_youtube_searched_for_black_48dp', 'ic_zoom_in_black_48dp', 'ic_zoom_out_black_48dp', 'ic_add_alert_black_48dp', 'ic_error_black_48dp', 'ic_error_outline_black_48dp', 'ic_warning_black_48dp', 'ic_add_to_queue_black_48dp', 'ic_airplay_black_48dp', 'ic_album_black_48dp', 'ic_art_track_black_48dp', 'ic_av_timer_black_48dp', 'ic_branding_watermark_black_48dp', 'ic_call_to_action_black_48dp', 'ic_closed_caption_black_48dp', 'ic_equalizer_black_48dp', 'ic_explicit_black_48dp', 'ic_fast_forward_black_48dp', 'ic_fast_rewind_black_48dp', 'ic_featured_play_list_black_48dp', 'ic_featured_video_black_48dp', 'ic_fiber_dvr_black_48dp', 'ic_fiber_manual_record_black_48dp', 'ic_fiber_new_black_48dp', 'ic_fiber_pin_black_48dp', 'ic_fiber_smart_record_black_48dp', 'ic_forward_10_black_48dp', 'ic_forward_30_black_48dp', 'ic_forward_5_black_48dp', 'ic_games_black_48dp', 'ic_hd_black_48dp', 'ic_hearing_black_48dp', 'ic_high_quality_black_48dp', 'ic_library_add_black_48dp', 'ic_library_books_black_48dp', 'ic_library_music_black_48dp', 'ic_loop_black_48dp', 'ic_mic_black_48dp', 'ic_mic_none_black_48dp', 'ic_mic_off_black_48dp', 'ic_movie_black_48dp', 'ic_music_video_black_48dp', 'ic_new_releases_black_48dp', 'ic_note_black_48dp', 'ic_not_interested_black_48dp', 'ic_pause_black_48dp', 'ic_pause_circle_filled_black_48dp', 'ic_pause_circle_outline_black_48dp', 'ic_playlist_add_black_48dp', 'ic_playlist_add_check_black_48dp', 'ic_playlist_play_black_48dp', 'ic_play_arrow_black_48dp', 'ic_play_circle_filled_black_48dp', 'ic_play_circle_filled_white_black_48dp', 'ic_play_circle_outline_black_48dp', 'ic_queue_black_48dp', 'ic_queue_music_black_48dp', 'ic_queue_play_next_black_48dp', 'ic_radio_black_48dp', 'ic_recent_actors_black_48dp', 'ic_remove_from_queue_black_48dp', 'ic_repeat_black_48dp', 'ic_repeat_one_black_48dp', 'ic_replay_10_black_48dp', 'ic_replay_30_black_48dp', 'ic_replay_5_black_48dp', 'ic_replay_black_48dp', 'ic_shuffle_black_48dp', 'ic_skip_next_black_48dp', 'ic_skip_previous_black_48dp', 'ic_slow_motion_video_black_48dp', 'ic_snooze_black_48dp', 'ic_sort_by_alpha_black_48dp', 'ic_stop_black_48dp', 'ic_subscriptions_black_48dp', 'ic_subtitles_black_48dp', 'ic_surround_sound_black_48dp', 'ic_videocam_black_48dp', 'ic_videocam_off_black_48dp', 'ic_video_call_black_48dp', 'ic_video_label_black_48dp', 'ic_video_library_black_48dp', 'ic_volume_down_black_48dp', 'ic_volume_mute_black_48dp', 'ic_volume_off_black_48dp', 'ic_volume_up_black_48dp', 'ic_web_asset_black_48dp', 'ic_web_black_48dp', 'ic_business_black_48dp', 'ic_call_black_48dp', 'ic_call_end_black_48dp', 'ic_call_made_black_48dp', 'ic_call_merge_black_48dp', 'ic_call_missed_black_48dp', 'ic_call_missed_outgoing_black_48dp', 'ic_call_received_black_48dp', 'ic_call_split_black_48dp', 'ic_chat_black_48dp', 'ic_chat_bubble_black_48dp', 'ic_chat_bubble_outline_black_48dp', 'ic_clear_all_black_48dp', 'ic_comment_black_48dp', 'ic_contacts_black_48dp', 'ic_contact_mail_black_48dp', 'ic_contact_phone_black_48dp', 'ic_dialer_sip_black_48dp', 'ic_dialpad_black_48dp', 'ic_email_black_48dp', 'ic_forum_black_48dp', 'ic_import_contacts_black_48dp', 'ic_import_export_black_48dp', 'ic_invert_colors_off_black_48dp', 'ic_live_help_black_48dp', 'ic_location_off_black_48dp', 'ic_location_on_black_48dp', 'ic_mail_outline_black_48dp', 'ic_message_black_48dp', 'ic_no_sim_black_48dp', 'ic_phonelink_erase_black_48dp', 'ic_phonelink_lock_black_48dp', 'ic_phonelink_ring_black_48dp', 'ic_phonelink_setup_black_48dp', 'ic_phone_black_48dp', 'ic_portable_wifi_off_black_48dp', 'ic_present_to_all_black_48dp', 'ic_ring_volume_black_48dp', 'ic_rss_feed_black_48dp', 'ic_screen_share_black_48dp', 'ic_speaker_phone_black_48dp', 'ic_stay_current_landscape_black_48dp', 'ic_stay_current_portrait_black_48dp', 'ic_stay_primary_landscape_black_48dp',
@@ -119,7 +120,8 @@ export function createFloaty({
     isOpen$: Observable<boolean>
     close: Function
 } {
-
+    // 每个被创建的悬浮窗都有自己的唯一UID，此UID可以正确的触发自己的事件
+    const FLOATY_UID = uuidjs.create(4).toString()
     const size = Math.floor(logoSize)
     const ICON_SIZE = Math.floor(32 / 44 * size)
 
@@ -171,8 +173,12 @@ export function createFloaty({
     )
     isFloatyOpen$.subscribe(isOpen => FLOATY.setTouchable(isOpen))
 
-    function toggleFloaty() {
+    uiThread.on(FLOATY_UID + 'togleFloaty', () => {
         toggleFloaty$.next(true)
+    })
+
+    function toggleFloaty() {
+        uiThread.emit(FLOATY_UID + 'toggleFloaty')
     }
 
     function animation() {
@@ -308,20 +314,23 @@ export function createFloaty({
         function toggleIcon() {
             if (iconLength > 1) {
                 index = (index + 1) % iconLength
-                FLOATY[item.id + '_icon'].setSource(`@drawable/${item.icon[index]}`)
-                if (iconLength === colorLength) {
-                    FLOATY[item.id + '_color'].setSource(item.color[index])
-                }
+                ui.run(() => {
+                    FLOATY[item.id + '_icon'].setSource(`@drawable/${item.icon[index]}`)
+                    if (iconLength === colorLength) {
+                        FLOATY[item.id + '_color'].setSource(item.color[index])
+                    }
+
+                })
             }
             return index
         }
 
-        FLOATY[item.id].on('click', () => {
+        // toggleFloaty通过主线程通信实现，toggleIcon通过ui.run实现
+        fromUiEvent(FLOATY[item.id], 'click').subscribe(() => {
             if (item.toggleOnClick !== false) {
                 toggleFloaty()
             }
             item.callback && item.callback(index)
-            // 如果item.icon是数组的话，切换item的按钮图标
             toggleIcon()
         })
 
