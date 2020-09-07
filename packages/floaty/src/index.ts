@@ -114,8 +114,9 @@ export function createFloaty({
     initX?: number
     initY?: number
 } = {}): {
-    FLOATY: any,
-    isOpen$: Observable<boolean>,
+    FLOATY: FloatyRawWindow
+    items: { toggleIcon: () => number }[]
+    isOpen$: Observable<boolean>
     close: Function
 } {
 
@@ -299,16 +300,12 @@ export function createFloaty({
 
     const t = setInterval(() => { }, 10000)
 
-    items.forEach(item => {
+    const list = items.map(item => {
         let index = 0
         const iconLength = getPrototype(item.icon) === 'Array' && item.icon.length || 0
         const colorLength = getPrototype(item.color) === 'Array' && item.color.length || 0
-        FLOATY[item.id].on('click', () => {
-            if (item.toggleOnClick !== false) {
-                toggleFloaty()
-            }
-            item.callback && item.callback(index)
-            // 如果item.icon是数组的话，切换item的按钮图标
+
+        function toggleIcon() {
             if (iconLength > 1) {
                 index = (index + 1) % iconLength
                 FLOATY[item.id + '_icon'].setSource(`@drawable/${item.icon[index]}`)
@@ -316,11 +313,26 @@ export function createFloaty({
                     FLOATY[item.id + '_color'].setSource(item.color[index])
                 }
             }
+            return index
+        }
+
+        FLOATY[item.id].on('click', () => {
+            if (item.toggleOnClick !== false) {
+                toggleFloaty()
+            }
+            item.callback && item.callback(index)
+            // 如果item.icon是数组的话，切换item的按钮图标
+            toggleIcon()
         })
+
+        return {
+            toggleIcon
+        }
     })
 
     return {
         FLOATY,
+        items: list,
         isOpen$: isFloatyOpen$,
         close() {
             FLOATY.close()

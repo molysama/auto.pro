@@ -182,16 +182,11 @@ export function createFloaty(_a) {
         return true;
     });
     var t = setInterval(function () { }, 10000);
-    items.forEach(function (item) {
+    var list = items.map(function (item) {
         var index = 0;
         var iconLength = getPrototype(item.icon) === 'Array' && item.icon.length || 0;
         var colorLength = getPrototype(item.color) === 'Array' && item.color.length || 0;
-        FLOATY[item.id].on('click', function () {
-            if (item.toggleOnClick !== false) {
-                toggleFloaty();
-            }
-            item.callback && item.callback(index);
-            // 如果item.icon是数组的话，切换item的按钮图标
+        function toggleIcon() {
             if (iconLength > 1) {
                 index = (index + 1) % iconLength;
                 FLOATY[item.id + '_icon'].setSource("@drawable/" + item.icon[index]);
@@ -199,10 +194,23 @@ export function createFloaty(_a) {
                     FLOATY[item.id + '_color'].setSource(item.color[index]);
                 }
             }
+            return index;
+        }
+        FLOATY[item.id].on('click', function () {
+            if (item.toggleOnClick !== false) {
+                toggleFloaty();
+            }
+            item.callback && item.callback(index);
+            // 如果item.icon是数组的话，切换item的按钮图标
+            toggleIcon();
         });
+        return {
+            toggleIcon: toggleIcon
+        };
     });
     return {
         FLOATY: FLOATY,
+        items: list,
         isOpen$: isFloatyOpen$,
         close: function () {
             FLOATY.close();

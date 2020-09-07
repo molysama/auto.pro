@@ -46,7 +46,10 @@ export declare function createFloaty({ logo, logoSize, duration, radius, angle, 
     initX?: number;
     initY?: number;
 }): {
-    FLOATY: any;
+    FLOATY: FloatyRawWindow;
+    items: {
+        toggleIcon: () => number;
+    }[];
     isOpen$: Observable<boolean>;
     close: Function;
 };
