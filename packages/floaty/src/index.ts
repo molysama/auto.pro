@@ -27,7 +27,7 @@ importClass(android.widget.Button)
 importClass(android.widget.ImageView)
 importClass(android.widget.TextView)
 
-import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels, uiEvent } from "@auto.pro/core";
+import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels } from "@auto.pro/core";
 import { from, merge, Observable, Subject } from 'rxjs';
 import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 import uuidjs from 'uuid-js';
@@ -173,12 +173,11 @@ export function createFloaty({
     )
     isFloatyOpen$.subscribe(isOpen => FLOATY.setTouchable(isOpen))
 
-    uiEvent.on(FLOATY_UID + 'toggleFloaty', () => {
-        toggleFloaty$.next(true)
-    })
 
     function toggleFloaty() {
-        uiEvent.emit(FLOATY_UID + 'toggleFloaty')
+        ui.run(() => {
+            toggleFloaty$.next(true)
+        })
     }
 
     function animation() {

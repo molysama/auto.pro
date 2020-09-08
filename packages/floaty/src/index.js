@@ -25,7 +25,7 @@ importClass(android.view.animation.PathInterpolator);
 importClass(android.widget.Button);
 importClass(android.widget.ImageView);
 importClass(android.widget.TextView);
-import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels, uiEvent } from "@auto.pro/core";
+import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels } from "@auto.pro/core";
 import { from, merge, Subject } from 'rxjs';
 import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 import uuidjs from 'uuid-js';
@@ -93,11 +93,10 @@ export function createFloaty(_a) {
         return from(animation());
     }), startWith(false), shareReplay(1));
     isFloatyOpen$.subscribe(function (isOpen) { return FLOATY.setTouchable(isOpen); });
-    uiEvent.on(FLOATY_UID + 'toggleFloaty', function () {
-        toggleFloaty$.next(true);
-    });
     function toggleFloaty() {
-        uiEvent.emit(FLOATY_UID + 'toggleFloaty');
+        ui.run(function () {
+            toggleFloaty$.next(true);
+        });
     }
     function animation() {
         return new Promise(function (resolve, reject) {

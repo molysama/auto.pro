@@ -6,23 +6,27 @@ importClass(android.webkit.WebResourceResponse)
 importClass(android.webkit.WebViewClient)
 
 interface WebViewOption {
-    xmlString: string
-    webviewId: string
+    xmlString?: string
+    webviewId?: string
     webviewClientOption?: any
-    afterLayout: Function
+    afterLayout?: Function
 }
 
-import { effectEvent, uiThread, uiEvent } from "@auto.pro/core"
+import { effectEvent } from "@auto.pro/core"
 import { fromEvent, Observable } from "rxjs"
 import { take } from 'rxjs/operators'
 import uuidjs from 'uuid-js'
 
-const uiThreadEvent = uiEvent
 
-const CREATE_WEBVIEW = uuidjs.create(4).toString()
-const CREATE_WEBVIEW_RESULT = CREATE_WEBVIEW + '_RESULT'
-
-uiThreadEvent.on(CREATE_WEBVIEW, (url, {
+/**
+ * @param {string} url  html路径
+ * @param {WebViewOption} option  自定义
+ * @param {string} option.xmlString 自定义界面
+ * @param {string} option.webviewId 自定义界面的webviewId，使用自定义界面时必填，且要与界面字符串内webview的id一致
+ * @param {Object} option.webviewClientOption JavaAdapter.WebChromeClient的回调拓展对象，可重写一些事件
+ * @param {Function} option.afterLayout 紧接着布局初始化的钩子函数
+ */
+export function run(url, {
     xmlString = `
     <linear w="*" h="*">
         <webview id="webview" h="*" w="*" />
@@ -32,12 +36,11 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     webviewClientOption = {},
     afterLayout = () => { }
 } = {
-    }) => {
+    }): CreateWebviewResult {
+
+    const WEBVIEW_UID = uuidjs.create(4).toString()
 
     const effectThreadEvent = effectEvent
-
-    // 每一个webview的事件id都不同
-    const WEBVIEW_UID = uuidjs.create(4).toString()
 
     ui.layout(xmlString)
     afterLayout()
@@ -59,16 +62,17 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     set.setJavaScriptEnabled(true)
 
     // webview执行html方法时必须在主线程执行，因此要用线程间的事件传递
-
-    uiThreadEvent.on(WEBVIEW_UID, (uuid, js) => {
-        webview.evaluateJavascript(js, new JavaAdapter(ValueCallback, {
-            onReceiveValue(result) {
-                effectThreadEvent.emit(uuid, result)
-            },
-            onReceivedError(error) {
-                effectThreadEvent.emit(uuid, error)
-            }
-        }))
+    effectEvent.on(WEBVIEW_UID, (uuid, js) => {
+        ui.run(() => {
+            webview.evaluateJavascript(js, new JavaAdapter(ValueCallback, {
+                onReceiveValue(result) {
+                    effectEvent.emit(uuid, result)
+                },
+                onReceivedError(error) {
+                    effectEvent.emit(uuid, error)
+                }
+            }))
+        })
     })
 
     function runHtmlFunction(fnName, ...value) {
@@ -81,8 +85,8 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     }
     function getHtmlResult(js) {
         const uuid = uuidjs.create(4).toString()
-        uiThreadEvent.emit(WEBVIEW_UID, uuid, js)
-        return fromEvent(effectThreadEvent, uuid).pipe(
+        effectEvent.emit(WEBVIEW_UID, uuid, js)
+        return fromEvent(effectEvent, uuid).pipe(
             take(1)
         )
     }
@@ -91,9 +95,11 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
         onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
             const param = defaultValue && JSON.parse(defaultValue)
 
-            if (effectThreadEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
-                effectThreadEvent.emit(fnName + WEBVIEW_UID, param, function (result) {
-                    jsPromptResult.confirm(result)
+            if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
+                effectEvent.emit(fnName + WEBVIEW_UID, param, function (result) {
+                    ui.run(() => {
+                        jsPromptResult.confirm(result)
+                    })
                 })
             } else {
                 jsPromptResult.confirm(undefined)
@@ -116,37 +122,21 @@ uiThreadEvent.on(CREATE_WEBVIEW, (url, {
     webview.setWebChromeClient(webcc)
     webview.loadUrl(url)
 
-    function on(eventName) {
-        return fromEvent(effectThreadEvent, eventName + WEBVIEW_UID)
+    function on(eventName: string) {
+        return fromEvent<[any, Function]>(effectEvent, eventName + WEBVIEW_UID)
     }
 
-    uiThreadEvent.emit(CREATE_WEBVIEW_RESULT, {
+    return {
+        webviewObject: webview,
         on,
-        off: effectThreadEvent.removeListener,
         runHtmlFunction,
         runHtmlJS
-    })
+    }
+}
 
-})
-
-type CreateWebviewResult = Observable<{
+type CreateWebviewResult = {
+    webviewObject: any
     on(eventName: string): Observable<[any, Function]>
-    off(): void
     runHtmlFunction(fnName: string, ...value): Observable<any>
     runHtmlJS(js: string): Observable<any>
-}>
-
-/*
- * 
- * @param {string} url html路径
- * @param {object} option 自定义选项
- * @param {string} option.xmlString 自定义界面
- * @param {string} option.webviewId 自定义界面的webviewId，使用自定义时必填，且要与字符串内的webview的id一致
- * @param {string} option.webviewClientOption 自定义webview的事件监听
- */
-export function run(url, option?: WebViewOption): CreateWebviewResult {
-    uiThreadEvent.emit(CREATE_WEBVIEW, url, option)
-    return fromEvent<any>(uiThreadEvent, CREATE_WEBVIEW_RESULT).pipe(
-        take(1)
-    )
 }
