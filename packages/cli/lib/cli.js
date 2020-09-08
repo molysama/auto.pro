@@ -6,7 +6,6 @@ var path = require('path')
 var exec = require('child_process').exec
 
 var chalk = require('chalk')
-var link = require('terminal-link')
 var program = require('commander')
 var inquirer = require('inquirer')
 var symbols = require('log-symbols')
@@ -55,8 +54,8 @@ program
                 console.log(`模板下载完毕，接下来用vscode打开${chalk.black.bgGreen(name)}目录`)
                 console.log(`执行${chalk.black.bgGreen(' npm i ')}安装依赖\n`)
                 console.log(chalk.bold('相关链接'))
-                console.log(link(chalkLink('wiki说明'), 'https://github.com/molysama/auto.pro/wiki'))
-                console.log(link(chalkLink('QQ群'), 'https://qm.qq.com/cgi-bin/qm/qr?k=0QGU0lmFq_6LusJ8rOVmgUtlrU26DRAS&jump_from=webapi'))
+                console.log(chalkLink('wiki说明'), 'https://github.com/molysama/auto.pro/wiki')
+                console.log(chalkLink('QQ群'), 'https://qm.qq.com/cgi-bin/qm/qr?k=0QGU0lmFq_6LusJ8rOVmgUtlrU26DRAS&jump_from=webapi')
                 console.log(chalk.black.bgGreen(` (^・ω・^ ) `))
             }
             process.exit(1)
@@ -66,10 +65,10 @@ program
 program.command('doc')
     .description('显示相关文档和联系方式')
     .action((name, cmd) => {
-        console.log(link(chalkLink('auto文档'), 'http://docs.autojs.org'))
-        console.log(link(chalkLink('wiki说明'), 'https://github.com/molysama/auto.pro/wiki'))
-        console.log(link(chalkLink('脚本大全'), 'https://github.com/snailuncle/autojsDemo'))
-        console.log(link(chalkLink('QQ群'), 'https://qm.qq.com/cgi-bin/qm/qr?k=0QGU0lmFq_6LusJ8rOVmgUtlrU26DRAS&jump_from=webapi'))
+        console.log(chalkLink('auto文档'), 'http://docs.autojs.org')
+        console.log(chalkLink('wiki说明'), 'https://github.com/molysama/auto.pro/wiki')
+        console.log(chalkLink('脚本大全'), 'https://github.com/snailuncle/autojsDemo')
+        console.log(chalkLink('QQ群'), 'https://qm.qq.com/cgi-bin/qm/qr?k=0QGU0lmFq_6LusJ8rOVmgUtlrU26DRAS&jump_from=webapi')
     })
 
 program
