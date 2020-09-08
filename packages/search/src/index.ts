@@ -162,6 +162,7 @@ export function findImg(param: FindImgParam): Observable<any> {
         let t: any
         return cap$.pipe(
             pausable(isPausable, false),
+            filter(cap => cap.isRecycled() === false),
             throttleTime(eachTime),
             filter(() => isPass && when()),
             exhaustMap(cap => {

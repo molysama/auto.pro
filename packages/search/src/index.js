@@ -140,7 +140,7 @@ export function findImg(param) {
         var when = param.when || (function () { return true; });
         var isPass = true;
         var t;
-        return cap$.pipe(pausable(isPausable, false), throttleTime(eachTime), filter(function () { return isPass && when(); }), exhaustMap(function (cap) {
+        return cap$.pipe(pausable(isPausable, false), filter(function (cap) { return cap.isRecycled() === false; }), throttleTime(eachTime), filter(function () { return isPass && when(); }), exhaustMap(function (cap) {
             var src = image || cap;
             var matches = images.matchTemplate(src, template, queryOption).matches;
             if (valid > 0) {

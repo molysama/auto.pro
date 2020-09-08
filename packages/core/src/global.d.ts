@@ -40,6 +40,7 @@ interface Image {
     saveTo(path): void
     pixel(x: number, y: number): number
     recycle: Function
+    isRecycled(): boolean
     mat: Mat
 }
 interface Point {
