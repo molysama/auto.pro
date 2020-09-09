@@ -1,16 +1,16 @@
-import { concat, iif, of, ReplaySubject, timer } from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { concat, fromEvent, iif, interval, of } from 'rxjs';
+import { filter, map, shareReplay, switchMap, take, toArray } from 'rxjs/operators';
 import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission } from './permission';
 import { initScreenSet } from './screen';
-export * from './permission';
 export * from './pausable';
+export * from './permission';
 export * from './screen';
 export * from './store';
 export * from './utils';
 /**
  * 作业流
  */
-export var effect$ = new ReplaySubject(1);
+export var effect$;
 /**
  * 作业线程
  */
@@ -32,13 +32,11 @@ export default function (_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.baseWidth, baseWidth = _c === void 0 ? 1280 : _c, _d = _b.baseHeight, baseHeight = _d === void 0 ? 720 : _d, _e = _b.needCap, needCap = _e === void 0 ? false : _e, _f = _b.needService, needService = _f === void 0 ? false : _f, _g = _b.needFloaty, needFloaty = _g === void 0 ? false : _g, _h = _b.needForeground, needForeground = _h === void 0 ? false : _h, _j = _b.needStableMode, needStableMode = _j === void 0 ? false : _j;
     initScreenSet(baseWidth, baseHeight);
     effectThread = threads.start(function () {
-        var thisThread = threads.currentThread();
-        effectEvent = events.emitter(thisThread);
+        effectEvent = events.emitter(threads.currentThread());
         var requestService$ = iif(function () { return needService; }, requestServicePermission(), of(true));
         var requestFloaty$ = iif(function () { return needFloaty; }, requestFloatyPermission(), of(true));
-        var requestScreenCapture$ = timer(0);
         if (needCap) {
-            if (images.requestScreenCapture({
+            if (!images.requestScreenCapture({
                 async: true,
                 orientation: {
                     '横屏': 1,
@@ -47,9 +45,6 @@ export default function (_a) {
                     'true': 3
                 }[needCap]
             })) {
-                requestScreenCapture$ = timer(500);
-            }
-            else {
                 toastLog('请求截图权限失败');
                 exit();
             }
@@ -60,16 +55,15 @@ export default function (_a) {
         if (needStableMode && !isOpenStableMode()) {
             openStableMode();
         }
-        concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(toArray()).subscribe({
+        concat(requestService$, requestFloaty$).pipe(toArray()).subscribe({
             next: function () {
-                effect$.next([thisThread, effectEvent]);
+                effectEvent.emit('effect$');
             },
             error: function (err) {
                 toastLog(err);
-                exit();
             }
         });
         setInterval(function () { }, 10000);
     });
-    effectThread.waitFor();
+    effect$ = interval(100).pipe(filter(function () { return effectEvent; }), take(1), switchMap(function () { return fromEvent(effectEvent, 'effect$'); }), take(1), map(function () { return [effectThread, effectEvent]; }), shareReplay(1));
 }

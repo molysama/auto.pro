@@ -1,10 +1,10 @@
-import { concat, iif, of, ReplaySubject, timer } from 'rxjs'
-import { toArray } from 'rxjs/operators'
+import { concat, fromEvent, iif, interval, Observable, of } from 'rxjs'
+import { filter, map, shareReplay, switchMap, take, toArray } from 'rxjs/operators'
 import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission } from './permission'
-import { height, initScreenSet, width } from './screen'
+import { initScreenSet } from './screen'
 
-export * from './permission'
 export * from './pausable'
+export * from './permission'
 export * from './screen'
 export * from './store'
 export * from './utils'
@@ -12,7 +12,7 @@ export * from './utils'
 /**
  * 作业流
  */
-export const effect$ = new ReplaySubject<[any, any]>(1)
+export let effect$: Observable<any>
 
 /**
  * 作业线程
@@ -66,8 +66,7 @@ export default function ({
 
     effectThread = threads.start(function () {
 
-        const thisThread = threads.currentThread()
-        effectEvent = events.emitter(thisThread)
+        effectEvent = events.emitter(threads.currentThread())
 
         const requestService$ = iif(
             () => needService,
@@ -81,9 +80,8 @@ export default function ({
             of(true)
         )
 
-        let requestScreenCapture$ = timer(0)
         if (needCap) {
-            if (images.requestScreenCapture({
+            if (!images.requestScreenCapture({
                 async: true,
                 orientation: {
                     '横屏': 1,
@@ -92,8 +90,6 @@ export default function ({
                     'true': 3
                 }[needCap]
             })) {
-                requestScreenCapture$ = timer(500)
-            } else {
                 toastLog('请求截图权限失败')
                 exit()
             }
@@ -107,21 +103,27 @@ export default function ({
             openStableMode()
         }
 
-        concat(requestService$, requestFloaty$, requestScreenCapture$).pipe(
+        concat(requestService$, requestFloaty$).pipe(
             toArray()
         ).subscribe({
             next() {
-                effect$.next([thisThread, effectEvent])
+                effectEvent.emit('effect$')
             },
             error(err) {
                 toastLog(err)
-                exit()
             }
         })
 
         setInterval(() => { }, 10000)
     })
 
-    effectThread.waitFor()
+    effect$ = interval(100).pipe(
+        filter(() => effectEvent),
+        take(1),
+        switchMap(() => fromEvent(effectEvent, 'effect$')),
+        take(1),
+        map(() => [effectThread, effectEvent]),
+        shareReplay(1)
+    )
 
 }

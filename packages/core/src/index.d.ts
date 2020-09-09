@@ -1,13 +1,13 @@
-import { ReplaySubject } from 'rxjs';
-export * from './permission';
+import { Observable } from 'rxjs';
 export * from './pausable';
+export * from './permission';
 export * from './screen';
 export * from './store';
 export * from './utils';
 /**
  * 作业流
  */
-export declare const effect$: ReplaySubject<[any, any]>;
+export declare let effect$: Observable<any>;
 /**
  * 作业线程
  */
