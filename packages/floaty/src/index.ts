@@ -29,7 +29,7 @@ importClass(android.widget.TextView)
 
 import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels } from "@auto.pro/core";
 import { from, merge, Observable, Subject } from 'rxjs';
-import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom, share } from 'rxjs/operators';
 import uuidjs from 'uuid-js';
 
 const icons = [
@@ -246,16 +246,19 @@ export function createFloaty({
     // 派发触摸事件
     const logoTouch$ = new Subject<any>()
     const down$ = logoTouch$.pipe(
-        filter(e => e.getAction() === e.ACTION_DOWN)
+        filter(e => e.getAction() === e.ACTION_DOWN),
+        share()
     )
     // 悬浮窗仅当关闭时可以移动
     const move$ = logoTouch$.pipe(
         withLatestFrom(isFloatyOpen$),
         filter(([e, isOpen]) => !isOpen && e.getAction() === e.ACTION_MOVE),
-        map(([e, isOpen]) => e)
+        map(([e, isOpen]) => e),
+        share()
     )
     const up$ = logoTouch$.pipe(
-        filter(e => e.getAction() === e.ACTION_UP)
+        filter(e => e.getAction() === e.ACTION_UP),
+        share()
     )
 
     down$.pipe(
