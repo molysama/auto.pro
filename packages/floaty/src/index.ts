@@ -29,7 +29,7 @@ importClass(android.widget.TextView)
 
 import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels } from "@auto.pro/core";
 import { from, merge, Observable, Subject } from 'rxjs';
-import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom, share } from 'rxjs/operators';
+import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom, share, groupBy } from 'rxjs/operators';
 import uuidjs from 'uuid-js';
 
 const icons = [
@@ -130,15 +130,14 @@ export function createFloaty({
 
     const FLOATY = floaty.rawWindow(`
         <frame w="${2 * radius}" h="${2 * radius}">
-            ${
-        items.map(item => {
-            return `
+            ${items.map(item => {
+        return `
                 <frame id="${item.id}" w="${size}" h="${size}" alpha="0" layout_gravity="center">
                     <img w="${size}" h="${size}" id="${item.id}_color" src="${getPrototype(item.color) === 'String' ? item.color : item.color && item.color && item.color.length > 0 && item.color[0]}" circle="true" />
                     <img w="${ICON_SIZE}" h="${ICON_SIZE}" id="${item.id}_icon" src="@drawable/${getPrototype(item.icon) === 'String' ? item.icon : item.icon && item.icon.length > 0 && item.icon[0]}" tint="${item.tint || '#ffffff'}" gravity="center" layout_gravity="center" />
                 </frame>
                     `
-        }).join('')
+    }).join('')
         }
             <frame id="logo" w="${size}" h="${size}" alpha="0.4" layout_gravity="center">
                 <img id="img_logo" w="*" h="*" src="${logo}" gravity="center" layout_gravity="center" />
@@ -244,20 +243,15 @@ export function createFloaty({
     }
 
     // 派发触摸事件
-    const logoTouch$ = new Subject<any>()
-    const down$ = logoTouch$.pipe(
-        filter(e => e.getAction() === e.ACTION_DOWN),
-        share()
-    )
+    const down$ = new Subject<any>()
+    const up$ = new Subject<any>()
+
+    const moveSource = new Subject<any>()
     // 悬浮窗仅当关闭时可以移动
-    const move$ = logoTouch$.pipe(
+    const move$ = moveSource.pipe(
         withLatestFrom(isFloatyOpen$),
-        filter(([e, isOpen]) => !isOpen && e.getAction() === e.ACTION_MOVE),
+        filter(([e, isOpen]) => !isOpen),
         map(([e, isOpen]) => e),
-        share()
-    )
-    const up$ = logoTouch$.pipe(
-        filter(e => e.getAction() === e.ACTION_UP),
         share()
     )
 
@@ -273,10 +267,7 @@ export function createFloaty({
             ),
             move$.pipe(
                 tap(e_move => {
-                    const rawX = e_move.getRawX() - dx
-                    const rawY = e_move.getRawY() - dy
-                    STAND.setPosition(sx + rawX, sy + rawY)
-                    FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y)
+                    FLOATY.setPosition(sx + e_move.getRawX() - dx - FLOATY_STAND_OFFSET_X, sy + e_move.getRawY() - dy - FLOATY_STAND_OFFSET_Y)
                 }),
                 takeUntil(up$),
             ),
@@ -284,17 +275,19 @@ export function createFloaty({
             up$.pipe(
                 skipUntil(move$),
                 tap((e_up) => {
-                    const upX = e_up.getRawX()
-                    const nowY = STAND.getY()
-                    const widthPixels = getWidthPixels()
-
+                    const upX = e_up.getRawX();
+                    const nowFY = FLOATY.getY()
+                    const widthPixels = getWidthPixels();
                     // 吸附左右边界
                     if (upX < 100) {
-                        STAND.setPosition(-2, nowY)
-                        FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y)
-                    } else if (upX > widthPixels - 100) {
-                        STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowY)
-                        FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowY - FLOATY_STAND_OFFSET_Y)
+                        FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowFY)
+                        STAND.setPosition(-2, nowFY + FLOATY_STAND_OFFSET_Y);
+                    }
+                    else if (upX > widthPixels - 100) {
+                        FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowFY)
+                        STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowFY + FLOATY_STAND_OFFSET_Y);
+                    } else {
+                        STAND.setPosition(FLOATY.getX() + FLOATY_STAND_OFFSET_X, FLOATY.getY() + FLOATY_STAND_OFFSET_Y);
                     }
                 })
             )
@@ -302,7 +295,17 @@ export function createFloaty({
     ).subscribe()
 
     STAND.btn.setOnTouchListener((v, e) => {
-        logoTouch$.next(e)
+        switch (e.getAction()) {
+            case e.ACTION_DOWN:
+                down$.next(e)
+                break
+            case e.ACTION_MOVE:
+                moveSource.next(e)
+                break
+            case e.ACTION_UP:
+                up$.next(e)
+                break
+        }
         return true
     })
 

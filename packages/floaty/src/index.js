@@ -143,17 +143,17 @@ export function createFloaty(_a) {
         });
     }
     // 派发触摸事件
-    var logoTouch$ = new Subject();
-    var down$ = logoTouch$.pipe(filter(function (e) { return e.getAction() === e.ACTION_DOWN; }), share());
+    var down$ = new Subject();
+    var up$ = new Subject();
+    var moveSource = new Subject();
     // 悬浮窗仅当关闭时可以移动
-    var move$ = logoTouch$.pipe(withLatestFrom(isFloatyOpen$), filter(function (_a) {
+    var move$ = moveSource.pipe(withLatestFrom(isFloatyOpen$), filter(function (_a) {
         var e = _a[0], isOpen = _a[1];
-        return !isOpen && e.getAction() === e.ACTION_MOVE;
+        return !isOpen;
     }), map(function (_a) {
         var e = _a[0], isOpen = _a[1];
         return e;
     }), share());
-    var up$ = logoTouch$.pipe(filter(function (e) { return e.getAction() === e.ACTION_UP; }), share());
     down$.pipe(map(function (e) { return ({ dx: e.getRawX(), dy: e.getRawY(), sx: STAND.getX(), sy: STAND.getY() }); }), switchMap(function (_a) {
         var dx = _a.dx, dy = _a.dy, sx = _a.sx, sy = _a.sy;
         return merge(
@@ -161,29 +161,39 @@ export function createFloaty(_a) {
         up$.pipe(takeUntil(move$), tap(function () {
             toggleFloaty();
         })), move$.pipe(tap(function (e_move) {
-            var rawX = e_move.getRawX() - dx;
-            var rawY = e_move.getRawY() - dy;
-            STAND.setPosition(sx + rawX, sy + rawY);
-            FLOATY.setPosition(sx + rawX - FLOATY_STAND_OFFSET_X, sy + rawY - FLOATY_STAND_OFFSET_Y);
+            FLOATY.setPosition(sx + e_move.getRawX() - dx - FLOATY_STAND_OFFSET_X, sy + e_move.getRawY() - dy - FLOATY_STAND_OFFSET_Y);
         }), takeUntil(up$)), 
         // 按下后有移动，则弹起时视为移动结束
         up$.pipe(skipUntil(move$), tap(function (e_up) {
             var upX = e_up.getRawX();
-            var nowY = STAND.getY();
+            var nowFY = FLOATY.getY();
             var widthPixels = getWidthPixels();
             // 吸附左右边界
             if (upX < 100) {
-                STAND.setPosition(-2, nowY);
-                FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowY - FLOATY_STAND_OFFSET_Y);
+                FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowFY);
+                STAND.setPosition(-2, nowFY + FLOATY_STAND_OFFSET_Y);
             }
             else if (upX > widthPixels - 100) {
-                STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowY);
-                FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowY - FLOATY_STAND_OFFSET_Y);
+                FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowFY);
+                STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowFY + FLOATY_STAND_OFFSET_Y);
+            }
+            else {
+                STAND.setPosition(FLOATY.getX() + FLOATY_STAND_OFFSET_X, FLOATY.getY() + FLOATY_STAND_OFFSET_Y);
             }
         })));
     })).subscribe();
     STAND.btn.setOnTouchListener(function (v, e) {
-        logoTouch$.next(e);
+        switch (e.getAction()) {
+            case e.ACTION_DOWN:
+                down$.next(e);
+                break;
+            case e.ACTION_MOVE:
+                moveSource.next(e);
+                break;
+            case e.ACTION_UP:
+                up$.next(e);
+                break;
+        }
         return true;
     });
     var t = setInterval(function () { }, 10000);
