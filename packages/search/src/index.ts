@@ -241,7 +241,7 @@ export function findImg(param: FindImgParam): Observable<any> {
                 }
 
                 if (param.center) {
-                    result = result.map(pt => [pt[0] + template.width / 2, pt[1] + template.height / 2])
+                    result = result && result.map(pt => [pt[0] + template.width / 2, pt[1] + template.height / 2])
                 }
                 return result
             }),
