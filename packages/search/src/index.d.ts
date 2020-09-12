@@ -18,6 +18,7 @@ export declare type FindImgParam = {
     image?: Image;
     valid?: number;
     isPausable?: boolean;
+    center?: boolean;
 };
 import { Observable } from 'rxjs';
 export declare function clearCache(cacheName: string): void;
@@ -27,7 +28,7 @@ export declare function clearCache(cacheName: string): void;
  * @param {number | undefined} mode 获取模式，若为0则返回灰度图像
  * @returns {Image | null}
  */
-export declare function readImg(imgPath: Image | string, mode?: number): any;
+export declare function readImg(imgPath: Image | string, mode?: number): Image;
 /**
  * 找图函数，此函数为异步函数！
  * @param {string} path 待查图片路径
@@ -43,6 +44,7 @@ export declare function readImg(imgPath: Image | string, mode?: number): any;
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差，默认为30
  * @param {boolean} isPausable 是否受暂停状态影响，默认为true，受影响
+ * @param {boolean} center 是否将返回坐标处理成图片中心
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export declare function findImg(param: FindImgParam): Observable<any>;

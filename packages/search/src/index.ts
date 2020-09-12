@@ -18,6 +18,7 @@ export type FindImgParam = {
     image?: Image,
     valid?: number
     isPausable?: boolean
+    center?: boolean
 }
 
 import { cap, getPrototype, height, pausable, scale, width, cap$ } from '@auto.pro/core'
@@ -62,7 +63,7 @@ function region(param: any) {
  */
 export function readImg(imgPath: Image | string, mode?: number) {
     if (!imgPath) {
-        return null
+        throw `图片${imgPath}不存在`
     }
 
     let result
@@ -76,7 +77,7 @@ export function readImg(imgPath: Image | string, mode?: number) {
         result = images.grayscale(result)
     }
 
-    return result
+    return result as Image
 }
 
 
@@ -95,6 +96,7 @@ export function readImg(imgPath: Image | string, mode?: number) {
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差，默认为30
  * @param {boolean} isPausable 是否受暂停状态影响，默认为true，受影响
+ * @param {boolean} center 是否将返回坐标处理成图片中心
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export function findImg(param: FindImgParam): Observable<any> {
@@ -236,6 +238,10 @@ export function findImg(param: FindImgParam): Observable<any> {
                     result = res.length > 0 ? res[0] : null
                 } else {
                     result = res
+                }
+
+                if (param.center) {
+                    result = result.map(pt => [pt[0] + template.width / 2, pt[1] + template.height / 2])
                 }
                 return result
             }),

@@ -55,7 +55,7 @@ function region(param) {
  */
 export function readImg(imgPath, mode) {
     if (!imgPath) {
-        return null;
+        throw "\u56FE\u7247" + imgPath + "\u4E0D\u5B58\u5728";
     }
     var result;
     if (getPrototype(imgPath) != 'String') {
@@ -84,6 +84,7 @@ export function readImg(imgPath, mode) {
  * @param {Image} image 提供预截图，设置此值后，将只查询1次并返回匹配结果
  * @param {number} valid 当valid大于0时，启用颜色匹配验证，消除匹配误差，默认为30
  * @param {boolean} isPausable 是否受暂停状态影响，默认为true，受影响
+ * @param {boolean} center 是否将返回坐标处理成图片中心
  * @returns {Observable<[[number, number] | [number, number] | null]>}
  */
 export function findImg(param) {
@@ -206,6 +207,9 @@ export function findImg(param) {
             }
             else {
                 result = res;
+            }
+            if (param.center) {
+                result = result.map(function (pt) { return [pt[0] + template.width / 2, pt[1] + template.height / 2]; });
             }
             return result;
         }), 
