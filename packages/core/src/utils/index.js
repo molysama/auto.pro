@@ -54,3 +54,9 @@ export function getPrototype(obj) {
         return prototype.substring(prototype.indexOf(' ') + 1, prototype.indexOf(']'));
     }
 }
+/**
+ * 禁用auto自带的音量上键退出应用功能
+ */
+export function disableVolumeExit() {
+    com.stardust.autojs.core.pref.Pref.INSTANCE.get().edit().putBoolean("key_use_volume_control_running", true).commit();
+}

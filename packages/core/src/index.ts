@@ -2,6 +2,7 @@ import { concat, fromEvent, iif, interval, Observable, of } from 'rxjs'
 import { filter, map, shareReplay, switchMap, take, toArray } from 'rxjs/operators'
 import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission } from './permission'
 import { initScreenSet } from './screen'
+import { disableVolumeExit } from './utils'
 
 export * from './pausable'
 export * from './permission'
@@ -42,6 +43,7 @@ interface CoreOption {
  * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
  * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
+ * @param {boolean | false} param.needVolExit 是否需要音量上键退出程序，默认为true
  */
 export default function ({
     baseWidth = 1280,
@@ -50,7 +52,8 @@ export default function ({
     needService = false,
     needFloaty = false,
     needForeground = false,
-    needStableMode = false
+    needStableMode = false,
+    needVolExit = true
 }: {
     baseWidth?: number
     baseHeight?: number
@@ -59,8 +62,13 @@ export default function ({
     needFloaty?: boolean
     needForeground?: boolean
     needStableMode?: boolean
+    needVolExit?: boolean
 } = {
     }) {
+
+    if (!needVolExit) {
+        disableVolumeExit()
+    }
 
     initScreenSet(baseWidth, baseHeight)
 

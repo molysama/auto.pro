@@ -2,6 +2,9 @@ type ScreenType = '横屏' | '竖屏'
 interface Thread {
     [key: string]: any
 }
+
+declare const com: any
+
 interface AutoStorage {
 
     /**

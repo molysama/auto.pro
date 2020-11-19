@@ -15,3 +15,7 @@ export declare function fromUiEvent(target: any, eventName: any): import("rxjs")
  * @returns {string}
  */
 export declare function getPrototype(obj: any): string;
+/**
+ * 禁用auto自带的音量上键退出应用功能
+ */
+export declare function disableVolumeExit(): void;

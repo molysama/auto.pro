@@ -24,8 +24,9 @@ export declare let effectEvent: any;
  * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
  * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
+ * @param {boolean | false} param.needVolExit 是否需要音量上键退出程序，默认为true
  */
-export default function ({ baseWidth, baseHeight, needCap, needService, needFloaty, needForeground, needStableMode }?: {
+export default function ({ baseWidth, baseHeight, needCap, needService, needFloaty, needForeground, needStableMode, needVolExit }?: {
     baseWidth?: number;
     baseHeight?: number;
     needCap?: false | '横屏' | '竖屏' | '自动';
@@ -33,4 +34,5 @@ export default function ({ baseWidth, baseHeight, needCap, needService, needFloa
     needFloaty?: boolean;
     needForeground?: boolean;
     needStableMode?: boolean;
+    needVolExit?: boolean;
 }): void;
