@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/webview",
-    "version": "9.0.8",
+    "version": "9.0.9",
     "description": "webview plugin for auto.pro",
     "author": "molysama <molysama.i@gmail.com>",
     "homepage": "https://github.com/molysama/auto.pro#readme",
@@ -29,7 +29,7 @@
         "url": "https://github.com/molysama/auto.pro/issues"
     },
     "dependencies": {
-        "@auto.pro/core": "^9.0.7",
+        "@auto.pro/core": "^9.0.8",
         "rxjs": "^6.6.2",
         "uuid-js": "^0.7.5"
     },
