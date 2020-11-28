@@ -45,7 +45,8 @@ program
                 }
             ])
         logWithSpinner(`Download UI template: ${answer.mode}`)
-        download(`molysama/auto-template-${answer.mode}`, name, function (err) {
+        // download(`molysama/auto-template-${answer.mode}`, name, function (err) {
+        download(`direct:https://gitee.com/molysama/auto-template-${answer.mode}.git`, name, {clone: true}, function (err) {
             if (err) {
                 failSpinner()
                 console.log(chalk.red(err))
