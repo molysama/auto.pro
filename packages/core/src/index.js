@@ -1,5 +1,5 @@
 import { concat, fromEvent, iif, interval, of } from 'rxjs';
-import { filter, map, shareReplay, switchMap, take, toArray } from 'rxjs/operators';
+import { filter, map, shareReplay, take, toArray } from 'rxjs/operators';
 import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission } from './permission';
 import { initScreenSet } from './screen';
 import { disableVolumeExit } from './utils';
@@ -37,7 +37,6 @@ export default function (_a) {
     }
     initScreenSet(baseWidth, baseHeight);
     effectThread = threads.start(function () {
-        effectEvent = events.emitter(threads.currentThread());
         var requestService$ = iif(function () { return needService; }, requestServicePermission(), of(true));
         var requestFloaty$ = iif(function () { return needFloaty; }, requestFloatyPermission(), of(true));
         if (needCap) {
@@ -62,7 +61,9 @@ export default function (_a) {
         }
         concat(requestService$, requestFloaty$).pipe(toArray()).subscribe({
             next: function () {
-                effectEvent.emit('effect$');
+                interval(10).pipe(filter(function () { return effectEvent.listenerCount('effect$') > 0; }), take(1)).subscribe(function () {
+                    effectEvent.emit('effect$');
+                });
             },
             error: function (err) {
                 toastLog(err);
@@ -70,5 +71,7 @@ export default function (_a) {
         });
         setInterval(function () { }, 10000);
     });
-    effect$ = interval(100).pipe(filter(function () { return effectEvent; }), take(1), switchMap(function () { return fromEvent(effectEvent, 'effect$'); }), take(1), map(function () { return [effectThread, effectEvent]; }), shareReplay(1));
+    effectThread.waitFor();
+    effectEvent = events.emitter(effectThread);
+    effect$ = fromEvent(effectEvent, 'effect$').pipe(map(function () { return [effectThread, effectEvent]; }), shareReplay(1));
 }

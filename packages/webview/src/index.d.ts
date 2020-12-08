@@ -4,12 +4,14 @@ import { Observable } from "rxjs";
  * @param {WebViewOption} option  自定义
  * @param {string} option.xmlString 自定义界面
  * @param {string} option.webviewId 自定义界面的webviewId，使用自定义界面时必填，且要与界面字符串内webview的id一致
- * @param {Object} option.webviewClientOption JavaAdapter.WebChromeClient的回调拓展对象，可重写一些事件
+ * @param {Object} option.chromeClientOption JavaAdapter.WebChromeClient的回调拓展对象，可重写其事件
+ * @param {Object} option.webviewClientOption JavaAdapter.WebViewClient的回调拓展对象，可重写其事件
  * @param {Function} option.afterLayout 紧接着布局初始化的钩子函数
  */
-export declare function run(url: any, { xmlString, webviewId, webviewClientOption, afterLayout }?: {
+export declare function run(url: any, { xmlString, webviewId, chromeClientOption, webviewClientOption, afterLayout }?: {
     xmlString?: string | undefined;
     webviewId?: string | undefined;
+    chromeClientOption?: {} | undefined;
     webviewClientOption?: {} | undefined;
     afterLayout?: (() => void) | undefined;
 }): CreateWebviewResult;

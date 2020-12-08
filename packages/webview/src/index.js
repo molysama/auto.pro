@@ -23,13 +23,14 @@ import uuidjs from 'uuid-js';
  * @param {WebViewOption} option  自定义
  * @param {string} option.xmlString 自定义界面
  * @param {string} option.webviewId 自定义界面的webviewId，使用自定义界面时必填，且要与界面字符串内webview的id一致
- * @param {Object} option.webviewClientOption JavaAdapter.WebChromeClient的回调拓展对象，可重写一些事件
+ * @param {Object} option.chromeClientOption JavaAdapter.WebChromeClient的回调拓展对象，可重写其事件
+ * @param {Object} option.webviewClientOption JavaAdapter.WebViewClient的回调拓展对象，可重写其事件
  * @param {Function} option.afterLayout 紧接着布局初始化的钩子函数
  */
 export function run(url, _a) {
-    var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.webviewClientOption, webviewClientOption = _e === void 0 ? {} : _e, _f = _b.afterLayout, afterLayout = _f === void 0 ? function () { } : _f;
+    var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.chromeClientOption, chromeClientOption = _e === void 0 ? {} : _e, _f = _b.webviewClientOption, webviewClientOption = _f === void 0 ? {} : _f, _g = _b.afterLayout, afterLayout = _g === void 0 ? function () { } : _g;
+    // 每个webview对象都有其唯一UID，便于处理自身事件
     var WEBVIEW_UID = uuidjs.create(4).toString();
-    var effectThreadEvent = effectEvent;
     ui.layout(xmlString);
     afterLayout();
     var webview = ui[webviewId];
@@ -89,14 +90,10 @@ export function run(url, _a) {
                 jsPromptResult.confirm(undefined);
             }
             return true;
-        }, onReceivedHttpError: function (view, request, error) {
-            log('webview http error', error);
-        }, onReceivedError: function (view, errorCode, desc, failingUrl) {
-            log('webview error', desc);
-        }, onConsoleMessage: function (msg) {
-            log(msg.message());
-        } }, webviewClientOption));
+        } }, chromeClientOption));
+    var webvc = new JavaAdapter(WebViewClient, webviewClientOption);
     webview.setWebChromeClient(webcc);
+    webview.setWebViewClient(webvc);
     webview.loadUrl(url);
     function on(eventName) {
         return fromEvent(effectEvent, eventName + WEBVIEW_UID);

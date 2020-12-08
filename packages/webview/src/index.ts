@@ -8,6 +8,7 @@ importClass(android.webkit.WebViewClient)
 interface WebViewOption {
     xmlString?: string
     webviewId?: string
+    chromeClientOption?: any
     webviewClientOption?: any
     afterLayout?: Function
 }
@@ -23,7 +24,8 @@ import uuidjs from 'uuid-js'
  * @param {WebViewOption} option  自定义
  * @param {string} option.xmlString 自定义界面
  * @param {string} option.webviewId 自定义界面的webviewId，使用自定义界面时必填，且要与界面字符串内webview的id一致
- * @param {Object} option.webviewClientOption JavaAdapter.WebChromeClient的回调拓展对象，可重写一些事件
+ * @param {Object} option.chromeClientOption JavaAdapter.WebChromeClient的回调拓展对象，可重写其事件
+ * @param {Object} option.webviewClientOption JavaAdapter.WebViewClient的回调拓展对象，可重写其事件
  * @param {Function} option.afterLayout 紧接着布局初始化的钩子函数
  */
 export function run(url, {
@@ -33,14 +35,14 @@ export function run(url, {
     </linear>
 `,
     webviewId = 'webview',
+    chromeClientOption = {},
     webviewClientOption = {},
     afterLayout = () => { }
 } = {
     }): CreateWebviewResult {
 
+    // 每个webview对象都有其唯一UID，便于处理自身事件
     const WEBVIEW_UID = uuidjs.create(4).toString()
-
-    const effectThreadEvent = effectEvent
 
     ui.layout(xmlString)
     afterLayout()
@@ -107,19 +109,13 @@ export function run(url, {
 
             return true
         },
-        onReceivedHttpError: function (view, request, error) {
-            log('webview http error', error)
-        },
-        onReceivedError: function (view, errorCode, desc, failingUrl) {
-            log('webview error', desc)
-        },
-        onConsoleMessage: function (msg) {
-            log(msg.message())
-        },
-        ...webviewClientOption
+        ...chromeClientOption
     })
 
+    const webvc = new JavaAdapter(WebViewClient, webviewClientOption)
+
     webview.setWebChromeClient(webcc)
+    webview.setWebViewClient(webvc)
     webview.loadUrl(url)
 
     function on(eventName: string) {
