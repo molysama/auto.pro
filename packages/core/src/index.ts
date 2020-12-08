@@ -74,7 +74,6 @@ export default function ({
 
     effectThread = threads.start(function () {
 
-
         const requestService$ = iif(
             () => needService,
             requestServicePermission(),
