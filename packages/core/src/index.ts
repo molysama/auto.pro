@@ -115,7 +115,7 @@ export default function ({
         ).subscribe({
             next() {
                 interval(10).pipe(
-                    filter(() => effectEvent.listenerCount('effect$') > 0),
+                    filter(() => effectEvent && effectEvent.listenerCount('effect$') > 0),
                     take(1)
                 ).subscribe(() => {
                     effectEvent.emit('effect$')

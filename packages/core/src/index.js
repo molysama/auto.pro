@@ -61,7 +61,7 @@ export default function (_a) {
         }
         concat(requestService$, requestFloaty$).pipe(toArray()).subscribe({
             next: function () {
-                interval(10).pipe(filter(function () { return effectEvent.listenerCount('effect$') > 0; }), take(1)).subscribe(function () {
+                interval(10).pipe(filter(function () { return effectEvent && effectEvent.listenerCount('effect$') > 0; }), take(1)).subscribe(function () {
                     effectEvent.emit('effect$');
                 });
             },
