@@ -74,7 +74,6 @@ export default function ({
 
     effectThread = threads.start(function () {
 
-        effectEvent = events.emitter(threads.currentThread())
 
         const requestService$ = iif(
             () => needService,
@@ -115,7 +114,12 @@ export default function ({
             toArray()
         ).subscribe({
             next() {
-                effectEvent.emit('effect$')
+                interval(10).pipe(
+                    filter(() => effectEvent.listenerCount('effect$') > 0),
+                    take(1)
+                ).subscribe(() => {
+                    effectEvent.emit('effect$')
+                })
             },
             error(err) {
                 toastLog(err)
@@ -125,11 +129,9 @@ export default function ({
         setInterval(() => { }, 10000)
     })
 
-    effect$ = interval(100).pipe(
-        filter(() => effectEvent),
-        take(1),
-        switchMap(() => fromEvent(effectEvent, 'effect$')),
-        take(1),
+    effectThread.waitFor()
+    effectEvent = events.emitter(effectThread);
+    effect$ = fromEvent(effectEvent, 'effect$').pipe(
         map(() => [effectThread, effectEvent]),
         shareReplay(1)
     )
