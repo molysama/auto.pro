@@ -1,5 +1,5 @@
 import { concat, fromEvent, iif, interval, Observable, of } from 'rxjs'
-import { filter, map, shareReplay, switchMap, take, toArray } from 'rxjs/operators'
+import { filter, map, shareReplay, take, toArray } from 'rxjs/operators'
 import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission } from './permission'
 import { initScreenSet } from './screen'
 import { disableVolumeExit } from './utils'
