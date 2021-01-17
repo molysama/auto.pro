@@ -106,14 +106,33 @@ export function run(url, {
         onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
             const param = defaultValue && JSON.parse(defaultValue)
 
-            if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
-                effectEvent.emit(fnName + WEBVIEW_UID, param, function (result) {
-                    ui.run(() => {
-                        jsPromptResult.confirm(result)
-                    })
-                })
-            } else {
+            // 如果param的参数中存在PROMPT_CALLBACK，说明是回调型事件，直接返回空值
+            if (param && param['PROMPT_CALLBACK']) {
                 jsPromptResult.confirm(undefined)
+                if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
+                    effectEvent.emit(fnName + WEBVIEW_UID, param, function (...param) {
+                        ui.run(() => {
+                            webview.evaluateJavascript(`javascript:${param['PROMPT_CALLBACK']}(...${JSON.stringify(param)})`, new JavaAdapter(ValueCallback, {
+                                onReceiveValue(result) {
+                                },
+                                onReceivedError(error) {
+                                }
+                            }))
+                        })
+                    })
+                }
+
+            } else {
+                if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
+                    effectEvent.emit(fnName + WEBVIEW_UID, param, function (result) {
+                        ui.run(() => {
+                            jsPromptResult.confirm(result)
+                        })
+                    })
+                } else {
+                    jsPromptResult.confirm(undefined)
+                }
+
             }
 
             return true

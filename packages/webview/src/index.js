@@ -23,17 +23,25 @@ import uuidjs from 'uuid-js';
  * @param {WebViewOption} option  自定义
  * @param {string} option.xmlString 自定义界面
  * @param {string} option.webviewId 自定义界面的webviewId，使用自定义界面时必填，且要与界面字符串内webview的id一致
+ * @param {Object} option.webviewObject 可以自主传入webview对象，使用此选项时无法再自定义界面
  * @param {Object} option.chromeClientOption JavaAdapter.WebChromeClient的回调拓展对象，可重写其事件
  * @param {Object} option.webviewClientOption JavaAdapter.WebViewClient的回调拓展对象，可重写其事件
  * @param {Function} option.afterLayout 紧接着布局初始化的钩子函数
  */
 export function run(url, _a) {
-    var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.chromeClientOption, chromeClientOption = _e === void 0 ? {} : _e, _f = _b.webviewClientOption, webviewClientOption = _f === void 0 ? {} : _f, _g = _b.afterLayout, afterLayout = _g === void 0 ? function () { } : _g;
+    var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.webviewObject, webviewObject = _e === void 0 ? null : _e, _f = _b.chromeClientOption, chromeClientOption = _f === void 0 ? {} : _f, _g = _b.webviewClientOption, webviewClientOption = _g === void 0 ? {} : _g, _h = _b.afterLayout, afterLayout = _h === void 0 ? function () { } : _h;
     // 每个webview对象都有其唯一UID，便于处理自身事件
     var WEBVIEW_UID = uuidjs.create(4).toString();
-    ui.layout(xmlString);
-    afterLayout();
-    var webview = ui[webviewId];
+    var webview;
+    if (webviewObject) {
+        webview = webviewObject;
+        afterLayout();
+    }
+    else {
+        ui.layout(xmlString);
+        afterLayout();
+        webview = ui[webviewId];
+    }
     var set = webview.getSettings();
     if (url.startsWith('file:')) {
         set.setAllowFileAccess(true);
@@ -79,15 +87,37 @@ export function run(url, _a) {
     }
     var webcc = new JavaAdapter(WebChromeClient, __assign({ onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
             var param = defaultValue && JSON.parse(defaultValue);
-            if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
-                effectEvent.emit(fnName + WEBVIEW_UID, param, function (result) {
-                    ui.run(function () {
-                        jsPromptResult.confirm(result);
+            // 如果param的参数中存在PROMPT_CALLBACK，说明是回调型事件，直接返回空值
+            if (param && param['PROMPT_CALLBACK']) {
+                jsPromptResult.confirm(undefined);
+                if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
+                    effectEvent.emit(fnName + WEBVIEW_UID, param, function () {
+                        var param = [];
+                        for (var _i = 0; _i < arguments.length; _i++) {
+                            param[_i] = arguments[_i];
+                        }
+                        ui.run(function () {
+                            webview.evaluateJavascript("javascript:" + param['PROMPT_CALLBACK'] + "(..." + JSON.stringify(param) + ")", new JavaAdapter(ValueCallback, {
+                                onReceiveValue: function (result) {
+                                },
+                                onReceivedError: function (error) {
+                                }
+                            }));
+                        });
                     });
-                });
+                }
             }
             else {
-                jsPromptResult.confirm(undefined);
+                if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
+                    effectEvent.emit(fnName + WEBVIEW_UID, param, function (result) {
+                        ui.run(function () {
+                            jsPromptResult.confirm(result);
+                        });
+                    });
+                }
+                else {
+                    jsPromptResult.confirm(undefined);
+                }
             }
             return true;
         } }, chromeClientOption));

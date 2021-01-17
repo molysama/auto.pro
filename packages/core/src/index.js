@@ -25,13 +25,14 @@ export var effectEvent;
  * @param {number | 1280} param.baseWidth 基准宽度，默认为1280
  * @param {number | 720} param.baseHeight 基准高度，默认为720
  * @param { false | '横屏' | '竖屏' | '自动'} param.needCap 是否需要截图功能，默认为false
+ * @param { '异步' | '同步' } param.capType 截图模式，默认为异步
  * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
  * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
  * @param {boolean | false} param.needVolExit 是否需要音量上键退出程序，默认为true
  */
 export default function (_a) {
-    var _b = _a === void 0 ? {} : _a, _c = _b.baseWidth, baseWidth = _c === void 0 ? 1280 : _c, _d = _b.baseHeight, baseHeight = _d === void 0 ? 720 : _d, _e = _b.needCap, needCap = _e === void 0 ? false : _e, _f = _b.needService, needService = _f === void 0 ? false : _f, _g = _b.needFloaty, needFloaty = _g === void 0 ? false : _g, _h = _b.needForeground, needForeground = _h === void 0 ? false : _h, _j = _b.needStableMode, needStableMode = _j === void 0 ? false : _j, _k = _b.needVolExit, needVolExit = _k === void 0 ? true : _k;
+    var _b = _a === void 0 ? {} : _a, _c = _b.baseWidth, baseWidth = _c === void 0 ? 1280 : _c, _d = _b.baseHeight, baseHeight = _d === void 0 ? 720 : _d, _e = _b.needCap, needCap = _e === void 0 ? false : _e, _f = _b.capType, capType = _f === void 0 ? '异步' : _f, _g = _b.needService, needService = _g === void 0 ? false : _g, _h = _b.needFloaty, needFloaty = _h === void 0 ? false : _h, _j = _b.needForeground, needForeground = _j === void 0 ? false : _j, _k = _b.needStableMode, needStableMode = _k === void 0 ? false : _k, _l = _b.needVolExit, needVolExit = _l === void 0 ? true : _l;
     if (!needVolExit) {
         disableVolumeExit();
     }
@@ -41,7 +42,7 @@ export default function (_a) {
         var requestFloaty$ = iif(function () { return needFloaty; }, requestFloatyPermission(), of(true));
         if (needCap) {
             if (!images.requestScreenCapture({
-                async: true,
+                async: capType === '异步',
                 orientation: {
                     '横屏': 1,
                     '竖屏': 2,

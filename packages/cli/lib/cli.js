@@ -12,7 +12,7 @@ var symbols = require('log-symbols')
 var download = require('download-git-repo')
 var chalkLink = chalk.hex('#54CC7C')
 
-const jsc = 'org.mozilla.javascript.tools.jsc.Main -opt 1 -nosource -encoding UTF-8'
+const jsc = 'org.mozilla.javascript.tools.jsc.Main -nosource -encoding UTF-8'
 
 const { logWithSpinner, stopSpinner, failSpinner } = require('./spinner')
 
@@ -46,7 +46,7 @@ program
             ])
         logWithSpinner(`Download UI template: ${answer.mode}`)
         // download(`molysama/auto-template-${answer.mode}`, name, function (err) {
-        download(`direct:https://gitee.com/molysama/auto-template-${answer.mode}.git`, name, {clone: true}, function (err) {
+        download(`direct:https://gitee.com/molysama/auto-template-${answer.mode}.git`, name, { clone: true }, function (err) {
             if (err) {
                 failSpinner()
                 console.log(chalk.red(err))
@@ -67,20 +67,27 @@ program.command('doc')
     .description('显示相关文档和联系方式')
     .action((name, cmd) => {
         console.log(chalkLink('auto文档'), 'http://docs.autojs.org')
-        console.log(chalkLink('wiki说明'), 'https://github.com/molysama/auto.pro/wiki')
+        console.log(chalkLink('本项目文档'), 'http://www.moly.host:30030/')
         console.log(chalkLink('脚本大全'), 'https://github.com/snailuncle/autojsDemo')
         console.log(chalkLink('QQ群'), 'https://qm.qq.com/cgi-bin/qm/qr?k=0QGU0lmFq_6LusJ8rOVmgUtlrU26DRAS&jump_from=webapi')
     })
 
 program
     .command('dex <file-name>')
-    .description('将JS转成dex')
-    .action((name, cmd) => {
+    .option('-l, --level', 'version', 200)
+    .option('-t, --opt <type>', 'opt等级，-1~9', 1)
+    .description('将js转成dex')
+    .action((name, options) => {
+
+        const opt = options.opt
+        const version = options.level
 
         const filePath = path.resolve(process.cwd(), name)
         const dir = path.resolve(filePath, '..')
         const basename = path.basename(filePath, '.js')
         const extname = path.extname(filePath)
+        const isDir = fs.statSync(filePath).isDirectory()
+
 
         if (extname !== '.js') {
             console.log(chalk.red(`${basename}不是js文件`))
@@ -93,7 +100,7 @@ program
         }
 
         const orgPath = path.resolve(__dirname, '..')
-        const classPath = `java -cp ${orgPath} ${jsc} ${filePath}`
+        const classPath = `java -cp ${orgPath} ${jsc} -opt ${opt} -version ${version} ${filePath}`
         logWithSpinner(`转换${basename}.js为${basename}.dex`)
 
         exec(classPath, (err, stdout, stderr) => {
