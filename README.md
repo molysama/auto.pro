@@ -24,4 +24,4 @@
 
 # 文档
 
-**[wiki 文档](https://github.com/molysama/auto.pro/wiki)**
+**[文档地址](http://www.moly.host:30030/)**
