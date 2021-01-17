@@ -29,6 +29,7 @@ interface CoreOption {
     baseWidth?: number
     baseHeight?: number
     needCap?: false | '横屏' | '竖屏' | '自动'
+    capType?: '异步' | '同步'
     needService?: boolean
     needFloaty?: boolean
     needForeground?: boolean
@@ -40,6 +41,7 @@ interface CoreOption {
  * @param {number | 1280} param.baseWidth 基准宽度，默认为1280
  * @param {number | 720} param.baseHeight 基准高度，默认为720
  * @param { false | '横屏' | '竖屏' | '自动'} param.needCap 是否需要截图功能，默认为false
+ * @param { '异步' | '同步' } param.capType 截图模式，默认为异步
  * @param {boolean | false} param.needService 是否需要无障碍服务，默认为false
  * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
@@ -49,6 +51,7 @@ export default function ({
     baseWidth = 1280,
     baseHeight = 720,
     needCap = false,
+    capType = '异步',
     needService = false,
     needFloaty = false,
     needForeground = false,
@@ -58,6 +61,7 @@ export default function ({
     baseWidth?: number
     baseHeight?: number
     needCap?: false | '横屏' | '竖屏' | '自动'
+    capType?: '异步' | '同步'
     needService?: boolean
     needFloaty?: boolean
     needForeground?: boolean
@@ -88,7 +92,7 @@ export default function ({
 
         if (needCap) {
             if (!images.requestScreenCapture({
-                async: true,
+                async: capType === '异步',
                 orientation: {
                     '横屏': 1,
                     '竖屏': 2,
