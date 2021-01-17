@@ -1,6 +1,6 @@
 {
     "name": "@auto.pro/floaty",
-    "version": "9.1.1",
+    "version": "9.1.2",
     "description": "> TODO: description",
     "keywords": [
         "auto.pro",
@@ -35,7 +35,7 @@
     },
     "gitHead": "47599db3a54d21d053f0857ccc61e3e7da1498b9",
     "dependencies": {
-        "@auto.pro/core": "^9.1.1",
+        "@auto.pro/core": "^9.1.2",
         "rxjs": "^6.6.2",
         "uuid-js": "^0.7.5"
     }
