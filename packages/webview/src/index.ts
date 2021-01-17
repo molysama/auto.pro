@@ -8,6 +8,7 @@ importClass(android.webkit.WebViewClient)
 interface WebViewOption {
     xmlString?: string
     webviewId?: string
+    webviewObject?: any
     chromeClientOption?: any
     webviewClientOption?: any
     afterLayout?: Function
@@ -24,6 +25,7 @@ import uuidjs from 'uuid-js'
  * @param {WebViewOption} option  自定义
  * @param {string} option.xmlString 自定义界面
  * @param {string} option.webviewId 自定义界面的webviewId，使用自定义界面时必填，且要与界面字符串内webview的id一致
+ * @param {Object} option.webviewObject 可以自主传入webview对象，使用此选项时无法再自定义界面
  * @param {Object} option.chromeClientOption JavaAdapter.WebChromeClient的回调拓展对象，可重写其事件
  * @param {Object} option.webviewClientOption JavaAdapter.WebViewClient的回调拓展对象，可重写其事件
  * @param {Function} option.afterLayout 紧接着布局初始化的钩子函数
@@ -35,19 +37,26 @@ export function run(url, {
     </linear>
 `,
     webviewId = 'webview',
+    webviewObject = null,
     chromeClientOption = {},
     webviewClientOption = {},
     afterLayout = () => { }
-} = {
+}: WebViewOption = {
     }): CreateWebviewResult {
 
     // 每个webview对象都有其唯一UID，便于处理自身事件
     const WEBVIEW_UID = uuidjs.create(4).toString()
 
-    ui.layout(xmlString)
-    afterLayout()
+    let webview
+    if (webviewObject) {
+        webview = webviewObject
+        afterLayout()
+    } else {
+        ui.layout(xmlString)
+        afterLayout()
+        webview = ui[webviewId]
+    }
 
-    const webview = ui[webviewId]
     const set = webview.getSettings()
 
     if (url.startsWith('file:')) {
