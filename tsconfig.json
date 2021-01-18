@@ -80,6 +80,7 @@
         "packages/*/__test__",
         "packages/cli",
         "packages/webpack-plugin",
-        "packages/webpack-loader"
+        "packages/webpack-loader",
+        "packages/web"
     ]
 }
