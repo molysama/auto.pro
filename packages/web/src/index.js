@@ -1,8 +1,9 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.AutoWeb = factory());
-}(this, (function () { 'use strict';
+        typeof define === 'function' && define.amd ? define(factory) :
+            (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.AutoWeb = factory());
+}(this, (function () {
+    'use strict';
 
     let emit = prompt;
     var source = {
@@ -11,7 +12,7 @@
         },
         devicelly(deviceFn, ngFn, self, once = false) {
             window[deviceFn] = (...option) => {
-                const result = ngFn.call(self || this, option);
+                const result = ngFn.apply(self || this, option);
                 if (once) {
                     delete window[deviceFn];
                 }

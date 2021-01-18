@@ -5,7 +5,7 @@ export default {
     },
     devicelly(deviceFn, ngFn, self, once = false) {
         window[deviceFn] = (...option) => {
-            const result = ngFn.call(self || this, option);
+            const result = ngFn.apply(self || this, option);
             if (once) {
                 delete window[deviceFn];
             }

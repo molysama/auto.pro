@@ -91,7 +91,7 @@ export function run(url, _a) {
             if (param && param['PROMPT_CALLBACK']) {
                 jsPromptResult.confirm(undefined);
                 if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
-                    effectEvent.emit(fnName + WEBVIEW_UID, param.data, function () {
+                    effectEvent.emit(fnName + WEBVIEW_UID, param.params, function () {
                         var result = [];
                         for (var _i = 0; _i < arguments.length; _i++) {
                             result[_i] = arguments[_i];
