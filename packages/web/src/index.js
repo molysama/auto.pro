@@ -8,7 +8,7 @@
             exports: {}
         };
         factory(mod.exports);
-        global.repl = mod.exports;
+        global.AutoWeb = mod.exports;
     }
 })(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : this, function (_exports) {
     "use strict";
