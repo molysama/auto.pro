@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "module": "UMD"
+    },
+    "include": [
+        "./src/**/*.ts"
+    ]
+}
