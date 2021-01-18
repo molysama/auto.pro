@@ -110,9 +110,9 @@ export function run(url, {
             if (param && param['PROMPT_CALLBACK']) {
                 jsPromptResult.confirm(undefined)
                 if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
-                    effectEvent.emit(fnName + WEBVIEW_UID, param, function (...param) {
+                    effectEvent.emit(fnName + WEBVIEW_UID, param, function (...result) {
                         ui.run(() => {
-                            webview.evaluateJavascript(`javascript:${param['PROMPT_CALLBACK']}(...${JSON.stringify(param)})`, new JavaAdapter(ValueCallback, {
+                            webview.evaluateJavascript(`javascript:${param['PROMPT_CALLBACK']}(...${JSON.stringify(result)})`, new JavaAdapter(ValueCallback, {
                                 onReceiveValue(result) {
                                 },
                                 onReceivedError(error) {

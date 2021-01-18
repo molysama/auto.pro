@@ -92,12 +92,12 @@ export function run(url, _a) {
                 jsPromptResult.confirm(undefined);
                 if (effectEvent.listenerCount(fnName + WEBVIEW_UID) > 0) {
                     effectEvent.emit(fnName + WEBVIEW_UID, param, function () {
-                        var param = [];
+                        var result = [];
                         for (var _i = 0; _i < arguments.length; _i++) {
-                            param[_i] = arguments[_i];
+                            result[_i] = arguments[_i];
                         }
                         ui.run(function () {
-                            webview.evaluateJavascript("javascript:" + param['PROMPT_CALLBACK'] + "(..." + JSON.stringify(param) + ")", new JavaAdapter(ValueCallback, {
+                            webview.evaluateJavascript("javascript:" + param['PROMPT_CALLBACK'] + "(..." + JSON.stringify(result) + ")", new JavaAdapter(ValueCallback, {
                                 onReceiveValue: function (result) {
                                 },
                                 onReceivedError: function (error) {
