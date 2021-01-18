@@ -29,7 +29,8 @@
     "url": "git+https://github.com/molysama/auto.pro.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "build": "rollup ./src/source.js --format umd --file ./src/index.js --name \"AutoWeb\""
   },
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"

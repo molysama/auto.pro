@@ -1,44 +1,32 @@
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports"], factory);
-    }
-})(function (require, exports) {
-    'use strict';
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var emit = prompt;
-    // module.exports = {
-    exports.default = {
-        setMode: function (mode) {
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.AutoWeb = factory());
+}(this, (function () { 'use strict';
+
+    let emit = prompt;
+    var source = {
+        setMode(mode) {
             emit = window[mode] || prompt;
         },
-        devicelly: function (deviceFn, ngFn, self, once) {
-            var _this = this;
-            if (once === void 0) { once = false; }
-            window[deviceFn] = function () {
-                var option = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    option[_i] = arguments[_i];
-                }
-                var result = ngFn.call(self || _this, option);
+        devicelly(deviceFn, ngFn, self, once = false) {
+            window[deviceFn] = (...option) => {
+                const result = ngFn.call(self || this, option);
                 if (once) {
                     delete window[deviceFn];
                 }
                 return result;
             };
         },
-        removeDevicelly: function (deviceFn) {
+        removeDevicelly(deviceFn) {
             delete window[deviceFn];
         },
-        auto: function (eventname, params, callback) {
+        auto(eventname, params, callback) {
             if (callback) {
-                var EVENT_ID = eventname + Date.now().toString();
+                const EVENT_ID = eventname + Date.now().toString();
                 this.devicelly(EVENT_ID, callback, this, true);
                 return emit(eventname, JSON.stringify({
-                    params: params,
+                    params,
                     PROMPT_CALLBACK: EVENT_ID
                 }));
             }
@@ -47,4 +35,7 @@
             }
         }
     };
-});
+
+    return source;
+
+})));
