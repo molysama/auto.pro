@@ -29,7 +29,7 @@ import uuidjs from 'uuid-js';
  * @param {Function} option.afterLayout 紧接着布局初始化的钩子函数
  */
 export function run(url, _a) {
-    var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.webviewObject, webviewObject = _e === void 0 ? null : _e, _f = _b.chromeClientOption, chromeClientOption = _f === void 0 ? {} : _f, _g = _b.webviewClientOption, webviewClientOption = _g === void 0 ? {} : _g, _h = _b.afterLayout, afterLayout = _h === void 0 ? function () { } : _h;
+    var _b = _a === void 0 ? {} : _a, _c = _b.xmlString, xmlString = _c === void 0 ? "\n    <linear w=\"*\" h=\"*\">\n        <webview id=\"webview\" h=\"*\" w=\"*\" />\n    </linear>\n" : _c, _d = _b.webviewId, webviewId = _d === void 0 ? 'webview' : _d, _e = _b.webviewObject, webviewObject = _e === void 0 ? null : _e, _f = _b.chromeClientOption, chromeClientOption = _f === void 0 ? {} : _f, _g = _b.webviewClientOption, webviewClientOption = _g === void 0 ? null : _g, _h = _b.afterLayout, afterLayout = _h === void 0 ? function () { } : _h;
     // 每个webview对象都有其唯一UID，便于处理自身事件
     var WEBVIEW_UID = uuidjs.create(4).toString();
     var webview;
@@ -55,6 +55,7 @@ export function run(url, _a) {
     }
     set.setSupportZoom(false);
     set.setJavaScriptEnabled(true);
+    webview.loadUrl(url);
     // webview执行html方法时必须在主线程执行，因此要用线程间的事件传递
     effectEvent.on(WEBVIEW_UID, function (uuid, js) {
         ui.run(function () {
@@ -85,7 +86,7 @@ export function run(url, _a) {
         effectEvent.emit(WEBVIEW_UID, uuid, js);
         return fromEvent(effectEvent, uuid).pipe(take(1));
     }
-    var webcc = new JavaAdapter(WebChromeClient, __assign({ onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
+    webview.setWebChromeClient(new JavaAdapter(WebChromeClient, __assign({ onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
             var param = defaultValue && JSON.parse(defaultValue);
             // 如果param的参数中存在PROMPT_CALLBACK，说明是回调型事件，直接返回空值
             if (param && param['PROMPT_CALLBACK']) {
@@ -120,11 +121,10 @@ export function run(url, _a) {
                 }
             }
             return true;
-        } }, chromeClientOption));
-    var webvc = new JavaAdapter(WebViewClient, webviewClientOption);
-    webview.setWebChromeClient(webcc);
-    webview.setWebViewClient(webvc);
-    webview.loadUrl(url);
+        } }, chromeClientOption)));
+    if (webviewClientOption) {
+        webview.setWebViewClient(new JavaAdapter(WebViewClient, webviewClientOption));
+    }
     function on(eventName) {
         return fromEvent(effectEvent, eventName + WEBVIEW_UID);
     }

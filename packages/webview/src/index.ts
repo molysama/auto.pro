@@ -39,7 +39,7 @@ export function run(url, {
     webviewId = 'webview',
     webviewObject = null,
     chromeClientOption = {},
-    webviewClientOption = {},
+    webviewClientOption = null,
     afterLayout = () => { }
 }: WebViewOption = {
     }): CreateWebviewResult {
@@ -71,6 +71,7 @@ export function run(url, {
 
     set.setSupportZoom(false)
     set.setJavaScriptEnabled(true)
+    webview.loadUrl(url)
 
     // webview执行html方法时必须在主线程执行，因此要用线程间的事件传递
     effectEvent.on(WEBVIEW_UID, (uuid, js) => {
@@ -102,7 +103,7 @@ export function run(url, {
         )
     }
 
-    const webcc = new JavaAdapter(WebChromeClient, {
+    webview.setWebChromeClient(new JavaAdapter(WebChromeClient, {
         onJsPrompt: function (view, url, fnName, defaultValue, jsPromptResult) {
             const param = defaultValue && JSON.parse(defaultValue)
 
@@ -138,13 +139,11 @@ export function run(url, {
             return true
         },
         ...chromeClientOption
-    })
+    }))
 
-    const webvc = new JavaAdapter(WebViewClient, webviewClientOption)
-
-    webview.setWebChromeClient(webcc)
-    webview.setWebViewClient(webvc)
-    webview.loadUrl(url)
+    if (webviewClientOption) {
+        webview.setWebViewClient(new JavaAdapter(WebViewClient, webviewClientOption))
+    }
 
     function on(eventName: string) {
         return fromEvent<[any, Function]>(effectEvent, eventName + WEBVIEW_UID)
