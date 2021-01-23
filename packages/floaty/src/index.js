@@ -170,12 +170,12 @@ export function createFloaty(_a) {
             var widthPixels = getWidthPixels();
             // 吸附左右边界
             if (upX < 100) {
-                FLOATY.setPosition(-2 - FLOATY_STAND_OFFSET_X, nowFY);
-                STAND.setPosition(-2, nowFY + FLOATY_STAND_OFFSET_Y);
+                FLOATY.setPosition(initX - FLOATY_STAND_OFFSET_X, nowFY);
+                STAND.setPosition(initX, nowFY + FLOATY_STAND_OFFSET_Y);
             }
             else if (upX > widthPixels - 100) {
-                FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS + 2, nowFY);
-                STAND.setPosition(widthPixels - SIZE_PIXELS + 2, nowFY + FLOATY_STAND_OFFSET_Y);
+                FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - initX, nowFY);
+                STAND.setPosition(widthPixels - SIZE_PIXELS - initX, nowFY + FLOATY_STAND_OFFSET_Y);
             }
             else {
                 STAND.setPosition(FLOATY.getX() + FLOATY_STAND_OFFSET_X, FLOATY.getY() + FLOATY_STAND_OFFSET_Y);
@@ -201,9 +201,14 @@ export function createFloaty(_a) {
         var index = 0;
         var iconLength = getPrototype(item.icon) === 'Array' && item.icon.length || 0;
         var colorLength = getPrototype(item.color) === 'Array' && item.color.length || 0;
-        function toggleIcon() {
+        function toggleIcon(iconIndex) {
             if (iconLength > 1) {
-                index = (index + 1) % iconLength;
+                if (iconIndex === undefined) {
+                    index = (index + 1) % iconLength;
+                }
+                else {
+                    index = iconIndex % iconLength;
+                }
                 ui.run(function () {
                     FLOATY[item.id + '_icon'].setSource("@drawable/" + item.icon[index]);
                     if (iconLength === colorLength) {
