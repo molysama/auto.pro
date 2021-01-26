@@ -49,6 +49,7 @@ const icons = [
  * @param {number} option.angle 子菜单形成的最大角度，默认120，建议大于90小于180
  * @param {number} option.initX 初始X坐标，默认为-2
  * @param {number} option.initY 初始Y坐标，默认为高度的一半
+ * @param {number} option.edge 吸附边缘时的x位移，默认为-2
  * @param {Object[]} option.items 子菜单数组
  */
 export function createFloaty({
@@ -80,7 +81,8 @@ export function createFloaty({
         },
     ],
     initX = -2,
-    initY = getHeightPixels() / 2
+    initY = getHeightPixels() / 2,
+    edge = -2
 }: {
     logo?: string | string[]
     logoSize?: number
@@ -114,19 +116,19 @@ export function createFloaty({
     }[],
     initX?: number
     initY?: number
+    edge?: number
 } = {}): {
     FLOATY: FloatyRawWindow
     items: { toggleIcon: (iconIndex?: number) => number }[]
     isOpen$: Observable<boolean>
     close: Function
 } {
-    // 每个被创建的悬浮窗都有自己的唯一UID，此UID可以正确的触发自己的事件
-    const FLOATY_UID = uuidjs.create(4).toString()
     const size = Math.floor(logoSize)
     const ICON_SIZE = Math.floor(32 / 44 * size)
 
     // size实际像素
-    const SIZE_PIXELS = Math.floor(size * context.getResources().getDisplayMetrics().density)
+    const DPI = context.getResources().getDisplayMetrics().density
+    const SIZE_PIXELS = Math.floor(size * DPI)
 
     const FLOATY = floaty.rawWindow(`
         <frame w="${2 * radius}" h="${2 * radius}">
@@ -193,7 +195,7 @@ export function createFloaty({
             const direction = STAND.getX() < getWidthPixels() / 2 ? 1 : -1
 
             const base = Math.floor(angle / (items.length - 1))
-            const r = radius - Math.floor(SIZE_PIXELS / 2 + 2)
+            const r = Math.floor(radius * DPI - (SIZE_PIXELS / 2 + 2))
             const animationItems: any[] = []
             let α = angle / 2
             items.forEach(item => {
@@ -280,12 +282,12 @@ export function createFloaty({
                     const widthPixels = getWidthPixels();
                     // 吸附左右边界
                     if (upX < 100) {
-                        FLOATY.setPosition(initX - FLOATY_STAND_OFFSET_X, nowFY)
-                        STAND.setPosition(initX, nowFY + FLOATY_STAND_OFFSET_Y);
+                        FLOATY.setPosition(edge - FLOATY_STAND_OFFSET_X, nowFY)
+                        STAND.setPosition(edge, nowFY + FLOATY_STAND_OFFSET_Y);
                     }
                     else if (upX > widthPixels - 100) {
-                        FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - initX, nowFY)
-                        STAND.setPosition(widthPixels - SIZE_PIXELS - initX, nowFY + FLOATY_STAND_OFFSET_Y);
+                        FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge, nowFY)
+                        STAND.setPosition(widthPixels - SIZE_PIXELS - edge, nowFY + FLOATY_STAND_OFFSET_Y);
                     } else {
                         STAND.setPosition(FLOATY.getX() + FLOATY_STAND_OFFSET_X, FLOATY.getY() + FLOATY_STAND_OFFSET_Y);
                     }
