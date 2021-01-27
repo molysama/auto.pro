@@ -27,7 +27,7 @@ importClass(android.widget.Button)
 importClass(android.widget.ImageView)
 importClass(android.widget.TextView)
 
-import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels } from "@auto.pro/core";
+import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels, isScreenLandscape } from "@auto.pro/core";
 import { from, merge, Observable, Subject } from 'rxjs';
 import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom, share, groupBy } from 'rxjs/operators';
 import uuidjs from 'uuid-js';
@@ -310,8 +310,31 @@ export function createFloaty({
         }
         return true
     })
-
-    const t = setInterval(() => { }, 10000)
+    let screenLandscape = isScreenLandscape();
+    const t = setInterval(() => {
+        // 屏幕旋转监听
+        if (screenLandscape !== isScreenLandscape()) {
+            screenLandscape = isScreenLandscape();
+            let widthPixels = getWidthPixels();
+            let heightPixels = getHeightPixels();
+            let attachLeft = edge - FLOATY_STAND_OFFSET_X === FLOATY.getX();
+            let attachRight = heightPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge === FLOATY.getX(); // 现在的height为原来的width
+            let nowX = FLOATY.getX() / heightPixels * widthPixels;
+            let nowY = FLOATY.getY() / widthPixels * heightPixels;
+            // 吸附左右边界
+            if (attachLeft) {
+                FLOATY.setPosition(edge - FLOATY_STAND_OFFSET_X, nowY)
+                STAND.setPosition(edge, nowY + FLOATY_STAND_OFFSET_Y);
+            }
+            else if (attachRight) {
+                FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge, nowY)
+                STAND.setPosition(widthPixels - SIZE_PIXELS - edge, nowY + FLOATY_STAND_OFFSET_Y);
+            } else {
+                FLOATY.setPosition(nowX, nowY);
+                STAND.setPosition(nowX + FLOATY_STAND_OFFSET_X, nowY + FLOATY_STAND_OFFSET_Y);
+            }
+        }
+    }, 1000)
 
     const list = items.map(item => {
         let index = 0
