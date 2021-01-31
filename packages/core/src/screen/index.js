@@ -131,18 +131,18 @@ export function setSystemUiVisibility(type) {
         params.height = statusBarHeight + rectHeight;
     }
     if (!systemUiVisibilitySub) {
-        systemUiVisibilitySub = screenDirection$.subscribe(function () { return requestLayout(type); });
+        systemUiVisibilitySub = screenDirection$.subscribe(requestLayout);
     }
 }
 /**
  * 刷新屏幕
  */
-function requestLayout(type) {
+function requestLayout() {
     var decorView = activity.getWindow().getDecorView();
     var target = decorView.getChildAt(0).getChildAt(1);
     var rect = new android.graphics.Rect();
     decorView.getWindowVisibleDisplayFrame(rect);
-    target.getLayoutParams().height = type === '无状态栏的沉浸式界面' ? (rect.height()) : (statusBarHeight + rect.height());
+    target.getLayoutParams().height = statusBarHeight + rect.height();
     target.requestLayout();
 }
 var screenDirectionSource = new Subject();
@@ -159,8 +159,8 @@ export var enableScreenListener = function () {
         onReceive: function () {
             screenDirectionSource.next(true);
         }
-    }, filter);
-    cw.registerReceiver(br);
+    });
+    cw.registerReceiver(br, filter);
     events.on('exit', function () {
         cw.unregisterReceiver(br);
     });

@@ -158,7 +158,7 @@ export function setSystemUiVisibility(type: VISIBILITY_TYPE) {
 
 
     if (!systemUiVisibilitySub) {
-        systemUiVisibilitySub = screenDirection$.subscribe(() => requestLayout(type))
+        systemUiVisibilitySub = screenDirection$.subscribe(requestLayout)
     }
 
 }
@@ -166,12 +166,12 @@ export function setSystemUiVisibility(type: VISIBILITY_TYPE) {
 /**
  * 刷新屏幕
  */
-function requestLayout(type?: VISIBILITY_TYPE) {
+function requestLayout() {
     const decorView = activity.getWindow().getDecorView()
     const target = decorView.getChildAt(0).getChildAt(1)
     const rect = new android.graphics.Rect()
     decorView.getWindowVisibleDisplayFrame(rect)
-    target.getLayoutParams().height = type === '无状态栏的沉浸式界面' ? (rect.height()) : (statusBarHeight + rect.height())
+    target.getLayoutParams().height = statusBarHeight + rect.height()
     target.requestLayout()
 }
 
@@ -194,8 +194,8 @@ export const enableScreenListener = () => {
         onReceive: function () {
             screenDirectionSource.next(true)
         }
-    }, filter)
-    cw.registerReceiver(br)
+    })
+    cw.registerReceiver(br, filter)
     events.on('exit', () => {
         cw.unregisterReceiver(br)
     })
