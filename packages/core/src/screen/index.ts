@@ -158,7 +158,7 @@ export function setSystemUiVisibility(type: VISIBILITY_TYPE) {
 
 
     if (!systemUiVisibilitySub) {
-        systemUiVisibilitySub = screenDirection$.subscribe(requestLayout)
+        systemUiVisibilitySub = screenDirection$.subscribe(() => requestLayout(type))
     }
 
 }
@@ -166,12 +166,12 @@ export function setSystemUiVisibility(type: VISIBILITY_TYPE) {
 /**
  * 刷新屏幕
  */
-function requestLayout() {
+function requestLayout(type?: VISIBILITY_TYPE) {
     const decorView = activity.getWindow().getDecorView()
     const target = decorView.getChildAt(0).getChildAt(1)
     const rect = new android.graphics.Rect()
     decorView.getWindowVisibleDisplayFrame(rect)
-    target.getLayoutParams().height = statusBarHeight + rect.height()
+    target.getLayoutParams().height = type === '无状态栏的沉浸式界面' ? (rect.height()) : (statusBarHeight + rect.height())
     target.requestLayout()
 }
 
@@ -189,11 +189,16 @@ export const screenDirection$ = screenDirectionSource.asObservable().pipe(
 export const enableScreenListener = () => {
     const filter = new android.content.IntentFilter()
     filter.addAction("android.intent.action.CONFIGURATION_CHANGED")
-    new android.content.ContextWrapper(context).registerReceiver(new android.content.BroadcastReceiver({
+    const cw = new android.content.ContextWrapper(context)
+    const br = new android.content.BroadcastReceiver({
         onReceive: function () {
             screenDirectionSource.next(true)
         }
-    }), filter)
+    }, filter)
+    cw.registerReceiver(br)
+    events.on('exit', () => {
+        cw.unregisterReceiver(br)
+    })
 }
 
 

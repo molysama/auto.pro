@@ -1,7 +1,7 @@
 import { concat, fromEvent, iif, interval, Observable, of } from 'rxjs'
 import { filter, map, shareReplay, take, toArray } from 'rxjs/operators'
 import { isOpenForeground, isOpenStableMode, openForeground, openStableMode, requestFloatyPermission, requestServicePermission } from './permission'
-import { initScreenSet } from './screen'
+import { enableScreenListener, initScreenSet } from './screen'
 import { disableVolumeExit } from './utils'
 
 export * from './pausable'
@@ -46,6 +46,7 @@ interface CoreOption {
  * @param {boolean | false} param.needFloaty 是否需要悬浮窗权限，默认为false
  * @param {boolean | false} param.needForeground 是否需要自动打开前台服务，默认为false
  * @param {boolean | false} param.needVolExit 是否需要音量上键退出程序，默认为true
+ * @param {boolean | false} param.needScreenListener 是否需要监听屏幕旋转状态，默认为false
  */
 export default function ({
     baseWidth = 1280,
@@ -56,7 +57,8 @@ export default function ({
     needFloaty = false,
     needForeground = false,
     needStableMode = false,
-    needVolExit = true
+    needVolExit = true,
+    needScreenListener = false
 }: {
     baseWidth?: number
     baseHeight?: number
@@ -67,6 +69,7 @@ export default function ({
     needForeground?: boolean
     needStableMode?: boolean
     needVolExit?: boolean
+    needScreenListener?: boolean
 } = {
     }) {
 
@@ -75,6 +78,10 @@ export default function ({
     }
 
     initScreenSet(baseWidth, baseHeight)
+
+    if (needScreenListener) {
+        enableScreenListener()
+    }
 
     effectThread = threads.start(function () {
 

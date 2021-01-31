@@ -29,7 +29,7 @@ importClass(android.widget.TextView)
 
 import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels } from "@auto.pro/core";
 import { from, merge, Observable, Subject } from 'rxjs';
-import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom, share, groupBy } from 'rxjs/operators';
+import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom, share, groupBy, take } from 'rxjs/operators';
 import uuidjs from 'uuid-js';
 
 const icons = [
@@ -82,7 +82,8 @@ export function createFloaty({
     ],
     initX = -2,
     initY = getHeightPixels() / 2,
-    edge = -2
+    edge = -2,
+    moveLimit = 50
 }: {
     logo?: string | string[]
     logoSize?: number
@@ -117,6 +118,7 @@ export function createFloaty({
     initX?: number
     initY?: number
     edge?: number
+    moveLimit?: number
 } = {}): {
     FLOATY: FloatyRawWindow
     items: { toggleIcon: (iconIndex?: number) => number }[]
@@ -181,6 +183,7 @@ export function createFloaty({
         })
     }
 
+    // 动画
     function animation() {
         return new Promise<boolean>((resolve, reject) => {
 
@@ -201,10 +204,10 @@ export function createFloaty({
             items.forEach(item => {
                 const element = FLOATY[item.id]
 
+                // 偏移的x = cos α * r, y = -1 * sin α * r
                 const offsetX = Math.floor(r * Math.cos(Math.PI * α / 180)) * direction
                 const offsetY = Math.floor(r * Math.sin(Math.PI * α / 180)) * -1
 
-                // 偏移的x = cos α * r, y = -1 * sin α * r
                 if (isOpen) {
                     animationItems.push(
                         ObjectAnimator.ofFloat(element, "translationX", 0, offsetX),
@@ -247,53 +250,57 @@ export function createFloaty({
     // 派发触摸事件
     const down$ = new Subject<any>()
     const up$ = new Subject<any>()
-
     const moveSource = new Subject<any>()
-    // 悬浮窗仅当关闭时可以移动
-    const move$ = moveSource.pipe(
-        withLatestFrom(isFloatyOpen$),
-        filter(([e, isOpen]) => !isOpen),
-        map(([e, isOpen]) => e),
-        share()
-    )
 
     down$.pipe(
         map(e => ({ dx: e.getRawX(), dy: e.getRawY(), sx: STAND.getX(), sy: STAND.getY() })),
-        switchMap(({ dx, dy, sx, sy }) => merge(
-            // 按下后无移动，则弹起时视为点击
-            up$.pipe(
-                takeUntil(move$),
-                tap(() => {
-                    toggleFloaty()
-                })
-            ),
-            move$.pipe(
-                tap(e_move => {
-                    FLOATY.setPosition(sx + e_move.getRawX() - dx - FLOATY_STAND_OFFSET_X, sy + e_move.getRawY() - dy - FLOATY_STAND_OFFSET_Y)
-                }),
-                takeUntil(up$),
-            ),
-            // 按下后有移动，则弹起时视为移动结束
-            up$.pipe(
-                skipUntil(move$),
-                tap((e_up) => {
-                    const upX = e_up.getRawX();
-                    const nowFY = FLOATY.getY()
-                    const widthPixels = getWidthPixels();
-                    // 吸附左右边界
-                    if (upX < 100) {
-                        FLOATY.setPosition(edge - FLOATY_STAND_OFFSET_X, nowFY)
-                        STAND.setPosition(edge, nowFY + FLOATY_STAND_OFFSET_Y);
-                    }
-                    else if (upX > widthPixels - 100) {
-                        FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge, nowFY)
-                        STAND.setPosition(widthPixels - SIZE_PIXELS - edge, nowFY + FLOATY_STAND_OFFSET_Y);
-                    } else {
-                        STAND.setPosition(FLOATY.getX() + FLOATY_STAND_OFFSET_X, FLOATY.getY() + FLOATY_STAND_OFFSET_Y);
-                    }
-                })
+        switchMap(({ dx, dy, sx, sy }) => {
+
+            // 悬浮窗仅当关闭时可以移动
+            // move$有个moveLimit的启动距离限制
+            const move$ = moveSource.pipe(
+                withLatestFrom(isFloatyOpen$),
+                filter(([e, isOpen]) => !isOpen && (e.getRawX() - dx >= moveLimit || e.getRawY() - dy >= moveLimit)),
+                take(1),
+                switchMap(() => moveSource),
+                share()
             )
-        ))
+            return merge(
+                // 按下后无移动，则弹起时视为点击
+                up$.pipe(
+                    takeUntil(move$),
+                    tap(() => {
+                        toggleFloaty()
+                    })
+                ),
+                move$.pipe(
+                    tap(e_move => {
+                        FLOATY.setPosition(sx + e_move.getRawX() - dx - FLOATY_STAND_OFFSET_X, sy + e_move.getRawY() - dy - FLOATY_STAND_OFFSET_Y)
+                    }),
+                    takeUntil(up$),
+                ),
+                // 按下后有移动，则弹起时视为移动结束
+                up$.pipe(
+                    skipUntil(move$),
+                    tap((e_up) => {
+                        const upX = e_up.getRawX();
+                        const nowFY = FLOATY.getY()
+                        const widthPixels = getWidthPixels();
+                        // 吸附左右边界
+                        if (upX < 100) {
+                            FLOATY.setPosition(edge - FLOATY_STAND_OFFSET_X, nowFY)
+                            STAND.setPosition(edge, nowFY + FLOATY_STAND_OFFSET_Y);
+                        }
+                        else if (upX > widthPixels - 100) {
+                            FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge, nowFY)
+                            STAND.setPosition(widthPixels - SIZE_PIXELS - edge, nowFY + FLOATY_STAND_OFFSET_Y);
+                        } else {
+                            STAND.setPosition(FLOATY.getX() + FLOATY_STAND_OFFSET_X, FLOATY.getY() + FLOATY_STAND_OFFSET_Y);
+                        }
+                    })
+                )
+            )
+        })
     ).subscribe()
 
     STAND.btn.setOnTouchListener((v, e) => {
