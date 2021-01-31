@@ -72,4 +72,5 @@ export declare function setSystemUiVisibility(type: VISIBILITY_TYPE): void;
  * @returns {'横屏'|'竖屏'}
  */
 export declare const screenDirection$: Observable<"竖屏" | "横屏">;
+export declare const enableScreenListener: () => void;
 export {};

@@ -13,7 +13,7 @@ declare const icons: readonly ["ic_3d_rotation_black_48dp", "ic_accessibility_bl
  * @param {number} option.edge 吸附边缘时的x位移，默认为-2
  * @param {Object[]} option.items 子菜单数组
  */
-export declare function createFloaty({ logo, logoSize, duration, radius, angle, items, initX, initY, edge }?: {
+export declare function createFloaty({ logo, logoSize, duration, radius, angle, items, initX, initY, edge, moveLimit }?: {
     logo?: string | string[];
     logoSize?: number;
     /**
@@ -47,6 +47,7 @@ export declare function createFloaty({ logo, logoSize, duration, radius, angle, 
     initX?: number;
     initY?: number;
     edge?: number;
+    moveLimit?: number;
 }): {
     FLOATY: FloatyRawWindow;
     items: {
