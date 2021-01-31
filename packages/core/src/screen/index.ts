@@ -182,29 +182,30 @@ const screenDirectionSource = new Subject()
  * @returns {'横屏'|'竖屏'}
  */
 export const screenDirection$ = screenDirectionSource.asObservable().pipe(
-    debounceTime(50),
-    map(() => context.getResources().getConfiguration().orientation),
-    map(v => {
-        if (v === 1) {
-            return '竖屏'
-        } else {
-            return '横屏'
-        }
-    }),
-    distinctUntilChanged(),
-    skip(1),
+    map(() => context.getResources().getConfiguration().orientation === 1 ? '竖屏' : '横屏'),
     share()
 )
 
-// 带界面的情况下，可以通过布局变化检测到屏幕旋转
-if (typeof activity === 'undefined') {
-    // 无界面下尚无思路，欢迎提交pr
-} else {
-    activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(
-        new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
-            onGlobalLayout() {
-                screenDirectionSource.next(true)
-            }
-        })
-    )
+export const enableScreenListener = () => {
+    const filter = new android.content.IntentFilter()
+    filter.addAction("android.intent.action.CONFIGURATION_CHANGED")
+    new android.content.ContextWrapper(context).registerReceiver(new android.content.BroadcastReceiver({
+        onReceive: function () {
+            screenDirectionSource.next(true)
+        }
+    }), filter)
 }
+
+
+// 通过布局来监听屏幕旋转
+// // 带界面的情况下，可以通过布局变化检测到屏幕旋转
+// if (typeof activity === 'undefined') {
+// } else {
+//     activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(
+//         new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
+//             onGlobalLayout() {
+//                 screenDirectionSource.next(true)
+//             }
+//         })
+//     )
+// }
