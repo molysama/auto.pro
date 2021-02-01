@@ -10,10 +10,11 @@ declare const icons: readonly ["ic_3d_rotation_black_48dp", "ic_accessibility_bl
  * @param {number} option.angle 子菜单形成的最大角度，默认120，建议大于90小于180
  * @param {number} option.initX 初始X坐标，默认为-2
  * @param {number} option.initY 初始Y坐标，默认为高度的一半
- * @param {number} option.edge 吸附边缘时的x位移，默认为-2
+ * @param {number} option.edge 吸附边缘时的位移，默认为-2
+ * @param {number} option.edgeXLimit 满足吸附的x轴距离
  * @param {Object[]} option.items 子菜单数组
  */
-export declare function createFloaty({ logo, logoSize, duration, radius, angle, items, initX, initY, edge, moveLimit }?: {
+export declare function createFloaty({ logo, logoSize, duration, radius, angle, items, initX, initY, edge, edgeXLimit, moveLimit }?: {
     logo?: string | string[];
     logoSize?: number;
     /**
@@ -47,6 +48,7 @@ export declare function createFloaty({ logo, logoSize, duration, radius, angle, 
     initX?: number;
     initY?: number;
     edge?: number;
+    edgeXLimit?: number;
     moveLimit?: number;
 }): {
     FLOATY: FloatyRawWindow;

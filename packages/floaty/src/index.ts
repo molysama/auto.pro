@@ -27,8 +27,8 @@ importClass(android.widget.Button)
 importClass(android.widget.ImageView)
 importClass(android.widget.TextView)
 
-import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels } from "@auto.pro/core";
-import { from, merge, Observable, Subject } from 'rxjs';
+import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels, screenDirection$ } from "@auto.pro/core";
+import { BehaviorSubject, from, merge, Observable, Subject } from 'rxjs';
 import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom, share, groupBy, take } from 'rxjs/operators';
 import uuidjs from 'uuid-js';
 
@@ -49,7 +49,8 @@ const icons = [
  * @param {number} option.angle 子菜单形成的最大角度，默认120，建议大于90小于180
  * @param {number} option.initX 初始X坐标，默认为-2
  * @param {number} option.initY 初始Y坐标，默认为高度的一半
- * @param {number} option.edge 吸附边缘时的x位移，默认为-2
+ * @param {number} option.edge 吸附边缘时的位移，默认为-2
+ * @param {number} option.edgeXLimit 满足吸附的x轴距离
  * @param {Object[]} option.items 子菜单数组
  */
 export function createFloaty({
@@ -83,6 +84,7 @@ export function createFloaty({
     initX = -2,
     initY = getHeightPixels() / 2,
     edge = -2,
+    edgeXLimit = 100,
     moveLimit = 50
 }: {
     logo?: string | string[]
@@ -118,6 +120,7 @@ export function createFloaty({
     initX?: number
     initY?: number
     edge?: number
+    edgeXLimit?: number
     moveLimit?: number
 } = {}): {
     FLOATY: FloatyRawWindow
@@ -157,8 +160,8 @@ export function createFloaty({
     `)
 
     // 两个悬浮窗的偏移量，在计算位置时 FLOATY的坐标 = STAND的坐标 - 偏移量
-    const FLOATY_STAND_OFFSET_X = FLOATY.logo.getX()
-    const FLOATY_STAND_OFFSET_Y = FLOATY.logo.getY()
+    const FLOATY_STAND_OFFSET_X = FLOATY.logo.getX() as number
+    const FLOATY_STAND_OFFSET_Y = FLOATY.logo.getY() as number
 
     // 设置悬浮窗的初始位置
     FLOATY.setTouchable(false)
@@ -174,8 +177,10 @@ export function createFloaty({
         startWith(false),
         shareReplay(1)
     )
-    isFloatyOpen$.subscribe(isOpen => FLOATY.setTouchable(isOpen))
+    // 存储悬浮窗的位置比例
+    const floatyPosition$ = new BehaviorSubject([(initX - FLOATY_STAND_OFFSET_X) / getWidthPixels(), (initY - FLOATY_STAND_OFFSET_Y) / getHeightPixels()])
 
+    const floatyOpen$$ = isFloatyOpen$.subscribe(isOpen => FLOATY.setTouchable(isOpen))
 
     function toggleFloaty() {
         ui.run(() => {
@@ -247,12 +252,43 @@ export function createFloaty({
         })
     }
 
+    // 校正悬浮窗位置
+    function checkFloatyPosition() {
+        const logoX = FLOATY.getX() + FLOATY_STAND_OFFSET_X
+        const nowFY = FLOATY.getY()
+        const widthPixels = getWidthPixels()
+        const heightPixels = getHeightPixels()
+        // 吸附左右边界
+        if (logoX < edgeXLimit) {
+            FLOATY.setPosition(edge - FLOATY_STAND_OFFSET_X, nowFY)
+            STAND.setPosition(edge, nowFY + FLOATY_STAND_OFFSET_Y)
+        }
+        else if (logoX + size * DPI > widthPixels - edgeXLimit) {
+            FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge, nowFY)
+            STAND.setPosition(widthPixels - SIZE_PIXELS - edge, nowFY + FLOATY_STAND_OFFSET_Y)
+        } else {
+            STAND.setPosition(FLOATY.getX() + FLOATY_STAND_OFFSET_X, FLOATY.getY() + FLOATY_STAND_OFFSET_Y)
+        }
+
+        floatyPosition$.next([
+            FLOATY.getX() / widthPixels,
+            FLOATY.getY() / heightPixels
+        ])
+    }
+
+    const direction$$ = screenDirection$.pipe(
+        withLatestFrom(floatyPosition$)
+    ).subscribe(([type, [x, y]]) => {
+        FLOATY.setPosition(getWidthPixels() * x, getHeightPixels() * y)
+        checkFloatyPosition()
+    })
+
     // 派发触摸事件
     const down$ = new Subject<any>()
     const up$ = new Subject<any>()
     const moveSource = new Subject<any>()
 
-    down$.pipe(
+    const mouseEvent$$ = down$.pipe(
         map(e => ({ dx: e.getRawX(), dy: e.getRawY(), sx: STAND.getX(), sy: STAND.getY() })),
         switchMap(({ dx, dy, sx, sy }) => {
 
@@ -269,9 +305,7 @@ export function createFloaty({
                 // 按下后无移动，则弹起时视为点击
                 up$.pipe(
                     takeUntil(move$),
-                    tap(() => {
-                        toggleFloaty()
-                    })
+                    tap(toggleFloaty)
                 ),
                 move$.pipe(
                     tap(e_move => {
@@ -282,22 +316,7 @@ export function createFloaty({
                 // 按下后有移动，则弹起时视为移动结束
                 up$.pipe(
                     skipUntil(move$),
-                    tap((e_up) => {
-                        const upX = e_up.getRawX();
-                        const nowFY = FLOATY.getY()
-                        const widthPixels = getWidthPixels();
-                        // 吸附左右边界
-                        if (upX < 100) {
-                            FLOATY.setPosition(edge - FLOATY_STAND_OFFSET_X, nowFY)
-                            STAND.setPosition(edge, nowFY + FLOATY_STAND_OFFSET_Y);
-                        }
-                        else if (upX > widthPixels - 100) {
-                            FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge, nowFY)
-                            STAND.setPosition(widthPixels - SIZE_PIXELS - edge, nowFY + FLOATY_STAND_OFFSET_Y);
-                        } else {
-                            STAND.setPosition(FLOATY.getX() + FLOATY_STAND_OFFSET_X, FLOATY.getY() + FLOATY_STAND_OFFSET_Y);
-                        }
-                    })
+                    tap(checkFloatyPosition)
                 )
             )
         })
@@ -362,6 +381,9 @@ export function createFloaty({
         items: list,
         isOpen$: isFloatyOpen$,
         close() {
+            direction$$.unsubscribe()
+            mouseEvent$$.unsubscribe()
+            floatyOpen$$.unsubscribe()
             FLOATY.close()
             STAND.close()
             clearInterval(t)
