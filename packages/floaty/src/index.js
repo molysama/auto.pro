@@ -25,7 +25,7 @@ importClass(android.view.animation.PathInterpolator);
 importClass(android.widget.Button);
 importClass(android.widget.ImageView);
 importClass(android.widget.TextView);
-import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels, isScreenLandscape } from "@auto.pro/core";
+import { fromUiEvent, getHeightPixels, getPrototype, getWidthPixels, screenDirection$ } from "@auto.pro/core";
 import { from, merge, Subject } from 'rxjs';
 import { exhaustMap, filter, map, shareReplay, skipUntil, startWith, switchMap, takeUntil, tap, withLatestFrom, share, take } from 'rxjs/operators';
 var icons = [
@@ -194,32 +194,30 @@ export function createFloaty(_a) {
         }
         return true;
     });
-    var screenLandscape = isScreenLandscape();
-    var t = setInterval(function () {
+    // 屏幕旋转监听，需要在core中声明needScreenListener: true
+    var screenDirectionSub = screenDirection$.subscribe(function (_type) {
         // 屏幕旋转监听
-        if (screenLandscape !== isScreenLandscape()) {
-            screenLandscape = isScreenLandscape();
-            var widthPixels = getWidthPixels();
-            var heightPixels = getHeightPixels();
-            var attachLeft = edge - FLOATY_STAND_OFFSET_X === FLOATY.getX();
-            var attachRight = heightPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge === FLOATY.getX(); // 现在的height为原来的width
-            var nowX = FLOATY.getX() / heightPixels * widthPixels;
-            var nowY = FLOATY.getY() / widthPixels * heightPixels;
-            // 吸附左右边界
-            if (attachLeft) {
-                FLOATY.setPosition(edge - FLOATY_STAND_OFFSET_X, nowY);
-                STAND.setPosition(edge, nowY + FLOATY_STAND_OFFSET_Y);
-            }
-            else if (attachRight) {
-                FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge, nowY);
-                STAND.setPosition(widthPixels - SIZE_PIXELS - edge, nowY + FLOATY_STAND_OFFSET_Y);
-            }
-            else {
-                FLOATY.setPosition(nowX, nowY);
-                STAND.setPosition(nowX + FLOATY_STAND_OFFSET_X, nowY + FLOATY_STAND_OFFSET_Y);
-            }
+        var widthPixels = getWidthPixels();
+        var heightPixels = getHeightPixels();
+        var attachLeft = edge - FLOATY_STAND_OFFSET_X === FLOATY.getX();
+        var attachRight = heightPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge === FLOATY.getX(); // 现在的height为原来的width
+        var nowX = FLOATY.getX() / heightPixels * widthPixels;
+        var nowY = FLOATY.getY() / widthPixels * heightPixels;
+        // 吸附左右边界
+        if (attachLeft) {
+            FLOATY.setPosition(edge - FLOATY_STAND_OFFSET_X, nowY);
+            STAND.setPosition(edge, nowY + FLOATY_STAND_OFFSET_Y);
         }
-    }, 1000);
+        else if (attachRight) {
+            FLOATY.setPosition(widthPixels - FLOATY_STAND_OFFSET_X - SIZE_PIXELS - edge, nowY);
+            STAND.setPosition(widthPixels - SIZE_PIXELS - edge, nowY + FLOATY_STAND_OFFSET_Y);
+        }
+        else {
+            FLOATY.setPosition(nowX, nowY);
+            STAND.setPosition(nowX + FLOATY_STAND_OFFSET_X, nowY + FLOATY_STAND_OFFSET_Y);
+        }
+    });
+    var t = setInterval(function () { }, 10000);
     var list = items.map(function (item) {
         var index = 0;
         var iconLength = getPrototype(item.icon) === 'Array' && item.icon.length || 0;
@@ -260,6 +258,7 @@ export function createFloaty(_a) {
         close: function () {
             FLOATY.close();
             STAND.close();
+            screenDirectionSub.unsubscribe();
             clearInterval(t);
         }
     };
