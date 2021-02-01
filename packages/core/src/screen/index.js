@@ -1,5 +1,5 @@
 import { Subject, fromEvent } from "rxjs";
-import { debounceTime, distinctUntilChanged, map, share, skip } from "rxjs/operators";
+import { map, share } from "rxjs/operators";
 /**
  * 编写脚本时的基准宽度
  */
@@ -150,22 +150,30 @@ var screenDirectionSource = new Subject();
  * 屏幕旋转事件，返回旋转后的屏幕类型
  * @returns {'横屏'|'竖屏'}
  */
-export var screenDirection$ = screenDirectionSource.asObservable().pipe(debounceTime(50), map(function () { return context.getResources().getConfiguration().orientation; }), map(function (v) {
-    if (v === 1) {
-        return '竖屏';
-    }
-    else {
-        return '横屏';
-    }
-}), distinctUntilChanged(), skip(1), share());
-// 带界面的情况下，可以通过布局变化检测到屏幕旋转
-if (typeof activity === 'undefined') {
-    // 无界面下尚无思路，欢迎提交pr
-}
-else {
-    activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
-        onGlobalLayout: function () {
+export var screenDirection$ = screenDirectionSource.asObservable().pipe(map(function () { return context.getResources().getConfiguration().orientation === 1 ? '竖屏' : '横屏'; }), share());
+export var enableScreenListener = function () {
+    var filter = new android.content.IntentFilter();
+    filter.addAction("android.intent.action.CONFIGURATION_CHANGED");
+    var cw = new android.content.ContextWrapper(context);
+    var br = new android.content.BroadcastReceiver({
+        onReceive: function () {
             screenDirectionSource.next(true);
         }
-    }));
-}
+    });
+    cw.registerReceiver(br, filter);
+    events.on('exit', function () {
+        cw.unregisterReceiver(br);
+    });
+};
+// 通过布局来监听屏幕旋转
+// // 带界面的情况下，可以通过布局变化检测到屏幕旋转
+// if (typeof activity === 'undefined') {
+// } else {
+//     activity.getWindow().getDecorView().getChildAt(0).getViewTreeObserver().addOnGlobalLayoutListener(
+//         new JavaAdapter(android.view.ViewTreeObserver.OnGlobalLayoutListener, {
+//             onGlobalLayout() {
+//                 screenDirectionSource.next(true)
+//             }
+//         })
+//     )
+// }
