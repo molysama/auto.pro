@@ -45,6 +45,7 @@ var icons = [
  * @param {number} option.initY 初始Y坐标，默认为高度的一半
  * @param {number} option.edge 吸附边缘时的位移，默认为-2
  * @param {number} option.edgeXLimit 满足吸附的x轴距离
+ * @param {number} option.moveLimit 初始移动距离判定，当移动距离大于该值时开始移动，默认为20px
  * @param {Object[]} option.items 子菜单数组
  */
 export function createFloaty(_a) {
@@ -69,7 +70,7 @@ export function createFloaty(_a) {
             icon: 'ic_clear_black_48dp',
             callback: function () { }
         },
-    ] : _h, _j = _b.initX, initX = _j === void 0 ? -2 : _j, _k = _b.initY, initY = _k === void 0 ? getHeightPixels() / 2 : _k, _l = _b.edge, edge = _l === void 0 ? -2 : _l, _m = _b.edgeXLimit, edgeXLimit = _m === void 0 ? 100 : _m, _o = _b.moveLimit, moveLimit = _o === void 0 ? 50 : _o;
+    ] : _h, _j = _b.initX, initX = _j === void 0 ? -2 : _j, _k = _b.initY, initY = _k === void 0 ? getHeightPixels() / 2 : _k, _l = _b.edge, edge = _l === void 0 ? -2 : _l, _m = _b.edgeXLimit, edgeXLimit = _m === void 0 ? 100 : _m, _o = _b.moveLimit, moveLimit = _o === void 0 ? 20 : _o;
     var size = Math.floor(logoSize);
     var ICON_SIZE = Math.floor(32 / 44 * size);
     // size实际像素
@@ -87,6 +88,7 @@ export function createFloaty(_a) {
     FLOATY.setTouchable(false);
     FLOATY.setPosition(initX - FLOATY_STAND_OFFSET_X, initY - FLOATY_STAND_OFFSET_Y);
     STAND.setPosition(initX, initY);
+    var close$ = new Subject();
     // 悬浮窗的开关状态及动画
     var toggleFloaty$ = new Subject();
     var isFloatyOpen$ = toggleFloaty$.asObservable().pipe(exhaustMap(function () {
@@ -94,7 +96,7 @@ export function createFloaty(_a) {
     }), startWith(false), shareReplay(1));
     // 存储悬浮窗的位置比例
     var floatyPosition$ = new BehaviorSubject([(initX - FLOATY_STAND_OFFSET_X) / getWidthPixels(), (initY - FLOATY_STAND_OFFSET_Y) / getHeightPixels()]);
-    var floatyOpen$$ = isFloatyOpen$.subscribe(function (isOpen) { return FLOATY.setTouchable(isOpen); });
+    isFloatyOpen$.pipe(takeUntil(close$)).subscribe(function (isOpen) { return FLOATY.setTouchable(isOpen); });
     function toggleFloaty() {
         ui.run(function () {
             toggleFloaty$.next(true);
@@ -168,7 +170,7 @@ export function createFloaty(_a) {
             FLOATY.getY() / heightPixels
         ]);
     }
-    var direction$$ = screenDirection$.pipe(withLatestFrom(floatyPosition$)).subscribe(function (_a) {
+    screenDirection$.pipe(takeUntil(close$), withLatestFrom(floatyPosition$)).subscribe(function (_a) {
         var type = _a[0], _b = _a[1], x = _b[0], y = _b[1];
         FLOATY.setPosition(getWidthPixels() * x, getHeightPixels() * y);
         checkFloatyPosition();
@@ -177,13 +179,13 @@ export function createFloaty(_a) {
     var down$ = new Subject();
     var up$ = new Subject();
     var moveSource = new Subject();
-    var mouseEvent$$ = down$.pipe(map(function (e) { return ({ dx: e.getRawX(), dy: e.getRawY(), sx: STAND.getX(), sy: STAND.getY() }); }), switchMap(function (_a) {
+    down$.pipe(map(function (e) { return ({ dx: e.getRawX(), dy: e.getRawY(), sx: STAND.getX(), sy: STAND.getY() }); }), switchMap(function (_a) {
         var dx = _a.dx, dy = _a.dy, sx = _a.sx, sy = _a.sy;
         // 悬浮窗仅当关闭时可以移动
         // move$有个moveLimit的启动距离限制
         var move$ = moveSource.pipe(withLatestFrom(isFloatyOpen$), filter(function (_a) {
             var e = _a[0], isOpen = _a[1];
-            return !isOpen && (e.getRawX() - dx >= moveLimit || e.getRawY() - dy >= moveLimit);
+            return !isOpen && (Math.abs(e.getRawX() - dx) >= moveLimit || Math.abs(e.getRawY() - dy) >= moveLimit);
         }), take(1), switchMap(function () { return moveSource; }), share());
         return merge(
         // 按下后无移动，则弹起时视为点击
@@ -192,7 +194,7 @@ export function createFloaty(_a) {
         }), takeUntil(up$)), 
         // 按下后有移动，则弹起时视为移动结束
         up$.pipe(skipUntil(move$), tap(checkFloatyPosition)));
-    })).subscribe();
+    }), takeUntil(close$)).subscribe();
     STAND.btn.setOnTouchListener(function (v, e) {
         switch (e.getAction()) {
             case e.ACTION_DOWN:
@@ -230,7 +232,7 @@ export function createFloaty(_a) {
             return index;
         }
         // toggleFloaty通过主线程通信实现，toggleIcon通过ui.run实现
-        fromUiEvent(FLOATY[item.id], 'click').subscribe(function () {
+        fromUiEvent(FLOATY[item.id], 'click').pipe(takeUntil(close$)).subscribe(function () {
             if (item.toggleOnClick !== false) {
                 toggleFloaty();
             }
@@ -246,9 +248,7 @@ export function createFloaty(_a) {
         items: list,
         isOpen$: isFloatyOpen$,
         close: function () {
-            direction$$.unsubscribe();
-            mouseEvent$$.unsubscribe();
-            floatyOpen$$.unsubscribe();
+            close$.next(true);
             FLOATY.close();
             STAND.close();
             clearInterval(t);

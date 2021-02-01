@@ -51,6 +51,7 @@ const icons = [
  * @param {number} option.initY 初始Y坐标，默认为高度的一半
  * @param {number} option.edge 吸附边缘时的位移，默认为-2
  * @param {number} option.edgeXLimit 满足吸附的x轴距离
+ * @param {number} option.moveLimit 初始移动距离判定，当移动距离大于该值时开始移动，默认为20px
  * @param {Object[]} option.items 子菜单数组
  */
 export function createFloaty({
@@ -85,7 +86,7 @@ export function createFloaty({
     initY = getHeightPixels() / 2,
     edge = -2,
     edgeXLimit = 100,
-    moveLimit = 50
+    moveLimit = 20
 }: {
     logo?: string | string[]
     logoSize?: number
@@ -168,6 +169,8 @@ export function createFloaty({
     FLOATY.setPosition(initX - FLOATY_STAND_OFFSET_X, initY - FLOATY_STAND_OFFSET_Y)
     STAND.setPosition(initX, initY)
 
+    const close$ = new Subject()
+
     // 悬浮窗的开关状态及动画
     const toggleFloaty$ = new Subject<boolean>()
     const isFloatyOpen$: Observable<boolean> = toggleFloaty$.asObservable().pipe(
@@ -180,7 +183,9 @@ export function createFloaty({
     // 存储悬浮窗的位置比例
     const floatyPosition$ = new BehaviorSubject([(initX - FLOATY_STAND_OFFSET_X) / getWidthPixels(), (initY - FLOATY_STAND_OFFSET_Y) / getHeightPixels()])
 
-    const floatyOpen$$ = isFloatyOpen$.subscribe(isOpen => FLOATY.setTouchable(isOpen))
+    isFloatyOpen$.pipe(
+        takeUntil(close$)
+    ).subscribe(isOpen => FLOATY.setTouchable(isOpen))
 
     function toggleFloaty() {
         ui.run(() => {
@@ -276,7 +281,8 @@ export function createFloaty({
         ])
     }
 
-    const direction$$ = screenDirection$.pipe(
+    screenDirection$.pipe(
+        takeUntil(close$),
         withLatestFrom(floatyPosition$)
     ).subscribe(([type, [x, y]]) => {
         FLOATY.setPosition(getWidthPixels() * x, getHeightPixels() * y)
@@ -288,7 +294,7 @@ export function createFloaty({
     const up$ = new Subject<any>()
     const moveSource = new Subject<any>()
 
-    const mouseEvent$$ = down$.pipe(
+    down$.pipe(
         map(e => ({ dx: e.getRawX(), dy: e.getRawY(), sx: STAND.getX(), sy: STAND.getY() })),
         switchMap(({ dx, dy, sx, sy }) => {
 
@@ -296,7 +302,7 @@ export function createFloaty({
             // move$有个moveLimit的启动距离限制
             const move$ = moveSource.pipe(
                 withLatestFrom(isFloatyOpen$),
-                filter(([e, isOpen]) => !isOpen && (e.getRawX() - dx >= moveLimit || e.getRawY() - dy >= moveLimit)),
+                filter(([e, isOpen]) => !isOpen && (Math.abs(e.getRawX() - dx) >= moveLimit || Math.abs(e.getRawY() - dy) >= moveLimit)),
                 take(1),
                 switchMap(() => moveSource),
                 share()
@@ -319,7 +325,8 @@ export function createFloaty({
                     tap(checkFloatyPosition)
                 )
             )
-        })
+        }),
+        takeUntil(close$)
     ).subscribe()
 
     STAND.btn.setOnTouchListener((v, e) => {
@@ -363,7 +370,9 @@ export function createFloaty({
         }
 
         // toggleFloaty通过主线程通信实现，toggleIcon通过ui.run实现
-        fromUiEvent(FLOATY[item.id], 'click').subscribe(() => {
+        fromUiEvent(FLOATY[item.id], 'click').pipe(
+            takeUntil(close$)
+        ).subscribe(() => {
             if (item.toggleOnClick !== false) {
                 toggleFloaty()
             }
@@ -381,9 +390,7 @@ export function createFloaty({
         items: list,
         isOpen$: isFloatyOpen$,
         close() {
-            direction$$.unsubscribe()
-            mouseEvent$$.unsubscribe()
-            floatyOpen$$.unsubscribe()
+            close$.next(true)
             FLOATY.close()
             STAND.close()
             clearInterval(t)

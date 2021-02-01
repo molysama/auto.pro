@@ -12,6 +12,7 @@ declare const icons: readonly ["ic_3d_rotation_black_48dp", "ic_accessibility_bl
  * @param {number} option.initY 初始Y坐标，默认为高度的一半
  * @param {number} option.edge 吸附边缘时的位移，默认为-2
  * @param {number} option.edgeXLimit 满足吸附的x轴距离
+ * @param {number} option.moveLimit 初始移动距离判定，当移动距离大于该值时开始移动，默认为20px
  * @param {Object[]} option.items 子菜单数组
  */
 export declare function createFloaty({ logo, logoSize, duration, radius, angle, items, initX, initY, edge, edgeXLimit, moveLimit }?: {
