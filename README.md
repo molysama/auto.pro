@@ -24,4 +24,4 @@
 
 # 文档
 
-**[文档地址](http://www.moly.host:30030/)**
+**[文档地址](http://auto.moly.host/index.html)**
