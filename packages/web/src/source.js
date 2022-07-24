@@ -1,4 +1,13 @@
 let emit = prompt;
+
+// 非时间种子的随机数
+const uuid = () => {
+    const tempUrl = URL.createObjectURL(new Blob());
+    const tempId = tempUrl.toString()
+    URL.revokeObjectURL(tempUrl)
+    return tempId.substring(tempId.lastIndexOf("/") + 1)
+}
+
 export default {
     setMode(mode) {
         emit = window[mode] || prompt;
@@ -17,7 +26,7 @@ export default {
     },
     auto(eventname, params, callback) {
         if (callback) {
-            const EVENT_ID = eventname + Date.now().toString();
+            const EVENT_ID = eventname + uuid()
             this.devicelly(EVENT_ID, callback, this, true);
             return emit(eventname, JSON.stringify({
                 params,
