@@ -21,7 +21,7 @@
     "src"
   ],
   "publishConfig": {
-    "registry": "http://registry.npmjs.org/",
+    "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
   "repository": {
@@ -35,5 +35,5 @@
   "bugs": {
     "url": "https://github.com/molysama/auto.pro/issues"
   },
-  "gitHead": "ddb20832b0f21cc312099dd38311de089093602c"
+  "gitHead": "ef740b19bf10d6a076457f20a5834d217caf43a3"
 }
