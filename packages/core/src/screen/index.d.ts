@@ -1,3 +1,4 @@
+import { Observable } from "rxjs";
 /**
  * 编写脚本时的基准宽度
  */
@@ -33,7 +34,7 @@ export declare function cap(path?: string): void | Image;
  * 返回异步截图流
  * @param value
  */
-export declare const cap$: any;
+export declare const cap$: Observable<Image>;
 /**
  * 获取当前width的分式值，如value = 1/4，则获取width的1/4，并向下取整
  * @param value 要获取的宽度百分比
@@ -70,6 +71,6 @@ export declare function setSystemUiVisibility(type: VISIBILITY_TYPE): void;
  * 屏幕旋转事件，返回旋转后的屏幕类型
  * @returns {'横屏'|'竖屏'}
  */
-export declare const screenDirection$: any;
+export declare const screenDirection$: Observable<"横屏" | "竖屏">;
 export declare const enableScreenListener: () => void;
 export {};
