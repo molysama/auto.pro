@@ -9,12 +9,14 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 import { getPrototype, height, pausable, scale, width, cap$ } from '@auto.pro/core';
 import { defer, of, throwError } from 'rxjs';
@@ -55,7 +57,7 @@ function region(param) {
  */
 export function readImg(imgPath, mode) {
     if (!imgPath) {
-        throw "\u56FE\u7247" + imgPath + "\u4E0D\u5B58\u5728";
+        throw "\u56FE\u7247".concat(imgPath, "\u4E0D\u5B58\u5728");
     }
     var result;
     if (getPrototype(imgPath) != 'String') {
@@ -107,7 +109,7 @@ export function findImg(param) {
         var TAKE_NUM = ONCE ? 1 : param.take === undefined ? 1 : param.take || 99999999;
         var template = readImg(path);
         if (!template) {
-            return throwError("template path " + path + " is null");
+            return throwError("template path ".concat(path, " is null"));
         }
         if (scale !== 1) {
             template = images.scale(template, scale, scale);
@@ -249,7 +251,7 @@ export function noAnyColors(image, region, colors) {
     if (colors === void 0) { colors = []; }
     var src = readImg(image);
     var result = !colors.some(function (c) {
-        if (images.findColorEquals.apply(images, __spreadArrays([src, c], region))) {
+        if (images.findColorEquals.apply(images, __spreadArray([src, c], region, false))) {
             return true;
         }
         else {
@@ -274,7 +276,7 @@ export function hasMulColors(image, region, colors) {
     if (colors === void 0) { colors = []; }
     var src = readImg(image);
     var result = colors.every(function (c) {
-        if (images.findColorEquals.apply(images, __spreadArrays([src, c], region))) {
+        if (images.findColorEquals.apply(images, __spreadArray([src, c], region, false))) {
             return true;
         }
         else {

@@ -1,9 +1,11 @@
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 import { effectEvent } from "..";
 import uuidjs from 'uuid-js';
@@ -34,7 +36,7 @@ export function fromUiEvent(target, eventName) {
         for (var _i = 0; _i < arguments.length; _i++) {
             params[_i] = arguments[_i];
         }
-        effectEvent.emit.apply(effectEvent, __spreadArrays([eventId], params));
+        effectEvent.emit.apply(effectEvent, __spreadArray([eventId], params, false));
     });
     return fromEvent(effectEvent, eventId).pipe(share());
 }

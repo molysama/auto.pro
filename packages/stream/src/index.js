@@ -73,7 +73,7 @@ export var clickImgWithCheck = function (path, region, threshold, checkDelay, us
             }
         }), retry());
     }), catchError(function (err) {
-        console.log("clickImgWithCheck " + param.path + " err", err);
+        console.log("clickImgWithCheck ".concat(param.path, " err"), err);
         return throwError(err);
     }), 
     // 由于是按时间戳生成的唯一缓存，结束后清掉

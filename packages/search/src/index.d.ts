@@ -1,4 +1,4 @@
-export declare type FindImgParam = {
+export type FindImgParam = {
     path: string;
     when?: Function;
     option?: {

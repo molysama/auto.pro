@@ -76,11 +76,11 @@ export function createFloaty(_a) {
     // size实际像素
     var DPI = context.getResources().getDisplayMetrics().density;
     var SIZE_PIXELS = Math.floor(size * DPI);
-    var FLOATY = floaty.rawWindow("\n        <frame w=\"" + 2 * radius + "\" h=\"" + 2 * radius + "\">\n            " + items.map(function (item) {
-        return "\n                <frame id=\"" + item.id + "\" w=\"" + size + "\" h=\"" + size + "\" alpha=\"0\" layout_gravity=\"center\">\n                    <img w=\"" + size + "\" h=\"" + size + "\" id=\"" + item.id + "_color\" src=\"" + (getPrototype(item.color) === 'String' ? item.color : item.color && item.color && item.color.length > 0 && item.color[0]) + "\" circle=\"true\" />\n                    <img w=\"" + ICON_SIZE + "\" h=\"" + ICON_SIZE + "\" id=\"" + item.id + "_icon\" src=\"@drawable/" + (getPrototype(item.icon) === 'String' ? item.icon : item.icon && item.icon.length > 0 && item.icon[0]) + "\" tint=\"" + (item.tint || '#ffffff') + "\" gravity=\"center\" layout_gravity=\"center\" />\n                </frame>\n                    ";
-    }).join('') + "\n            <frame id=\"logo\" w=\"" + size + "\" h=\"" + size + "\" alpha=\"0.4\" layout_gravity=\"center\">\n                <img id=\"img_logo\" w=\"*\" h=\"*\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n            </frame>\n        </frame>\n    ");
+    var FLOATY = floaty.rawWindow("\n        <frame w=\"".concat(2 * radius, "\" h=\"").concat(2 * radius, "\">\n            ").concat(items.map(function (item) {
+        return "\n                <frame id=\"".concat(item.id, "\" w=\"").concat(size, "\" h=\"").concat(size, "\" alpha=\"0\" layout_gravity=\"center\">\n                    <img w=\"").concat(size, "\" h=\"").concat(size, "\" id=\"").concat(item.id, "_color\" src=\"").concat(getPrototype(item.color) === 'String' ? item.color : item.color && item.color && item.color.length > 0 && item.color[0], "\" circle=\"true\" />\n                    <img w=\"").concat(ICON_SIZE, "\" h=\"").concat(ICON_SIZE, "\" id=\"").concat(item.id, "_icon\" src=\"@drawable/").concat(getPrototype(item.icon) === 'String' ? item.icon : item.icon && item.icon.length > 0 && item.icon[0], "\" tint=\"").concat(item.tint || '#ffffff', "\" gravity=\"center\" layout_gravity=\"center\" />\n                </frame>\n                    ");
+    }).join(''), "\n            <frame id=\"logo\" w=\"").concat(size, "\" h=\"").concat(size, "\" alpha=\"0.4\" layout_gravity=\"center\">\n                <img id=\"img_logo\" w=\"*\" h=\"*\" src=\"").concat(logo, "\" gravity=\"center\" layout_gravity=\"center\" />\n            </frame>\n        </frame>\n    "));
     // 创建一个替身，让子菜单在关闭时不接受点击事件
-    var STAND = floaty.rawWindow("\n        <frame id=\"btn\" w=\"" + size + "\" h=\"" + size + "\" alpha=\"0\">\n            <img id=\"stand_logo\" w=\"*\" h=\"*\" src=\"" + logo + "\" gravity=\"center\" layout_gravity=\"center\" />\n        </frame>\n    ");
+    var STAND = floaty.rawWindow("\n        <frame id=\"btn\" w=\"".concat(size, "\" h=\"").concat(size, "\" alpha=\"0\">\n            <img id=\"stand_logo\" w=\"*\" h=\"*\" src=\"").concat(logo, "\" gravity=\"center\" layout_gravity=\"center\" />\n        </frame>\n    "));
     // 两个悬浮窗的偏移量，在计算位置时 FLOATY的坐标 = STAND的坐标 - 偏移量
     var FLOATY_STAND_OFFSET_X = FLOATY.logo.getX();
     var FLOATY_STAND_OFFSET_Y = FLOATY.logo.getY();
@@ -223,7 +223,7 @@ export function createFloaty(_a) {
                     index = iconIndex % iconLength;
                 }
                 ui.run(function () {
-                    FLOATY[item.id + '_icon'].setSource("@drawable/" + item.icon[index]);
+                    FLOATY[item.id + '_icon'].setSource("@drawable/".concat(item.icon[index]));
                     if (iconLength === colorLength) {
                         FLOATY[item.id + '_color'].setSource(item.color[index]);
                     }

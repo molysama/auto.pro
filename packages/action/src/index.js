@@ -1,10 +1,12 @@
 'use strict';
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 import { height, isRoot, pausable, scale, width } from '@auto.pro/core';
 import { switchMap, delay } from 'rxjs/operators';
@@ -46,9 +48,9 @@ export var swipe = function (duration, startPoint, endPoint, isPausable) {
             Math.floor((xMax - xMin) / 3 * 2 + xMin) + random(5, 10),
             Math.floor((yMax - yMin) / 3 * 2 + yMin) - random(5, 10)
         ];
-        var curve = new (Bezier.bind.apply(Bezier, __spreadArrays([void 0], startPoint, endPoint, c1, c2)))();
+        var curve = new (Bezier.bind.apply(Bezier, __spreadArray(__spreadArray(__spreadArray(__spreadArray([void 0], startPoint, false), endPoint, false), c1, false), c2, false)))();
         var points = curve.getLUT(16).map(function (p) { return [Math.floor(p['x']), Math.floor(p['y'])]; });
-        gesture.apply(void 0, __spreadArrays([duration], points));
+        gesture.apply(void 0, __spreadArray([duration], points, false));
         return of(v);
     })); };
 };

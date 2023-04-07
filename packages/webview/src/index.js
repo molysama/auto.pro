@@ -74,11 +74,11 @@ export function run(url, _a) {
         for (var _i = 1; _i < arguments.length; _i++) {
             value[_i - 1] = arguments[_i];
         }
-        var js = "javascript:" + fnName + "(..." + JSON.stringify(value) + ")";
+        var js = "javascript:".concat(fnName, "(...").concat(JSON.stringify(value), ")");
         return getHtmlResult(js);
     }
     function runHtmlJS(propertyName) {
-        var js = "javascript:" + propertyName;
+        var js = "javascript:".concat(propertyName);
         return getHtmlResult(js);
     }
     function getHtmlResult(js) {
@@ -98,7 +98,7 @@ export function run(url, _a) {
                             result[_i] = arguments[_i];
                         }
                         ui.run(function () {
-                            webview.evaluateJavascript("javascript:window['" + param['PROMPT_CALLBACK'] + "'](..." + JSON.stringify(result) + ")", new JavaAdapter(ValueCallback, {
+                            webview.evaluateJavascript("javascript:window['".concat(param['PROMPT_CALLBACK'], "'](...").concat(JSON.stringify(result), ")"), new JavaAdapter(ValueCallback, {
                                 onReceiveValue: function (result) {
                                 },
                                 onReceivedError: function (error) {

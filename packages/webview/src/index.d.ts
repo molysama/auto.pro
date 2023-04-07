@@ -18,7 +18,7 @@ import { Observable } from "rxjs";
  * @param {Function} option.afterLayout 紧接着布局初始化的钩子函数
  */
 export declare function run(url: any, { xmlString, webviewId, webviewObject, chromeClientOption, webviewClientOption, afterLayout }?: WebViewOption): CreateWebviewResult;
-declare type CreateWebviewResult = {
+type CreateWebviewResult = {
     webviewObject: any;
     on(eventName: string): Observable<[any, Function]>;
     runHtmlFunction(fnName: string, ...value: any[]): Observable<any>;
