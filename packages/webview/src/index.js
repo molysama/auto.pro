@@ -98,7 +98,7 @@ export function run(url, _a) {
                             result[_i] = arguments[_i];
                         }
                         ui.run(function () {
-                            webview.evaluateJavascript("javascript:" + param['PROMPT_CALLBACK'] + "(..." + JSON.stringify(result) + ")", new JavaAdapter(ValueCallback, {
+                            webview.evaluateJavascript("javascript:window['" + param['PROMPT_CALLBACK'] + "'](..." + JSON.stringify(result) + ")", new JavaAdapter(ValueCallback, {
                                 onReceiveValue: function (result) {
                                 },
                                 onReceivedError: function (error) {
